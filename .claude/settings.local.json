@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter build:*)",
+      "Bash(flutter:*)",
+      "Bash(xcopy:*)",
+      "Bash(robocopy:*)",
+      "Bash(npx @composio/mcp@latest setup:*)",
+      "Bash(if not exist \"%APPDATA%\\Claude\" mkdir \"%APPDATA%\\Claude\")",
+      "WebFetch(domain:www.figma.com)"
+    ],
+    "deny": []
+  }
+}
