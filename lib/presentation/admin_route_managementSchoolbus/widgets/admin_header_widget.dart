@@ -8,6 +8,8 @@ class AdminHeaderWidget extends StatelessWidget {
   final String systemStatus;
   final VoidCallback? onMenuTap;
   final VoidCallback? onNotificationTap;
+  final VoidCallback? onBackTap;
+  final bool showBackButton;
 
   const AdminHeaderWidget({
     super.key,
@@ -15,6 +17,8 @@ class AdminHeaderWidget extends StatelessWidget {
     required this.systemStatus,
     this.onMenuTap,
     this.onNotificationTap,
+    this.onBackTap,
+    this.showBackButton = false,
   });
 
   @override
@@ -32,13 +36,13 @@ class AdminHeaderWidget extends StatelessWidget {
         bottom: false,
         child: Column(
           children: [
-            // Top row with menu and notifications
+            // Top row with back/menu and notifications
             Row(
               children: [
                 IconButton(
-                  onPressed: onMenuTap,
+                  onPressed: showBackButton ? (onBackTap ?? () => Navigator.pop(context)) : onMenuTap,
                   icon: CustomIconWidget(
-                    iconName: 'menu',
+                    iconName: showBackButton ? 'arrow_back' : 'menu',
                     color: AppTheme.onPrimaryLight,
                     size: 24,
                   ),

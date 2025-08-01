@@ -1,0 +1,43 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="backgroundGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a4d3a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2d5a3d;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="busGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f0f0f0;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="256" cy="256" r="240" fill="url(#backgroundGradient)" stroke="#ffffff" stroke-width="8"/>
+  
+  <!-- Bus Body -->
+  <rect x="120" y="200" width="272" height="120" rx="20" ry="20" fill="url(#busGradient)" stroke="#1a4d3a" stroke-width="4"/>
+  
+  <!-- Bus Windows -->
+  <rect x="140" y="220" width="60" height="40" rx="8" ry="8" fill="#87CEEB" stroke="#1a4d3a" stroke-width="2"/>
+  <rect x="220" y="220" width="60" height="40" rx="8" ry="8" fill="#87CEEB" stroke="#1a4d3a" stroke-width="2"/>
+  <rect x="300" y="220" width="60" height="40" rx="8" ry="8" fill="#87CEEB" stroke="#1a4d3a" stroke-width="2"/>
+  
+  <!-- Bus Front -->
+  <rect x="392" y="210" width="20" height="100" rx="10" ry="10" fill="url(#busGradient)" stroke="#1a4d3a" stroke-width="4"/>
+  
+  <!-- Bus Wheels -->
+  <circle cx="160" cy="340" r="25" fill="#2a2a2a" stroke="#1a4d3a" stroke-width="3"/>
+  <circle cx="160" cy="340" r="15" fill="#666666"/>
+  <circle cx="352" cy="340" r="25" fill="#2a2a2a" stroke="#1a4d3a" stroke-width="3"/>
+  <circle cx="352" cy="340" r="15" fill="#666666"/>
+  
+  <!-- Bus Door -->
+  <rect x="120" y="240" width="20" height="60" rx="5" ry="5" fill="#e0e0e0" stroke="#1a4d3a" stroke-width="2"/>
+  <rect x="125" y="245" width="10" height="50" rx="3" ry="3" fill="#d0d0d0"/>
+  
+  <!-- Headlights -->
+  <circle cx="405" cy="230" r="8" fill="#ffff99" stroke="#1a4d3a" stroke-width="2"/>
+  <circle cx="405" cy="280" r="8" fill="#ffff99" stroke="#1a4d3a" stroke-width="2"/>
+  
+  <!-- App Name -->
+  <text x="256" y="420" font-family="Arial, sans-serif" font-size="48" font-weight="bold" text-anchor="middle" fill="#ffffff">T</text>
+</svg>

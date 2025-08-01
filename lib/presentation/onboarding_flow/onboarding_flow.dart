@@ -113,7 +113,7 @@ class _OnboardingFlowState extends State<OnboardingFlow>
   }
 
   void _navigateToHome() {
-    Navigator.pushReplacementNamed(context, '/home-dashboard');
+    Navigator.pushReplacementNamed(context, '/login');
   }
 
   void _onPageChanged(int page) {

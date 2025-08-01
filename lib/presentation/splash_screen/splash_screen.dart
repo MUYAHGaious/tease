@@ -115,7 +115,7 @@ class _SplashScreenState extends State<SplashScreen>
     } else if (_isFirstTime) {
       nextRoute = '/onboarding-flow';
     } else {
-      nextRoute = '/home-dashboard'; // Default to home for returning users
+      nextRoute = '/login'; // Navigate to login for returning users
     }
 
     Navigator.pushReplacementNamed(context, nextRoute);

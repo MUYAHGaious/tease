@@ -99,46 +99,19 @@ class _HomeDashboardState extends State<HomeDashboard>
         );
         break;
       case 1: // Favorites
-        Navigator.pushNamed(context, '/favorites');
+        Navigator.pushNamed(context, '/my-tickets'); // Using tickets as favorites for now
         break;
-      case 2: // Book (Center button)
-        Navigator.pushNamed(context, '/search-booking');
-        break;
-      case 3: // Tickets
+      case 2: // Tickets
         Navigator.pushNamed(context, '/my-tickets');
         break;
-      case 4: // Menu
-        _showCustomMenu();
+      case 3: // Profile
+        Navigator.pushNamed(context, '/profile-settings');
         break;
     }
   }
 
   void _showCustomMenu() {
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: 'Menu',
-      barrierColor: Colors.black.withValues(alpha: 0.5),
-      transitionDuration: const Duration(milliseconds: 400),
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return Align(
-          alignment: Alignment.centerLeft,
-          child: const CustomMenuDrawer(),
-        );
-      },
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        return SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(-1.0, 0.0),
-            end: Offset.zero,
-          ).animate(CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOutCubic,
-          )),
-          child: child,
-        );
-      },
-    );
+    Scaffold.of(context).openDrawer();
   }
 
   Future<void> _handleRefresh() async {
@@ -168,7 +141,16 @@ class _HomeDashboardState extends State<HomeDashboard>
   Widget _buildAnimatedBackground() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[50], // Light background to match screenshot
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.grey[50]!,
+            Colors.white,
+            Colors.grey[50]!,
+          ],
+          stops: const [0.0, 0.5, 1.0],
+        ),
       ),
     );
   }
@@ -200,6 +182,7 @@ class _HomeDashboardState extends State<HomeDashboard>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
+      drawer: const CustomMenuDrawer(),
       body: Stack(
         children: [
           _buildAnimatedBackground(),
@@ -282,7 +265,121 @@ class _HomeDashboardState extends State<HomeDashboard>
       bottomNavigationBar: BottomNavigationWidget(
         currentIndex: _currentBottomNavIndex,
         onTap: _handleBottomNavTap,
-        cartBadgeCount: 1, // Example badge count
+      ),
+      floatingActionButton: _buildGlassFAB(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    );
+  }
+
+  Widget _buildGlassFAB() {
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: const LinearGradient(
+          colors: [Color(0xFF1a4d3a), Color(0xFF2d5a3d)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF1a4d3a).withOpacity(0.4), 
+            blurRadius: 15, 
+            spreadRadius: 0, 
+            offset: const Offset(0, 6)
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1), 
+            blurRadius: 6, 
+            spreadRadius: 0, 
+            offset: const Offset(0, 2)
+          ),
+        ],
+      ),
+      child: FloatingActionButton(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        onPressed: () {
+          HapticFeedback.mediumImpact();
+          _showVoiceAssistant();
+        },
+        child: const Icon(
+          Icons.mic, 
+          color: Colors.white, 
+          size: 28,
+        ),
+      ),
+    );
+  }
+
+  void _showVoiceAssistant() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.4,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF1a4d3a), Color(0xFF2d5a3d)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.mic,
+                color: Colors.white,
+                size: 40,
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Voice Assistant',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Say "Book a ticket" to get started',
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 30),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(25),
+              ),
+              child: const Text(
+                'Listening...',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

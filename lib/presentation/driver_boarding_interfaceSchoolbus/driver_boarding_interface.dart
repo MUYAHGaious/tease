@@ -421,6 +421,8 @@ class _DriverBoardingInterfaceState extends State<DriverBoardingInterface> {
                 currentStop: _currentStop,
                 nextStop: _nextStop,
                 isOnline: _isOnline,
+                showBackButton: true,
+                onBackTap: () => Navigator.pop(context),
               ),
 
               // Main Content Area

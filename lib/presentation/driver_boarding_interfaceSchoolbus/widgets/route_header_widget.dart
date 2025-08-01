@@ -10,6 +10,8 @@ class RouteHeaderWidget extends StatelessWidget {
   final String currentStop;
   final String nextStop;
   final bool isOnline;
+  final VoidCallback? onBackTap;
+  final bool showBackButton;
 
   const RouteHeaderWidget({
     Key? key,
@@ -19,6 +21,8 @@ class RouteHeaderWidget extends StatelessWidget {
     required this.currentStop,
     required this.nextStop,
     required this.isOnline,
+    this.onBackTap,
+    this.showBackButton = false,
   }) : super(key: key);
 
   @override
@@ -43,6 +47,24 @@ class RouteHeaderWidget extends StatelessWidget {
         bottom: false,
         child: Column(
           children: [
+            // Top row with back button (if enabled)
+            if (showBackButton)
+              Padding(
+                padding: EdgeInsets.only(bottom: 1.h),
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: onBackTap ?? () => Navigator.pop(context),
+                      icon: CustomIconWidget(
+                        iconName: 'arrow_back',
+                        color: AppTheme.onPrimaryLight,
+                        size: 24,
+                      ),
+                    ),
+                    const Spacer(),
+                  ],
+                ),
+              ),
             Row(
               children: [
                 // Route Info

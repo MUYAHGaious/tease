@@ -295,6 +295,8 @@ class _AdminRouteManagementState extends State<AdminRouteManagement> {
           AdminHeaderWidget(
             adminName: 'Dr. Sarah Wilson',
             systemStatus: 'Online',
+            showBackButton: true,
+            onBackTap: () => Navigator.pop(context),
             onMenuTap: () => _scaffoldKey.currentState?.openDrawer(),
             onNotificationTap: () {
               ScaffoldMessenger.of(context).showSnackBar(

@@ -257,94 +257,93 @@ class _SearchBookingState extends State<SearchBooking>
     return count;
   }
 
+  Widget _buildAppBar() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              Navigator.pop(context);
+            },
+            child: Container(
+              padding: EdgeInsets.all(2.w),
+              decoration: BoxDecoration(
+                color: AppTheme.lightTheme.colorScheme.surface.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
+                  width: 1,
+                ),
+              ),
+              child: Icon(
+                Icons.arrow_back,
+                color: AppTheme.lightTheme.colorScheme.onSurface,
+                size: 6.w,
+              ),
+            ),
+          ),
+          SizedBox(width: 4.w),
+          Expanded(
+            child: Text(
+              'Search Buses',
+              style: AppTheme.lightTheme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: AppTheme.lightTheme.colorScheme.onSurface,
+              ),
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              _showFilterBottomSheet();
+            },
+            child: Container(
+              padding: EdgeInsets.all(2.w),
+              decoration: BoxDecoration(
+                color: AppTheme.lightTheme.colorScheme.surface.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
+                  width: 1,
+                ),
+              ),
+              child: Icon(
+                Icons.tune,
+                color: AppTheme.lightTheme.colorScheme.onSurface,
+                size: 6.w,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Header
-            AnimatedBuilder(
-              animation: _headerAnimation,
-              builder: (context, child) {
-                return FadeTransition(
-                  opacity: _headerAnimation,
-                  child: Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
-                    decoration: BoxDecoration(
-                      color: AppTheme.lightTheme.colorScheme.surface,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppTheme.shadowLight,
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: Container(
-                            padding: EdgeInsets.all(2.w),
-                            decoration: BoxDecoration(
-                              color: AppTheme
-                                  .lightTheme.colorScheme.surfaceContainerHighest
-                                  .withValues(alpha: 0.5),
-                              shape: BoxShape.circle,
-                            ),
-                            child: CustomIconWidget(
-                              iconName: 'arrow_back',
-                              color: AppTheme.lightTheme.colorScheme.onSurface,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 4.w),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Search & Book',
-                                style: AppTheme
-                                    .lightTheme.textTheme.headlineSmall
-                                    ?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              Text(
-                                'Find your perfect bus route',
-                                style: AppTheme.lightTheme.textTheme.bodyMedium
-                                    ?.copyWith(
-                                  color: AppTheme.textMediumEmphasisLight,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-
-            // Search Form
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.grey[50]!,
-                      Colors.white,
-                    ],
-                  ),
-                ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppTheme.lightTheme.colorScheme.primary.withValues(alpha: 0.05),
+              AppTheme.lightTheme.scaffoldBackgroundColor,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // App Bar
+              _buildAppBar(),
+              
+              // Search Form
+              Expanded(
                 child: SingleChildScrollView(
                   controller: _scrollController,
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -363,8 +362,7 @@ class _SearchBookingState extends State<SearchBooking>
                                 origin: _origin,
                                 destination: _destination,
                                 onOriginChanged: _handleOriginChanged,
-                                onDestinationChanged:
-                                    _handleDestinationChanged,
+                                onDestinationChanged: _handleDestinationChanged,
                                 onSwap: _handleSwap,
                               ),
                             ),
@@ -498,7 +496,7 @@ class _SearchBookingState extends State<SearchBooking>
                         ),
                       ),
 
-                      // Predictive Suggestions (now in normal flow)
+                      // Predictive Suggestions
                       if (_showSuggestions)
                         AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
@@ -529,8 +527,8 @@ class _SearchBookingState extends State<SearchBooking>
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

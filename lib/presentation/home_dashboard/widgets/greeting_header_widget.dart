@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
+import 'custom_menu_drawer.dart';
 
 class GreetingHeaderWidget extends StatefulWidget {
   const GreetingHeaderWidget({super.key});
@@ -15,23 +16,46 @@ class GreetingHeaderWidget extends StatefulWidget {
 class _GreetingHeaderWidgetState extends State<GreetingHeaderWidget>
     with TickerProviderStateMixin {
   late AnimationController _animationController;
-  late AnimationController _typewriterController;
-  late AnimationController _gradientController;
+  late AnimationController _tipController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-  late Animation<double> _typewriterAnimation;
-  late Animation<double> _gradientAnimation;
+  late Animation<double> _tipAnimation;
+  
+  int _currentTipIndex = 0;
+  
+  final List<Map<String, dynamic>> _appTips = [
+    {
+      'icon': Icons.flash_on,
+      'tip': 'Book faster with Quick Actions',
+      'color': Color(0xFF2d5a3d),
+    },
+    {
+      'icon': Icons.favorite,
+      'tip': 'Save routes to Favorites',
+      'color': Color(0xFF4a7c59),
+    },
+    {
+      'icon': Icons.notification_important,
+      'tip': 'Enable notifications for updates',
+      'color': Color(0xFF1a4d3a),
+    },
+    {
+      'icon': Icons.qr_code_scanner,
+      'tip': 'Use QR codes for quick boarding',
+      'color': Color(0xFF2d5a3d),
+    },
+  ];
 
   String _getGreeting() {
     final hour = DateTime.now().hour;
     const userName = 'Alex'; // This would come from user data in real app
     
     if (hour < 12) {
-      return 'Good Morning, $userName';
+      return 'Good Morning, $userName!';
     } else if (hour < 17) {
-      return 'Good Afternoon, $userName';
+      return 'Good Afternoon, $userName!';
     } else {
-      return 'Good Evening, $userName';
+      return 'Good Evening, $userName!';
     }
   }
 
@@ -55,13 +79,8 @@ class _GreetingHeaderWidgetState extends State<GreetingHeaderWidget>
       vsync: this,
     );
 
-    _typewriterController = AnimationController(
-      duration: const Duration(milliseconds: 2000),
-      vsync: this,
-    );
-
-    _gradientController = AnimationController(
-      duration: const Duration(seconds: 3),
+    _tipController = AnimationController(
+      duration: const Duration(milliseconds: 600),
       vsync: this,
     );
 
@@ -70,42 +89,55 @@ class _GreetingHeaderWidgetState extends State<GreetingHeaderWidget>
       end: 1.0,
     ).animate(CurvedAnimation(
       parent: _animationController,
-      curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+      curve: Curves.easeOut,
     ));
 
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, -0.5),
+      begin: const Offset(0, -0.3),
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: _animationController,
-      curve: const Interval(0.2, 0.8, curve: Curves.elasticOut),
+      curve: Curves.easeOutCubic,
     ));
 
-    _typewriterAnimation = Tween<double>(
+    _tipAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
     ).animate(CurvedAnimation(
-      parent: _typewriterController,
+      parent: _tipController,
       curve: Curves.easeInOut,
     ));
 
-    _gradientAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(_gradientController);
-
     _animationController.forward();
-    Future.delayed(const Duration(milliseconds: 500), () {
-      _typewriterController.forward();
+    _tipController.forward();
+    _startTipRotation();
+  }
+
+  void _startTipRotation() {
+    Future.delayed(const Duration(seconds: 1), () {
+      if (mounted) {
+        _cycleTips();
+      }
     });
-    _gradientController.repeat(reverse: true);
+  }
+
+  void _cycleTips() async {
+    while (mounted) {
+      await Future.delayed(const Duration(seconds: 3));
+      if (mounted) {
+        await _tipController.reverse();
+        setState(() {
+          _currentTipIndex = (_currentTipIndex + 1) % _appTips.length;
+        });
+        await _tipController.forward();
+      }
+    }
   }
 
   @override
   void dispose() {
     _animationController.dispose();
-    _typewriterController.dispose();
-    _gradientController.dispose();
+    _tipController.dispose();
     super.dispose();
   }
 
@@ -291,104 +323,217 @@ class _GreetingHeaderWidgetState extends State<GreetingHeaderWidget>
     );
   }
 
+  void _showCustomMenu(BuildContext context) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Menu',
+      barrierColor: Colors.black.withValues(alpha: 0.5),
+      transitionDuration: const Duration(milliseconds: 400),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return Align(
+          alignment: Alignment.centerLeft,
+          child: const CustomMenuDrawer(),
+        );
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(-1.0, 0.0),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          )),
+          child: child,
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 3.h),
-      child: Row(
-        children: [
-          // App logo
-          Container(
-            width: 12.w,
-            height: 12.w,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Container(
-                width: 8.w,
-                height: 8.w,
-                decoration: BoxDecoration(
-                  color: Colors.green[600],
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  _getGreetingIcon(),
-                  color: Colors.white,
-                  size: 4.w,
-                ),
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
+          child: Column(
+            children: [
+              // Main header row
+              Row(
+                children: [
+                  // Avatar with time-based icon
+                  Container(
+                    width: 12.w,
+                    height: 12.w,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xFF1a4d3a),
+                          Color(0xFF2d5a3d),
+                        ],
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(0xFF1a4d3a).withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      _getGreetingIcon(),
+                      color: Colors.white,
+                      size: 6.w,
+                    ),
+                  ),
+                  SizedBox(width: 4.w),
+                  // Greeting text - responsive
+                  Expanded(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        _getGreeting(),
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1a4d3a),
+                          letterSpacing: 0.5,
+                        ),
+                        maxLines: 1,
+                      ),
+                    ),
+                  ),
+                  // Menu button
+                  GestureDetector(
+                    onTap: () => Scaffold.of(context).openDrawer(),
+                    child: Container(
+                      padding: EdgeInsets.all(2.5.w),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.2),
+                            blurRadius: 4,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.menu,
+                        color: Color(0xFF1a4d3a),
+                        size: 5.w,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ),
-          SizedBox(width: 4.w),
-          // Greeting text with AI animations
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AnimatedBuilder(
-                  animation: _typewriterAnimation,
-                  builder: (context, child) {
-                    final greeting = _getGreeting();
-                    final visibleLength = (_typewriterAnimation.value * greeting.length).round();
-                    final visibleText = greeting.substring(0, visibleLength);
-                    
-                    return AnimatedBuilder(
-                      animation: _gradientAnimation,
-                      builder: (context, child) {
-                        return ShaderMask(
-                          shaderCallback: (bounds) {
-                            return LinearGradient(
+              
+              SizedBox(height: 2.h),
+              
+              // App tips section with AI-style animation
+              AnimatedBuilder(
+                animation: _tipAnimation,
+                builder: (context, child) {
+                  final currentTip = _appTips[_currentTipIndex];
+                  return Transform.scale(
+                    scale: 0.9 + (_tipAnimation.value * 0.1),
+                    child: Transform.translate(
+                      offset: Offset(
+                        (1 - _tipAnimation.value) * 50 * ((_currentTipIndex % 2 == 0) ? -1 : 1), 
+                        0
+                      ),
+                      child: Opacity(
+                        opacity: _tipAnimation.value,
+                        child: Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
                               colors: [
-                                Color(0xFF1a4d3a), // Deep forest green from splash
-                                Color(0xFF2d5a3d), // Medium forest green
-                                Color(0xFF4a7c59), // Lighter forest green
-                              ],
-                              stops: [
-                                (_gradientAnimation.value - 0.2).clamp(0.0, 1.0),
-                                _gradientAnimation.value,
-                                (_gradientAnimation.value + 0.2).clamp(0.0, 1.0),
+                                (currentTip['color'] as Color).withOpacity(0.15),
+                                (currentTip['color'] as Color).withOpacity(0.05),
                               ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
-                            ).createShader(bounds);
-                          },
-                          child: Text(
-                            visibleText + (_typewriterAnimation.value < 1.0 ? '|' : ''),
-                            style: TextStyle(
-                              fontSize: 20.sp,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                              letterSpacing: 0.5,
                             ),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: (currentTip['color'] as Color).withOpacity(0.3),
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: (currentTip['color'] as Color).withOpacity(0.1),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
-                        );
-                      },
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-          // Hamburger menu
-          GestureDetector(
-            onTap: () => _showBurgerMenu(context),
-            child: Container(
-              padding: EdgeInsets.all(2.w),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(8),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: EdgeInsets.all(2.5.w),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      (currentTip['color'] as Color).withOpacity(0.3),
+                                      (currentTip['color'] as Color).withOpacity(0.2),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Icon(
+                                  currentTip['icon'],
+                                  color: currentTip['color'],
+                                  size: 4.5.w,
+                                ),
+                              ),
+                              SizedBox(width: 3.w),
+                              Expanded(
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    currentTip['tip'],
+                                    style: TextStyle(
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF1a4d3a),
+                                    ),
+                                    maxLines: 1,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.all(1.5.w),
+                                decoration: BoxDecoration(
+                                  color: (currentTip['color'] as Color).withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.auto_awesome,
+                                  color: (currentTip['color'] as Color).withOpacity(0.8),
+                                  size: 3.5.w,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
-              child: Icon(
-                Icons.menu,
-                color: Colors.black54,
-                size: 6.w,
-              ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

@@ -22,29 +22,29 @@ class _SpecialOffersSectionWidgetState extends State<SpecialOffersSectionWidget>
   late Timer _autoScrollTimer;
   int _currentPage = 0;
 
-  final List<Map<String, dynamic>> _offers = [
+  final List<Map<String, dynamic>> _features = [
     {
-      'title': 'Weekend Special',
-      'subtitle': '25% off on all routes',
-      'code': 'WEEKEND25',
-      'validUntil': 'Valid until Dec 31',
-      'gradient': [AppTheme.secondaryLight, const Color(0xFFFF8C00)],
+      'title': 'Real-Time Tracking',
+      'subtitle': 'Track your bus location live',
+      'feature': 'GPS TRACKING',
+      'description': 'Always included',
+      'gradient': [AppTheme.primaryLight, const Color(0xFF4CAF50)],
       'image':
           'https://images.pexels.com/photo-1570125909232-eb263c188f7e?w=400',
     },
     {
-      'title': 'Student Discount',
-      'subtitle': '40% off with student ID',
-      'code': 'STUDENT40',
-      'validUntil': 'Valid all semester',
-      'gradient': [AppTheme.primaryLight, const Color(0xFF4CAF50)],
+      'title': 'Free Cancellation',
+      'subtitle': 'Cancel anytime at no cost',
+      'feature': 'NO FEES',
+      'description': 'Flexible booking',
+      'gradient': [AppTheme.secondaryLight, const Color(0xFF2196F3)],
       'image': 'https://images.pexels.com/photo-1559827260-dc66d52bef19?w=400',
     },
     {
-      'title': 'First Ride Free',
-      'subtitle': 'New users get first ride free',
-      'code': 'NEWUSER',
-      'validUntil': 'Valid for 30 days',
+      'title': '24/7 Support',
+      'subtitle': 'Round-the-clock assistance',
+      'feature': 'SUPPORT',
+      'description': 'Always available',
       'gradient': [const Color(0xFF9C27B0), const Color(0xFF3F51B5)],
       'image':
           'https://images.pexels.com/photo-1565440962783-f87efdea99ce?w=400',
@@ -78,7 +78,7 @@ class _SpecialOffersSectionWidgetState extends State<SpecialOffersSectionWidget>
   void _startAutoScroll() {
     _autoScrollTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
       if (mounted && _pageController.hasClients) {
-        _currentPage = (_currentPage + 1) % _offers.length;
+        _currentPage = (_currentPage + 1) % _features.length;
         _pageController.animateToPage(
           _currentPage,
           duration: const Duration(milliseconds: 500),
@@ -122,7 +122,7 @@ class _SpecialOffersSectionWidgetState extends State<SpecialOffersSectionWidget>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Special Offers',
+                'Free Features',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: AppTheme.primaryLight,
@@ -131,22 +131,22 @@ class _SpecialOffersSectionWidgetState extends State<SpecialOffersSectionWidget>
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
                 decoration: BoxDecoration(
-                  color: AppTheme.errorLight.withValues(alpha: 0.1),
+                  color: AppTheme.primaryLight.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(2.w),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      Icons.local_fire_department,
-                      color: AppTheme.errorLight,
+                      Icons.verified,
+                      color: AppTheme.primaryLight,
                       size: 4.w,
                     ),
                     SizedBox(width: 1.w),
                     Text(
-                      'Limited Time',
+                      'Always Included',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppTheme.errorLight,
+                            color: AppTheme.primaryLight,
                             fontWeight: FontWeight.w600,
                           ),
                     ),
@@ -166,9 +166,9 @@ class _SpecialOffersSectionWidgetState extends State<SpecialOffersSectionWidget>
                 _currentPage = index;
               });
             },
-            itemCount: _offers.length,
+            itemCount: _features.length,
             itemBuilder: (context, index) {
-              return _buildOfferCard(_offers[index], index);
+              return _buildFeatureCard(_features[index], index);
             },
           ),
         ),
@@ -178,14 +178,14 @@ class _SpecialOffersSectionWidgetState extends State<SpecialOffersSectionWidget>
     );
   }
 
-  Widget _buildOfferCard(Map<String, dynamic> offer, int index) {
+  Widget _buildFeatureCard(Map<String, dynamic> feature, int index) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 5.w),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(4.w),
         boxShadow: [
           BoxShadow(
-            color: offer['gradient'][0].withValues(alpha: 0.3),
+            color: feature['gradient'][0].withValues(alpha: 0.3),
             blurRadius: 15,
             offset: const Offset(0, 6),
           ),
@@ -198,14 +198,14 @@ class _SpecialOffersSectionWidgetState extends State<SpecialOffersSectionWidget>
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: offer['gradient'],
+              colors: feature['gradient'],
             ),
           ),
           child: Stack(
             children: [
               _buildBackgroundPattern(),
-              _buildOfferContent(offer),
-              _buildCountdownTimer(),
+              _buildFeatureContent(feature),
+              _buildFeatureBadge(feature),
             ],
           ),
         ),
@@ -221,7 +221,7 @@ class _SpecialOffersSectionWidgetState extends State<SpecialOffersSectionWidget>
     );
   }
 
-  Widget _buildOfferContent(Map<String, dynamic> offer) {
+  Widget _buildFeatureContent(Map<String, dynamic> feature) {
     return Padding(
       padding: EdgeInsets.all(5.w),
       child: Row(
@@ -233,7 +233,7 @@ class _SpecialOffersSectionWidgetState extends State<SpecialOffersSectionWidget>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  offer['title'],
+                  feature['title'],
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
@@ -241,7 +241,7 @@ class _SpecialOffersSectionWidgetState extends State<SpecialOffersSectionWidget>
                 ),
                 SizedBox(height: 1.h),
                 Text(
-                  offer['subtitle'],
+                  feature['subtitle'],
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: Colors.white.withValues(alpha: 0.9),
                         fontWeight: FontWeight.w500,
@@ -259,7 +259,7 @@ class _SpecialOffersSectionWidgetState extends State<SpecialOffersSectionWidget>
                     ),
                   ),
                   child: Text(
-                    'Code: ${offer['code']}',
+                    feature['feature'],
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
@@ -269,7 +269,7 @@ class _SpecialOffersSectionWidgetState extends State<SpecialOffersSectionWidget>
                 ),
                 SizedBox(height: 1.h),
                 Text(
-                  offer['validUntil'],
+                  feature['description'],
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Colors.white.withValues(alpha: 0.8),
                       ),
@@ -294,13 +294,13 @@ class _SpecialOffersSectionWidgetState extends State<SpecialOffersSectionWidget>
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(3.w),
                 child: Image.network(
-                  offer['image'],
+                  feature['image'],
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
                       color: Colors.white.withValues(alpha: 0.2),
                       child: Icon(
-                        Icons.local_offer,
+                        Icons.verified,
                         color: Colors.white,
                         size: 8.w,
                       ),
@@ -315,7 +315,7 @@ class _SpecialOffersSectionWidgetState extends State<SpecialOffersSectionWidget>
     );
   }
 
-  Widget _buildCountdownTimer() {
+  Widget _buildFeatureBadge(Map<String, dynamic> feature) {
     return Positioned(
       top: 3.w,
       right: 3.w,
@@ -329,15 +329,15 @@ class _SpecialOffersSectionWidgetState extends State<SpecialOffersSectionWidget>
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              Icons.timer,
-              color: AppTheme.errorLight,
+              Icons.check_circle,
+              color: AppTheme.primaryLight,
               size: 3.w,
             ),
             SizedBox(width: 1.w),
             Text(
-              '2d 14h',
+              'FREE',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.errorLight,
+                    color: AppTheme.primaryLight,
                     fontWeight: FontWeight.w600,
                   ),
             ),
@@ -351,7 +351,7 @@ class _SpecialOffersSectionWidgetState extends State<SpecialOffersSectionWidget>
     return Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: _offers.asMap().entries.map((entry) {
+        children: _features.asMap().entries.map((entry) {
           int index = entry.key;
           return AnimatedContainer(
             duration: const Duration(milliseconds: 300),

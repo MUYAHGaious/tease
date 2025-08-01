@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import '../presentation/onboarding_flow/onboarding_flow.dart';
 import '../presentation/splash_screen/splash_screen.dart';
+import '../presentation/auth/login_screen.dart';
+import '../presentation/auth/signup_screen.dart';
 import '../presentation/seat_selection/seat_selection.dart';
 import '../presentation/home_dashboard/home_dashboard.dart';
 import '../presentation/search_booking/search_booking.dart';
 import '../presentation/booking_confirmation/booking_confirmation.dart';
 import '../presentation/school_bus_home/premium_home_screen.dart';
-import '../presentation/parent_dashboardSchoolbus/parent_dashboard.dart';
 import '../presentation/bus_booking_formSchoolbus/bus_booking_form.dart';
 import '../presentation/qr_code_displaySchoolbus/qr_code_display.dart';
 import '../presentation/my_tickets/my_tickets.dart';
@@ -20,14 +21,15 @@ import '../presentation/driver_boarding_interfaceSchoolbus/driver_boarding_inter
 class AppRoutes {
   // TODO: Add your routes here
   static const String initial = '/';
-  static const String onboardingFlow = '/onboarding-flow';
   static const String splashScreen = '/splash-screen';
+  static const String login = '/login';
+  static const String signup = '/signup';
+  static const String onboardingFlow = '/onboarding-flow';
   static const String seatSelection = '/seat-selection';
   static const String homeDashboard = '/home-dashboard';
   static const String searchBooking = '/search-booking';
   static const String bookingConfirmation = '/booking-confirmation';
   static const String schoolBusHome = '/school-bus-home';
-  static const String parentDashboard = '/parent-dashboard';
   static const String busBookingForm = '/bus-booking-form';
   static const String qrCodeDisplay = '/qr-code-display';
   static const String bookingHistory = '/booking-history';
@@ -42,15 +44,16 @@ class AppRoutes {
   static const String driverBoardingInterface = '/driver-boarding-interface';
 
   static Map<String, WidgetBuilder> routes = {
-    initial: (context) => const SplashScreen(), // Back to original
-    onboardingFlow: (context) => const OnboardingFlow(),
+    initial: (context) => const SplashScreen(),
     splashScreen: (context) => const SplashScreen(),
+    login: (context) => const LoginScreen(),
+    signup: (context) => const SignupScreen(),
+    onboardingFlow: (context) => const OnboardingFlow(),
     seatSelection: (context) => const SeatSelection(),
     homeDashboard: (context) => const HomeDashboard(),
     searchBooking: (context) => const SearchBooking(),
     bookingConfirmation: (context) => const BookingConfirmation(),
     schoolBusHome: (context) => const PremiumHomeScreen(),
-    parentDashboard: (context) => const ParentDashboard(),
     busBookingForm: (context) => const BusBookingForm(),
     qrCodeDisplay: (context) => const QrCodeDisplay(),
     bookingHistory: (context) => const BookingHistory(),

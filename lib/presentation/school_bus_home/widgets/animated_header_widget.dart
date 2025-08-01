@@ -91,16 +91,19 @@ class _AnimatedHeaderWidgetState extends State<AnimatedHeaderWidget>
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Container(
-          padding: EdgeInsets.all(2.w),
-          decoration: BoxDecoration(
-            color: AppTheme.onPrimaryLight.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(2.w),
-          ),
-          child: Icon(
-            Icons.menu,
-            color: AppTheme.onPrimaryLight,
-            size: 6.w,
+        GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Container(
+            padding: EdgeInsets.all(2.w),
+            decoration: BoxDecoration(
+              color: AppTheme.onPrimaryLight.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(2.w),
+            ),
+            child: Icon(
+              Icons.arrow_back,
+              color: AppTheme.onPrimaryLight,
+              size: 6.w,
+            ),
           ),
         ),
         Row(

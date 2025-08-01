@@ -5,207 +5,95 @@ import 'dart:ui';
 
 import '../../../core/app_export.dart';
 import '../../../theme/app_theme.dart';
-import '../../../widgets/custom_icon_widget.dart';
 
-class BottomNavigationWidget extends StatefulWidget {
+const primaryGradient = LinearGradient(
+  colors: [Color(0xFF1a4d3a), Color(0xFF2d5a3d)],
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
+);
+
+class BottomNavigationWidget extends StatelessWidget {
   final int currentIndex;
-  final Function(int) onTap;
-  final int cartBadgeCount;
+  final ValueChanged<int> onTap;
 
   const BottomNavigationWidget({
     super.key,
     required this.currentIndex,
     required this.onTap,
-    this.cartBadgeCount = 0,
   });
 
-  @override
-  State<BottomNavigationWidget> createState() => _BottomNavigationWidgetState();
-}
-
-class _BottomNavigationWidgetState extends State<BottomNavigationWidget>
-    with TickerProviderStateMixin {
-  late AnimationController _centerButtonController;
-  late Animation<double> _centerButtonAnimation;
-
-  final List<Map<String, dynamic>> _navItems = [
-    {
-      'icon': Icons.home,
-      'label': 'Home',
-      'route': '/home-dashboard',
-    },
-    {
-      'icon': Icons.favorite_border,
-      'label': 'Favorites',
-      'route': '/favorites',
-    },
-    {
-      'icon': null, // Center button placeholder
-      'label': 'Book',
-      'route': '/search-booking',
-    },
-    {
-      'icon': Icons.shopping_bag_outlined,
-      'label': 'Tickets',
-      'route': '/my-tickets',
-    },
-    {
-      'icon': Icons.menu,
-      'label': 'Menu',
-      'route': '/menu',
-    },
+  final List<IconData> icons = const [
+    Icons.home,
+    Icons.favorite,
+    Icons.confirmation_num,
+    Icons.person,
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _centerButtonController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _centerButtonAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.95,
-    ).animate(CurvedAnimation(
-      parent: _centerButtonController,
-      curve: Curves.easeInOut,
-    ));
-  }
-
-  @override
-  void dispose() {
-    _centerButtonController.dispose();
-    super.dispose();
-  }
-
-  Widget _buildNavItem(Map<String, dynamic> item, int index) {
-    final bool isSelected = widget.currentIndex == index;
-    
-    // Center button (index 2)
-    if (index == 2) {
-      return _buildCenterButton();
-    }
-
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.selectionClick();
-        widget.onTap(index);
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 2.h),
-        child: Icon(
-          item['icon'],
-          color: isSelected ? Colors.orange : Colors.grey[400],
-          size: 7.w,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCenterButton() {
-    return GestureDetector(
-      onTapDown: (_) {
-        _centerButtonController.forward();
-      },
-      onTapUp: (_) {
-        _centerButtonController.reverse();
-      },
-      onTapCancel: () {
-        _centerButtonController.reverse();
-      },
-      onTap: () {
-        HapticFeedback.mediumImpact();
-        widget.onTap(2);
-      },
-      child: AnimatedBuilder(
-        animation: _centerButtonAnimation,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _centerButtonAnimation.value,
-            child: Container(
-              width: 16.w,
-              height: 16.w,
-              decoration: BoxDecoration(
-                color: Colors.grey[800],
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Icon(
-                    Icons.shopping_cart,
-                    color: Colors.white,
-                    size: 7.w,
-                  ),
-                  if (widget.cartBadgeCount > 0)
-                    Positioned(
-                      top: 2.w,
-                      right: 2.w,
-                      child: Container(
-                        padding: EdgeInsets.all(1.w),
-                        decoration: const BoxDecoration(
-                          color: Colors.orange,
-                          shape: BoxShape.circle,
-                        ),
-                        constraints: BoxConstraints(
-                          minWidth: 4.w,
-                          minHeight: 4.w,
-                        ),
-                        child: Text(
-                          widget.cartBadgeCount.toString(),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 8.sp,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
+  final List<String> labels = const ["Home", "Favorites", "Tickets", "Profile"];
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 20.h,
-      decoration: BoxDecoration(
-        color: const Color(0xFF2A2A2A),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, -5),
-          ),
-        ],
+      decoration: const BoxDecoration(
+        gradient: primaryGradient,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      child: SafeArea(
-        top: false,
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 8.w),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: _navItems.asMap().entries.map((entry) {
-              return _buildNavItem(entry.value, entry.key);
-            }).toList(),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+          child: BottomAppBar(
+            height: 70, // Fixed height to prevent overflow
+            color: const Color(0xFF1a4d3a).withOpacity(0.8),
+            shape: const CircularNotchedRectangle(),
+            notchMargin: 8,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: List.generate(icons.length, (index) {
+                  final isSelected = currentIndex == index;
+                  return Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        onTap(index);
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14),
+                          color: isSelected ? Colors.white.withOpacity(0.15) : Colors.transparent,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              icons[index],
+                              size: isSelected ? 24 : 22,
+                              color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              labels[index],
+                              style: TextStyle(
+                                fontSize: 9,
+                                color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
+                                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
           ),
         ),
       ),
