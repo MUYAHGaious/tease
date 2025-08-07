@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tease App Icon Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        canvas {
+            border: 2px solid #ddd;
+            margin: 10px;
+            border-radius: 8px;
+        }
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .icon-item {
+            text-align: center;
+        }
+        button {
+            background: #1a4d3a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2d5a3d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tease App Icon Generator</h1>
+        <p>Generate custom app icons for your Tease bus booking app. Click "Generate Icons" and then right-click each canvas to save the image.</p>
+        
+        <button onclick="generateAllIcons()">Generate Icons</button>
+        <button onclick="downloadAllIcons()">Download All Icons</button>
+        
+        <div class="icon-grid" id="iconGrid">
+            <!-- Icons will be generated here -->
+        </div>
+    </div>
+
+    <script>
+        const iconSizes = [
+            { name: 'Android MDPI', size: 48, folder: 'mipmap-mdpi' },
+            { name: 'Android HDPI', size: 72, folder: 'mipmap-hdpi' },
+            { name: 'Android XHDPI', size: 96, folder: 'mipmap-xhdpi' },
+            { name: 'Android XXHDPI', size: 144, folder: 'mipmap-xxhdpi' },
+            { name: 'Android XXXHDPI', size: 192, folder: 'mipmap-xxxhdpi' },
+            { name: 'iOS 20pt', size: 20, folder: 'ios' },
+            { name: 'iOS 20pt @2x', size: 40, folder: 'ios' },
+            { name: 'iOS 20pt @3x', size: 60, folder: 'ios' },
+            { name: 'iOS 29pt', size: 29, folder: 'ios' },
+            { name: 'iOS 29pt @2x', size: 58, folder: 'ios' },
+            { name: 'iOS 29pt @3x', size: 87, folder: 'ios' },
+            { name: 'iOS 40pt', size: 40, folder: 'ios' },
+            { name: 'iOS 40pt @2x', size: 80, folder: 'ios' },
+            { name: 'iOS 40pt @3x', size: 120, folder: 'ios' },
+            { name: 'iOS 60pt @2x', size: 120, folder: 'ios' },
+            { name: 'iOS 60pt @3x', size: 180, folder: 'ios' },
+            { name: 'iOS 76pt', size: 76, folder: 'ios' },
+            { name: 'iOS 76pt @2x', size: 152, folder: 'ios' },
+            { name: 'iOS 83.5pt @2x', size: 167, folder: 'ios' },
+            { name: 'iOS App Store', size: 1024, folder: 'ios' }
+        ];
+
+        function drawIcon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            canvas.width = size;
+            canvas.height = size;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, size, size);
+            
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#1a4d3a');
+            gradient.addColorStop(1, '#2d5a3d');
+            
+            // Background circle
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(size/2, size/2, size/2 - 4, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // White border
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = size * 0.015;
+            ctx.stroke();
+            
+            // Scale factor for drawing elements
+            const scale = size / 512;
+            
+            // Bus body
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(120 * scale, 200 * scale, 272 * scale, 120 * scale);
+            ctx.strokeStyle = '#1a4d3a';
+            ctx.lineWidth = 4 * scale;
+            ctx.strokeRect(120 * scale, 200 * scale, 272 * scale, 120 * scale);
+            
+            // Bus windows
+            ctx.fillStyle = '#87CEEB';
+            ctx.fillRect(140 * scale, 220 * scale, 60 * scale, 40 * scale);
+            ctx.fillRect(220 * scale, 220 * scale, 60 * scale, 40 * scale);
+            ctx.fillRect(300 * scale, 220 * scale, 60 * scale, 40 * scale);
+            
+            ctx.strokeStyle = '#1a4d3a';
+            ctx.lineWidth = 2 * scale;
+            ctx.strokeRect(140 * scale, 220 * scale, 60 * scale, 40 * scale);
+            ctx.strokeRect(220 * scale, 220 * scale, 60 * scale, 40 * scale);
+            ctx.strokeRect(300 * scale, 220 * scale, 60 * scale, 40 * scale);
+            
+            // Bus front
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(392 * scale, 210 * scale, 20 * scale, 100 * scale);
+            ctx.strokeStyle = '#1a4d3a';
+            ctx.lineWidth = 4 * scale;
+            ctx.strokeRect(392 * scale, 210 * scale, 20 * scale, 100 * scale);
+            
+            // Bus wheels
+            ctx.fillStyle = '#2a2a2a';
+            ctx.beginPath();
+            ctx.arc(160 * scale, 340 * scale, 25 * scale, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(352 * scale, 340 * scale, 25 * scale, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = '#666666';
+            ctx.beginPath();
+            ctx.arc(160 * scale, 340 * scale, 15 * scale, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(352 * scale, 340 * scale, 15 * scale, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Bus door
+            ctx.fillStyle = '#e0e0e0';
+            ctx.fillRect(120 * scale, 240 * scale, 20 * scale, 60 * scale);
+            ctx.strokeStyle = '#1a4d3a';
+            ctx.lineWidth = 2 * scale;
+            ctx.strokeRect(120 * scale, 240 * scale, 20 * scale, 60 * scale);
+            
+            // Headlights
+            ctx.fillStyle = '#ffff99';
+            ctx.beginPath();
+            ctx.arc(405 * scale, 230 * scale, 8 * scale, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(405 * scale, 280 * scale, 8 * scale, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Letter T
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `bold ${48 * scale}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.fillText('T', size/2, 420 * scale);
+        }
+
+        function generateAllIcons() {
+            const iconGrid = document.getElementById('iconGrid');
+            iconGrid.innerHTML = '';
+            
+            iconSizes.forEach((iconInfo, index) => {
+                const iconItem = document.createElement('div');
+                iconItem.className = 'icon-item';
+                
+                const canvas = document.createElement('canvas');
+                const title = document.createElement('h3');
+                const subtitle = document.createElement('p');
+                const downloadBtn = document.createElement('button');
+                
+                title.textContent = iconInfo.name;
+                subtitle.textContent = `${iconInfo.size}x${iconInfo.size}px`;
+                downloadBtn.textContent = 'Download PNG';
+                downloadBtn.onclick = () => downloadIcon(canvas, iconInfo.name, iconInfo.size);
+                
+                drawIcon(canvas, iconInfo.size);
+                
+                iconItem.appendChild(title);
+                iconItem.appendChild(subtitle);
+                iconItem.appendChild(canvas);
+                iconItem.appendChild(downloadBtn);
+                
+                iconGrid.appendChild(iconItem);
+            });
+        }
+
+        function downloadIcon(canvas, name, size) {
+            const link = document.createElement('a');
+            link.download = `ic_launcher_${size}x${size}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        function downloadAllIcons() {
+            const canvases = document.querySelectorAll('canvas');
+            canvases.forEach((canvas, index) => {
+                const iconInfo = iconSizes[index];
+                setTimeout(() => {
+                    downloadIcon(canvas, iconInfo.name, iconInfo.size);
+                }, index * 200); // Delay to prevent browser blocking multiple downloads
+            });
+        }
+
+        // Generate icons on page load
+        window.onload = function() {
+            generateAllIcons();
+        };
+    </script>
+</body>
+</html>

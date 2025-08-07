@@ -1,0 +1,107 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Claude AI artifacts and sensitive files
+.claude/
+**/.claude/
+*.claude
+.claude.json
+.claude.*
+
+# Environment and local config files
+.env
+.env.local
+.env.*.local
+local.properties
+firebase_options.dart
+
+# IDE specific files
+*.iml
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# Log files
+*.log
+logs/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Export/backup folders that shouldn't be committed
+export/
+export.zip
+lib_backup/
+combined_busflow/
+
+# Screenshots and documentation images (optional, based on needs)
+screenshots/
+Screenshot*.png
+Screenshot*.jpg
+
+# Analysis and memory files that are development-specific
+project_memory.md
+errors.md
+architecture_analysis.md
+AI_REDESIGN_CONTEXT.md
+*analysis*.md
