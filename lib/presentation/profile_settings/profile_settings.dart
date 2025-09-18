@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
+import '../../widgets/global_bottom_navigation.dart';
 import './widgets/animated_toggle_widget.dart';
 import './widgets/language_selector_widget.dart';
 import './widgets/payment_card_widget.dart';
@@ -567,127 +568,8 @@ class _ProfileSettingsState extends State<ProfileSettings>
           ),
         ),
       ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).bottomNavigationBarTheme.backgroundColor,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 8,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          currentIndex: 4, // Profile tab active
-          onTap: (index) {
-            switch (index) {
-              case 0:
-                Navigator.pushReplacementNamed(context, '/home-dashboard');
-                break;
-              case 1:
-                Navigator.pushReplacementNamed(context, '/passenger-details');
-                break;
-              case 2:
-                Navigator.pushReplacementNamed(context, '/payment-gateway');
-                break;
-              case 3:
-                Navigator.pushReplacementNamed(context, '/my-tickets');
-                break;
-              case 4:
-                // Already on profile settings
-                break;
-            }
-          },
-          items: [
-            BottomNavigationBarItem(
-              icon: CustomIconWidget(
-                iconName: 'home',
-                color: Theme.of(context)
-                    .bottomNavigationBarTheme
-                    .unselectedItemColor!,
-                size: 6.w,
-              ),
-              activeIcon: CustomIconWidget(
-                iconName: 'home',
-                color: Theme.of(context)
-                    .bottomNavigationBarTheme
-                    .selectedItemColor!,
-                size: 6.w,
-              ),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: CustomIconWidget(
-                iconName: 'search',
-                color: Theme.of(context)
-                    .bottomNavigationBarTheme
-                    .unselectedItemColor!,
-                size: 6.w,
-              ),
-              activeIcon: CustomIconWidget(
-                iconName: 'search',
-                color: Theme.of(context)
-                    .bottomNavigationBarTheme
-                    .selectedItemColor!,
-                size: 6.w,
-              ),
-              label: 'Search',
-            ),
-            BottomNavigationBarItem(
-              icon: CustomIconWidget(
-                iconName: 'payment',
-                color: Theme.of(context)
-                    .bottomNavigationBarTheme
-                    .unselectedItemColor!,
-                size: 6.w,
-              ),
-              activeIcon: CustomIconWidget(
-                iconName: 'payment',
-                color: Theme.of(context)
-                    .bottomNavigationBarTheme
-                    .selectedItemColor!,
-                size: 6.w,
-              ),
-              label: 'Payment',
-            ),
-            BottomNavigationBarItem(
-              icon: CustomIconWidget(
-                iconName: 'confirmation_number',
-                color: Theme.of(context)
-                    .bottomNavigationBarTheme
-                    .unselectedItemColor!,
-                size: 6.w,
-              ),
-              activeIcon: CustomIconWidget(
-                iconName: 'confirmation_number',
-                color: Theme.of(context)
-                    .bottomNavigationBarTheme
-                    .selectedItemColor!,
-                size: 6.w,
-              ),
-              label: 'Tickets',
-            ),
-            BottomNavigationBarItem(
-              icon: CustomIconWidget(
-                iconName: 'person',
-                color: Theme.of(context)
-                    .bottomNavigationBarTheme
-                    .unselectedItemColor!,
-                size: 6.w,
-              ),
-              activeIcon: CustomIconWidget(
-                iconName: 'person',
-                color: Theme.of(context)
-                    .bottomNavigationBarTheme
-                    .selectedItemColor!,
-                size: 6.w,
-              ),
-              label: 'Profile',
-            ),
-          ],
-        ),
+      bottomNavigationBar: GlobalBottomNavigation(
+        initialIndex: 4, // Profile tab
       ),
     );
   }

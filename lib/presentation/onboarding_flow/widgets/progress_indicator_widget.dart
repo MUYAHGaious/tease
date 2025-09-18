@@ -7,12 +7,21 @@ import '../../../theme/app_theme.dart';
 class ProgressIndicatorWidget extends StatelessWidget {
   final int currentPage;
   final int totalPages;
+  final int? currentStep;
+  final int? totalSteps;
+  final bool? isResuming;
 
   const ProgressIndicatorWidget({
     super.key,
-    required this.currentPage,
-    required this.totalPages,
+    this.currentPage = 1,
+    this.totalPages = 1,
+    this.currentStep,
+    this.totalSteps,
+    this.isResuming,
   });
+
+  int get _currentValue => currentStep ?? currentPage;
+  int get _totalValue => totalSteps ?? totalPages;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +37,7 @@ class ProgressIndicatorWidget extends StatelessWidget {
           AnimatedContainer(
             duration: const Duration(milliseconds: 600),
             curve: Curves.easeInOutCubic,
-            width: (80.w * (currentPage + 1)) / totalPages,
+            width: (80.w * _currentValue) / _totalValue,
             height: 0.8.h,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(4),

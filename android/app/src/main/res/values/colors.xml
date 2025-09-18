@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Light theme colors -->
+    <color name="ic_launcher_background">#FFFFFF</color>
+    <color name="ic_launcher_foreground">#1a4d3a</color>
+    <color name="tease_primary">#1a4d3a</color>
+    <color name="tease_accent">#2d5a3d</color>
+</resources>

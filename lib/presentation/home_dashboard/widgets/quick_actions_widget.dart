@@ -33,8 +33,8 @@ class _QuickActionsWidgetState extends State<QuickActionsWidget>
       'title': 'Search Buses',
       'icon': 'search',
       'route': '/search-booking',
-      'color': Color(0xFF1a4d3a),
-      'gradient': [Color(0xFF1a4d3a), Color(0xFF2d5a3d)],
+      'color': Color(0xFF20B2AA),
+      'gradient': [Color(0xFF20B2AA), Color(0xFF48CAE4)],
     },
     {
       'title': 'Track Buses',

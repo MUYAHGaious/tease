@@ -6,13 +6,12 @@ import 'package:google_fonts/google_fonts.dart';
 class AppTheme {
   AppTheme._();
 
-  // Sophisticated Earth Gradient Color Palette
-  static const Color primaryLight = Color(0xFF1a4d3a); // Deep forest green
-  static const Color primaryVariantLight =
-      Color(0xFF2d5a3d); // Lighter forest green
-  static const Color secondaryLight = Color(0xFFf4d03f); // Bright yellow accent
+  // Teal/Turquoise Color Palette (matching hero image)
+  static const Color primaryLight = Color(0xFF20B2AA); // Medium turquoise
+  static const Color primaryVariantLight = Color(0xFF48CAE4); // Light turquoise
+  static const Color secondaryLight = Color(0xFF0077B6); // Deep blue accent
   static const Color secondaryVariantLight =
-      Color(0xFFf1c40f); // Darker yellow variant
+      Color(0xFF023E8A); // Darker blue variant
   static const Color backgroundLight = Color(0xFFf8f9fa); // Soft off-white
   static const Color surfaceLight = Color(0xFFffffff); // Pure white
   static const Color surfaceVariantLight = Color(0xFFf1f3f4); // Subtle gray
@@ -25,21 +24,21 @@ class AppTheme {
   static const Color onSurfaceLight = Color(0xFF202124); // Dark gray on surface
   static const Color onSurfaceVariantLight = Color(0xFF5f6368); // Medium gray
   static const Color onErrorLight = Color(0xFFffffff); // White on error
-  
+
   // Additional semantic colors
   static const Color warningLight = Color(0xFFf39c12); // Orange warning
-  static const Color successLight = Color(0xFF27ae60); // Green success  
+  static const Color successLight =
+      Color(0xFF20B2AA); // Teal success (matching primary)
   static const Color neutralLight = Color(0xFF95a5a6); // Gray neutral
 
-  // Dark theme variants (maintaining earth gradient philosophy)
+  // Dark theme variants (maintaining teal/turquoise philosophy)
   static const Color primaryDark =
-      Color(0xFF4a7c59); // Lighter forest green for dark mode
-  static const Color primaryVariantDark =
-      Color(0xFF2d5a3d); // Secondary forest green
+      Color(0xFF48CAE4); // Light turquoise for dark mode
+  static const Color primaryVariantDark = Color(0xFF20B2AA); // Medium turquoise
   static const Color secondaryDark =
-      Color(0xFFf4d03f); // Bright yellow (consistent)
+      Color(0xFF0077B6); // Deep blue (consistent)
   static const Color secondaryVariantDark =
-      Color(0xFFf39c12); // Orange-yellow variant
+      Color(0xFF023E8A); // Darker blue variant
   static const Color backgroundDark =
       Color(0xFF121212); // Material dark background
   static const Color surfaceDark = Color(0xFF1e1e1e); // Dark surface

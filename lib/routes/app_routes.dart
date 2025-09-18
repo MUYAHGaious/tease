@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import '../presentation/onboarding_flow/onboarding_flow.dart';
+import '../presentation/onboarding_flow/progressive_onboarding_screen.dart';
 import '../presentation/splash_screen/splash_screen.dart';
 import '../presentation/auth/login_screen.dart';
 import '../presentation/auth/signup_screen.dart';
+import '../presentation/auth/welcome_screen.dart';
+import '../presentation/auth/hi_screen.dart';
+import '../presentation/auth/auth_demo_screen.dart';
+import '../presentation/auth/forgot_password_screen.dart';
 import '../presentation/seat_selection/seat_selection.dart';
 import '../presentation/home_dashboard/home_dashboard.dart';
 import '../presentation/search_booking/search_booking.dart';
@@ -27,6 +32,11 @@ class AppRoutes {
   static const String splashScreen = '/splash-screen';
   static const String login = '/login';
   static const String signup = '/signup';
+  static const String welcome = '/welcome';
+  static const String hiScreen = '/hi';
+  static const String authDemo = '/auth-demo';
+  static const String forgotPassword = '/forgot-password';
+  static const String home = '/home';
   static const String onboardingFlow = '/onboarding-flow';
   static const String seatSelection = '/seat-selection';
   static const String homeDashboard = '/home-dashboard';
@@ -48,12 +58,27 @@ class AppRoutes {
   static const String favorites = '/favorites';
   static const String ticketBooking = '/ticket-booking';
   static const String busTrackingMap = '/bus-tracking-map';
+  static const String progressiveOnboarding = '/progressive-onboarding';
 
   static Map<String, WidgetBuilder> routes = {
     initial: (context) => const SplashScreen(),
     splashScreen: (context) => const SplashScreen(),
-    login: (context) => const LoginScreen(),
-    signup: (context) => const SignupScreen(),
+    login: (context) {
+      final arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      return LoginScreen(
+        email: arguments?['email'],
+        name: arguments?['name'],
+      );
+    },
+    signup: (context) {
+      final arguments = ModalRoute.of(context)?.settings.arguments as String?;
+      return SignupScreen(email: arguments);
+    },
+    welcome: (context) => const WelcomeScreen(),
+    home: (context) => const HomeDashboard(),
+    hiScreen: (context) => const HiScreen(),
+    authDemo: (context) => const AuthDemoScreen(),
+    forgotPassword: (context) => const ForgotPasswordScreen(),
     onboardingFlow: (context) => const OnboardingFlow(),
     seatSelection: (context) => const SeatSelection(),
     homeDashboard: (context) => const HomeDashboard(),
@@ -68,13 +93,21 @@ class AppRoutes {
     paymentGateway: (context) => const PaymentGateway(),
     profileSettings: (context) => const ProfileSettings(),
     adminRouteManagement: (context) => const AdminRouteManagement(),
-    adminDashboard: (context) => const AdminRouteManagement(), // Using admin route management as admin dashboard
-    schoolBusBooking: (context) => const PremiumHomeScreen(), // Using premium home for school bus booking
+    adminDashboard: (context) =>
+        const AdminRouteManagement(), // Using admin route management as admin dashboard
+    schoolBusBooking: (context) =>
+        const PremiumHomeScreen(), // Using premium home for school bus booking
     bookingHistorySchoolbus: (context) => const BookingHistory(),
     driverBoardingInterface: (context) => const DriverBoardingInterface(),
     favorites: (context) => const Favorites(),
     ticketBooking: (context) => const TicketBookingScreen(),
     busTrackingMap: (context) => const SafeBusTrackingScreen(),
+    progressiveOnboarding: (context) {
+      final arguments =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
+              {};
+      return ProgressiveOnboardingScreen(arguments: arguments);
+    },
     // TODO: Add your other routes here
   };
 }

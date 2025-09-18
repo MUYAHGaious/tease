@@ -108,7 +108,7 @@ class _RecentBookingsWidgetState extends State<RecentBookingsWidget>
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'confirmed':
-        return const Color(0xFF4CAF50);
+        return const Color(0xFF20B2AA);
       case 'pending':
         return const Color(0xFFFF9800);
       case 'cancelled':

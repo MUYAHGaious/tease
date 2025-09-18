@@ -3,11 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
+import '../../widgets/global_bottom_navigation.dart';
 import './widgets/date_picker_widget.dart';
 import './widgets/filter_bottom_sheet_widget.dart';
 import './widgets/origin_destination_widget.dart';
 import './widgets/predictive_suggestions_widget.dart';
 import './widgets/premium_search_results_widget.dart';
+import '../../services/bus_service.dart';
+import '../../models/bus_models.dart';
 
 class SearchBooking extends StatefulWidget {
   const SearchBooking({super.key});
@@ -31,6 +34,7 @@ class _SearchBookingState extends State<SearchBooking>
   bool _hasSearched = false;
   Map<String, dynamic> _currentFilters = {};
   List<Map<String, dynamic>> _searchResults = [];
+  String _searchError = '';
 
   final ScrollController _scrollController = ScrollController();
   final FocusNode _searchFocusNode = FocusNode();
@@ -124,6 +128,7 @@ class _SearchBookingState extends State<SearchBooking>
       _showSuggestions = false;
     });
     _searchFocusNode.unfocus();
+    HapticFeedback.selectionClick();
   }
 
   void _showFilterBottomSheet() {
@@ -146,8 +151,8 @@ class _SearchBookingState extends State<SearchBooking>
     _performSearch();
   }
 
-  void _performSearch() {
-    if (_origin.isEmpty || _destination.isEmpty) {
+  Future<void> _performSearch() async {
+    if (_origin.trim().isEmpty || _destination.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -170,33 +175,96 @@ class _SearchBookingState extends State<SearchBooking>
       _isSearching = true;
       _hasSearched = false;
       _showSuggestions = false;
+      _searchError = '';
     });
 
     _searchFocusNode.unfocus();
+    HapticFeedback.lightImpact();
 
-    // Simulate API call with comprehensive mock bus results
-    Future.delayed(const Duration(seconds: 2), () {
+    try {
+      // Create search query - for demo, we'll use city names
+      // In production, you'd convert these to coordinates
+      final fromCoords = _getCityCoordinates(_origin);
+      final toCoords = _getCityCoordinates(_destination);
+      
+      final result = await BusService.searchRoutes(
+        from: '$fromCoords',
+        to: '$toCoords',
+        radius: _currentFilters['radius']?.toDouble() ?? 10.0,
+        date: _selectedDate,
+        busType: _currentFilters['busType'],
+      );
+
       if (mounted) {
         setState(() {
           _isSearching = false;
           _hasSearched = true;
-          _searchResults = [
+          
+          if (result.success) {
+            _searchResults = (result.data as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [];
+            _searchError = '';
+          } else {
+            _searchResults = [];
+            _searchError = result.message;
+          }
+        });
+
+        // If no results found, show fallback mock data for demo purposes
+        if (_searchResults.isEmpty && _searchError.isEmpty) {
+          _showMockResults();
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isSearching = false;
+          _hasSearched = true;
+          _searchResults = [];
+          _searchError = 'Search failed. Please try again.';
+        });
+        
+        // Show mock results as fallback for demo
+        _showMockResults();
+      }
+    }
+  }
+
+  // Helper method to get city coordinates (mock implementation)
+  String _getCityCoordinates(String cityName) {
+    // In production, you'd use a geocoding service
+    final mockCoordinates = {
+      'douala': '4.0483,-9.7043',
+      'yaoundé': '3.8480,11.5021',
+      'bamenda': '5.9597,10.1486',
+      'bafoussam': '5.4781,10.4167',
+      'garoua': '9.3265,13.3969',
+      'maroua': '10.5915,14.3176',
+    };
+    
+    final normalizedCity = cityName.toLowerCase().trim();
+    return mockCoordinates[normalizedCity] ?? '4.0483,-9.7043'; // Default to Douala
+  }
+
+  // Fallback mock results for demo purposes
+  void _showMockResults() {
+    setState(() {
+      _searchResults = [
             {
               'id': 'bus_001',
-              'operator': 'Express Voyage',
+              'operator': 'Cameroon Express',
               'route': '$_origin → $_destination',
-              'departure': '08:30 AM',
-              'arrival': '02:45 PM',
-              'duration': '6h 15m',
+              'departure': '08:00 AM',
+              'arrival': '02:30 PM',
+              'duration': '6h 30m',
               'price': 45.99,
               'originalPrice': 55.99,
-              'busType': 'AC Sleeper',
+              'busType': 'AC Seater',
               'availableSeats': 12,
               'totalSeats': 45,
-              'amenities': ['WiFi', 'AC', 'Charging Port', 'Snacks'],
-              'rating': 4.5,
-              'reviews': 234,
-              'image': 'https://images.pexels.com/photos/1545743/pexels-photo-1545743.jpeg?auto=compress&cs=tinysrgb&w=800',
+              'amenities': ['WiFi', 'AC', 'Movies'],
+              'rating': 4.3,
+              'reviews': 156,
+              'image': 'https://images.pexels.com/photos/1098365/pexels-photo-1098365.jpeg?auto=compress&cs=tinysrgb&w=800',
             },
             {
               'id': 'bus_002',
@@ -250,8 +318,8 @@ class _SearchBookingState extends State<SearchBooking>
               'image': 'https://images.pexels.com/photos/1098365/pexels-photo-1098365.jpeg?auto=compress&cs=tinysrgb&w=800',
             },
           ];
-        });
-      }
+      _hasSearched = true;
+      _isSearching = false;
     });
   }
 
@@ -325,6 +393,7 @@ class _SearchBookingState extends State<SearchBooking>
     });
     return count;
   }
+
 
   Widget _buildAppBar() {
     return Container(
@@ -599,6 +668,9 @@ class _SearchBookingState extends State<SearchBooking>
             ],
           ),
         ),
+      ),
+      bottomNavigationBar: GlobalBottomNavigation(
+        initialIndex: 1, // Search tab
       ),
     );
   }

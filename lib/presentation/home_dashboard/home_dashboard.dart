@@ -7,7 +7,7 @@ import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
 import '../../theme/app_theme.dart';
-import './widgets/bottom_navigation_widget.dart';
+import '../../widgets/global_bottom_navigation.dart';
 import './widgets/custom_menu_drawer.dart';
 import './widgets/greeting_header_widget.dart';
 import './widgets/popular_routes_widget.dart';
@@ -271,9 +271,8 @@ class _HomeDashboardState extends State<HomeDashboard>
             ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationWidget(
-        currentIndex: _currentBottomNavIndex,
-        onTap: _handleBottomNavTap,
+      bottomNavigationBar: GlobalBottomNavigation(
+        initialIndex: 0, // Home tab
       ),
       floatingActionButton: _buildGlassFAB(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -285,13 +284,13 @@ class _HomeDashboardState extends State<HomeDashboard>
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: const LinearGradient(
-          colors: [Color(0xFF1a4d3a), Color(0xFF2d5a3d)],
+          colors: [Color(0xFF20B2AA), Color(0xFF48CAE4)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF1a4d3a).withOpacity(0.4), 
+            color: const Color(0xFF20B2AA).withOpacity(0.4), 
             blurRadius: 15, 
             spreadRadius: 0, 
             offset: const Offset(0, 6)
@@ -329,7 +328,7 @@ class _HomeDashboardState extends State<HomeDashboard>
         height: MediaQuery.of(context).size.height * 0.4,
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [Color(0xFF1a4d3a), Color(0xFF2d5a3d)],
+            colors: [Color(0xFF20B2AA), Color(0xFF48CAE4)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),

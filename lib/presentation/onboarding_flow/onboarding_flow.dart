@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/app_export.dart';
 import '../../theme/app_theme.dart';
@@ -121,8 +122,13 @@ class _OnboardingFlowState extends State<OnboardingFlow>
     _navigateToHome();
   }
 
-  void _navigateToHome() {
-    Navigator.pushReplacementNamed(context, '/home-dashboard');
+  Future<void> _navigateToHome() async {
+    // Mark that user has seen onboarding
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('has_seen_onboarding', true);
+    
+    // Navigate to signup for new users to register
+    Navigator.pushReplacementNamed(context, '/signup');
   }
 
   void _onPageChanged(int page) {

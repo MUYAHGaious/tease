@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 import '../../core/app_export.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/global_bottom_navigation.dart';
 
 class Favorites extends StatefulWidget {
   const Favorites({Key? key}) : super(key: key);
@@ -556,6 +557,9 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
             ),
           ),
         ],
+      ),
+      bottomNavigationBar: GlobalBottomNavigation(
+        initialIndex: 3, // Favorites tab
       ),
     );
   }

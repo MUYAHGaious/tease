@@ -2,12 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
 
-import '../core/app_export.dart';
-import '../widgets/custom_error_widget.dart';
+import 'core/app_export.dart';
+import 'widgets/custom_error_widget.dart';
+// import 'core/api_client.dart'; // Disabled for frontend-only
+// import 'services/auth_service.dart'; // Disabled for frontend-only
+// import 'core/app_state.dart'; // Disabled for frontend-only
 
 void main() async {
   // Ensure proper binding initialization for mobile APK
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Services disabled for frontend-only development
+  debugPrint('Frontend-only mode: Backend services disabled');
 
   // Enhanced error handling for release builds
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -22,14 +28,12 @@ void main() async {
       errorDetails: details,
     );
   };
-  
+
   // 🚨 CRITICAL: Device orientation lock - DO NOT REMOVE
   try {
-    await SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown
-    ]);
-    
+    await SystemChrome.setPreferredOrientations(
+        [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+
     // Additional system UI configuration for mobile stability
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
@@ -37,7 +41,7 @@ void main() async {
         statusBarIconBrightness: Brightness.dark,
       ),
     );
-    
+
     runApp(MyApp());
   } catch (e) {
     debugPrint('Initialization error: $e');
@@ -67,7 +71,8 @@ class MyApp extends StatelessWidget {
         // 🚨 END CRITICAL SECTION
         debugShowCheckedModeBanner: false,
         routes: AppRoutes.routes,
-        initialRoute: AppRoutes.initial,
+        initialRoute:
+            AppRoutes.welcome, // Start with the welcome screen
       );
     });
   }

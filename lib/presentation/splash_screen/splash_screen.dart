@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
-import 'package:lottie/lottie.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/app_export.dart';
 
@@ -54,85 +54,109 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   void _startSplashTimer() {
-    // Navigate after 3 seconds (duration of Lottie animation)
-    Future.delayed(const Duration(seconds: 3), () {
+    // Navigate after 2.5 seconds for optimal user experience with image
+    Future.delayed(const Duration(milliseconds: 2500), () {
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/signup');
+        _navigateToNextScreen();
       }
     });
+  }
+
+  Future<void> _navigateToNextScreen() async {
+    try {
+      // Check if user is already logged in
+      final isLoggedIn = await _checkAuthStatus();
+
+      if (isLoggedIn) {
+        // User is logged in, go to home dashboard
+        Navigator.pushReplacementNamed(context, '/home-dashboard');
+        return;
+      }
+
+      // Always go to welcome screen for auth flow
+      Navigator.pushReplacementNamed(context, '/welcome');
+    } catch (e) {
+      // If there's any error, go to welcome screen
+      Navigator.pushReplacementNamed(context, '/welcome');
+    }
+  }
+
+  Future<bool> _checkAuthStatus() async {
+    try {
+      // Import the auth service to check login status
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('access_token');
+      final isLoggedIn = prefs.getBool('is_logged_in') ?? false;
+      
+      // Simple check - if we have both token and logged in flag
+      return accessToken != null && accessToken.isNotEmpty && isLoggedIn;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> _checkFirstTimeUser() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
+      return !hasSeenOnboarding;
+    } catch (e) {
+      return true; // Default to first time if we can't check
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1a4d3a), // Set background to match Lottie animation
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: Container(
+      backgroundColor: const Color(0xFF1a4d3a), // Immediate background to prevent white screen
+      body: Container(
+        width: 100.w,
+        height: 100.h,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF1a4d3a),
+              Color(0xFF2d5a3d),
+            ],
+          ),
+        ),
+        child: Image.asset(
+          'assets/images/bus.png',
           width: 100.w,
           height: 100.h,
-          child: Lottie.asset(
-            'assets/lottie-splash-screen.json',
-            fit: BoxFit.cover,
-            repeat: false,
-            animate: true,
-            frameRate: FrameRate.max,
-            onLoaded: (composition) {
-              print('Lottie splash screen loaded successfully - Duration: ${composition.duration}');
-            },
-            errorBuilder: (context, error, stackTrace) {
-              print('Lottie error: $error');
-              // Return a simple fallback that matches your brand colors
-              return Container(
-                width: 100.w,
-                height: 100.h,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      const Color(0xFF1a4d3a),
-                      const Color(0xFF2d5a3d),
-                    ],
-                  ),
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 30.w,
-                        height: 30.w,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withValues(alpha: 0.2),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.3),
-                            width: 2,
-                          ),
-                        ),
-                        child: Icon(
-                          Icons.directions_bus,
-                          color: Colors.white,
-                          size: 15.w,
-                        ),
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            print('Image loading error: $error');
+            return Container(
+              width: 100.w,
+              height: 100.h,
+              color: Colors.black,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.directions_bus,
+                      color: Colors.white,
+                      size: 20.w,
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      'TEASE',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24.sp,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 3.0,
                       ),
-                      SizedBox(height: 4.h),
-                      Text(
-                        'TEASE',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24.sp,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 3.0,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );

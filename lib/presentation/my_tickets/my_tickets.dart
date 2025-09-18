@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
-import './widgets/bottom_navigation_widget.dart';
+import '../../widgets/global_bottom_navigation.dart';
 import './widgets/empty_state_widget.dart';
 import './widgets/filter_bottom_sheet_widget.dart';
 import './widgets/search_bar_widget.dart';
@@ -186,9 +186,8 @@ class _MyTicketsState extends State<MyTickets> with TickerProviderStateMixin {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavigationWidget(
-        currentIndex: _currentBottomNavIndex,
-        onTap: _onBottomNavTap,
+      bottomNavigationBar: GlobalBottomNavigation(
+        initialIndex: 2, // My Tickets tab
       ),
     );
   }

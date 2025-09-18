@@ -158,20 +158,29 @@
   <script>
     window.addEventListener('load', function(ev) {
       var loading = document.querySelector('#loading');
-      _flutter.loader.loadEntrypoint({
-        serviceWorker: {
-          serviceWorkerVersion: null,
-        }
-      }).then(function(engineInitializer) {
-        return engineInitializer.initializeEngine();
-      }).then(function(appRunner) {
-        // Hide loading screen
-        if (loading) {
-          loading.classList.add('loaded');
-          setTimeout(() => loading.style.display = 'none', 500);
-        }
-        return appRunner.runApp();
-      });
+      
+      // Simple Flutter web initialization
+      if (typeof _flutter !== 'undefined') {
+        _flutter.loader.loadEntrypoint({
+          serviceWorker: {
+            serviceWorkerVersion: null,
+          }
+        }).then(function(engineInitializer) {
+          return engineInitializer.initializeEngine();
+        }).then(function(appRunner) {
+          // Hide loading screen
+          if (loading) {
+            loading.classList.add('loaded');
+            setTimeout(() => loading.style.display = 'none', 500);
+          }
+          return appRunner.runApp();
+        }).catch(function(error) {
+          console.error('Flutter initialization error:', error);
+          if (loading) {
+            loading.innerHTML = '<div style="color: white; text-align: center; padding: 20px;">Error loading app. Please refresh.</div>';
+          }
+        });
+      }
     });
   </script>
 </body>

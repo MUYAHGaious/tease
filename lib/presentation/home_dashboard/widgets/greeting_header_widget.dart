@@ -27,22 +27,22 @@ class _GreetingHeaderWidgetState extends State<GreetingHeaderWidget>
     {
       'icon': Icons.flash_on,
       'tip': 'Book faster with Quick Actions',
-      'color': Color(0xFF2d5a3d),
+      'color': Color(0xFF20B2AA),
     },
     {
       'icon': Icons.favorite,
       'tip': 'Save routes to Favorites',
-      'color': Color(0xFF4a7c59),
+      'color': Color(0xFF20B2AA),
     },
     {
       'icon': Icons.notification_important,
       'tip': 'Enable notifications for updates',
-      'color': Color(0xFF1a4d3a),
+      'color': Color(0xFF20B2AA),
     },
     {
       'icon': Icons.qr_code_scanner,
       'tip': 'Use QR codes for quick boarding',
-      'color': Color(0xFF2d5a3d),
+      'color': Color(0xFF20B2AA),
     },
   ];
 
@@ -370,16 +370,11 @@ class _GreetingHeaderWidgetState extends State<GreetingHeaderWidget>
                     width: 12.w,
                     height: 12.w,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Color(0xFF1a4d3a),
-                          Color(0xFF2d5a3d),
-                        ],
-                      ),
+                      color: Color(0xFF20B2AA),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Color(0xFF1a4d3a).withOpacity(0.3),
+                          color: Color(0xFF20B2AA).withOpacity(0.3),
                           blurRadius: 8,
                           offset: Offset(0, 2),
                         ),
@@ -402,7 +397,7 @@ class _GreetingHeaderWidgetState extends State<GreetingHeaderWidget>
                         style: TextStyle(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF1a4d3a),
+                          color: Color(0xFF20B2AA),
                           letterSpacing: 0.5,
                         ),
                         maxLines: 1,
@@ -427,7 +422,7 @@ class _GreetingHeaderWidgetState extends State<GreetingHeaderWidget>
                       ),
                       child: Icon(
                         Icons.menu,
-                        color: Color(0xFF1a4d3a),
+                        color: Color(0xFF20B2AA),
                         size: 5.w,
                       ),
                     ),
@@ -505,7 +500,7 @@ class _GreetingHeaderWidgetState extends State<GreetingHeaderWidget>
                                     style: TextStyle(
                                       fontSize: 12.sp,
                                       fontWeight: FontWeight.w600,
-                                      color: const Color(0xFF1a4d3a),
+                                      color: const Color(0xFF20B2AA),
                                     ),
                                     maxLines: 1,
                                   ),

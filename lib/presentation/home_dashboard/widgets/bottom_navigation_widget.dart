@@ -7,7 +7,7 @@ import '../../../core/app_export.dart';
 import '../../../theme/app_theme.dart';
 
 const primaryGradient = LinearGradient(
-  colors: [Color(0xFF1a4d3a), Color(0xFF2d5a3d)],
+  colors: [Color(0xFF20B2AA), Color(0xFF20B2AA)],
   begin: Alignment.topLeft,
   end: Alignment.bottomRight,
 );
@@ -35,7 +35,7 @@ class BottomNavigationWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        gradient: primaryGradient,
+        color: Color(0xFF20B2AA),
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: ClipRRect(
@@ -44,7 +44,7 @@ class BottomNavigationWidget extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
           child: BottomAppBar(
             height: 70, // Fixed height to prevent overflow
-            color: const Color(0xFF1a4d3a).withOpacity(0.8),
+            color: const Color(0xFF20B2AA).withOpacity(0.8),
             shape: const CircularNotchedRectangle(),
             notchMargin: 8,
             child: Padding(
