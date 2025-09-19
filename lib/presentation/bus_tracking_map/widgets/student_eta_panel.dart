@@ -97,14 +97,15 @@ class _StudentETAPanelState extends State<StudentETAPanel>
   Widget build(BuildContext context) {
     // Sort students by ETA (closest first)
     final sortedStudents = List<Map<String, dynamic>>.from(widget.students);
-    sortedStudents.sort((a, b) => (a['etaToBus'] as int).compareTo(b['etaToBus'] as int));
+    sortedStudents
+        .sort((a, b) => (a['etaToBus'] as int).compareTo(b['etaToBus'] as int));
 
     return SlideTransition(
       position: _slideAnimation,
       child: Positioned(
         top: 15.h,
         right: 4.w,
-        bottom: 20.h,
+        bottom: 8.h, // Reduced from 20.h to 8.h to prevent bottom overlap
         child: Container(
           width: 80.w,
           decoration: BoxDecoration(
@@ -125,8 +126,10 @@ class _StudentETAPanelState extends State<StudentETAPanel>
               Container(
                 padding: EdgeInsets.all(4.w),
                 decoration: BoxDecoration(
-                  color: AppTheme.lightTheme.colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                  color: AppTheme.lightTheme.colorScheme.primary
+                      .withValues(alpha: 0.1),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(20)),
                 ),
                 child: Row(
                   children: [
@@ -142,14 +145,16 @@ class _StudentETAPanelState extends State<StudentETAPanel>
                         children: [
                           Text(
                             'Student ETAs',
-                            style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+                            style: AppTheme.lightTheme.textTheme.titleMedium
+                                ?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: AppTheme.lightTheme.colorScheme.primary,
                             ),
                           ),
                           Text(
                             '${sortedStudents.length} students tracked',
-                            style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+                            style: AppTheme.lightTheme.textTheme.bodySmall
+                                ?.copyWith(
                               color: AppTheme.textMediumEmphasisLight,
                             ),
                           ),
@@ -185,7 +190,8 @@ class _StudentETAPanelState extends State<StudentETAPanel>
                   itemCount: sortedStudents.length,
                   separatorBuilder: (context, index) => Divider(
                     height: 3.h,
-                    color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
+                    color: AppTheme.lightTheme.colorScheme.outline
+                        .withValues(alpha: 0.2),
                   ),
                   itemBuilder: (context, index) {
                     final student = sortedStudents[index];
@@ -230,14 +236,18 @@ class _StudentETAPanelState extends State<StudentETAPanel>
                                   children: [
                                     Text(
                                       student['name'],
-                                      style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(
+                                      style: AppTheme
+                                          .lightTheme.textTheme.bodyLarge
+                                          ?.copyWith(
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
                                     SizedBox(height: 0.5.h),
                                     Text(
                                       student['grade'],
-                                      style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+                                      style: AppTheme
+                                          .lightTheme.textTheme.bodySmall
+                                          ?.copyWith(
                                         color: AppTheme.textMediumEmphasisLight,
                                       ),
                                     ),
@@ -245,14 +255,17 @@ class _StudentETAPanelState extends State<StudentETAPanel>
                                 ),
                               ),
                               Container(
-                                padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 2.w, vertical: 1.h),
                                 decoration: BoxDecoration(
                                   color: statusColor.withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
                                   _getStatusText(status),
-                                  style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
+                                  style: AppTheme
+                                      .lightTheme.textTheme.labelSmall
+                                      ?.copyWith(
                                     color: statusColor,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -270,9 +283,14 @@ class _StudentETAPanelState extends State<StudentETAPanel>
                                 child: _buildInfoChip(
                                   icon: Icons.timer,
                                   label: 'ETA',
-                                  value: etaToBus > 0 ? '${etaToBus} min' : 'Arrived',
-                                  color: etaToBus <= 2 ? Colors.green : 
-                                         etaToBus <= 5 ? Colors.orange : Colors.blue,
+                                  value: etaToBus > 0
+                                      ? '${etaToBus} min'
+                                      : 'Arrived',
+                                  color: etaToBus <= 2
+                                      ? Colors.green
+                                      : etaToBus <= 5
+                                          ? Colors.orange
+                                          : Colors.blue,
                                 ),
                               ),
                               SizedBox(width: 2.w),
@@ -291,7 +309,8 @@ class _StudentETAPanelState extends State<StudentETAPanel>
 
                           // Contact info
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.5.h),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 3.w, vertical: 1.5.h),
                             decoration: BoxDecoration(
                               color: Colors.grey.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
@@ -307,7 +326,8 @@ class _StudentETAPanelState extends State<StudentETAPanel>
                                 SizedBox(width: 2.w),
                                 Text(
                                   student['parentPhone'],
-                                  style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+                                  style: AppTheme.lightTheme.textTheme.bodySmall
+                                      ?.copyWith(
                                     color: AppTheme.textMediumEmphasisLight,
                                     fontWeight: FontWeight.w500,
                                   ),

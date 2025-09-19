@@ -59,12 +59,14 @@ class AppRoutes {
   static const String ticketBooking = '/ticket-booking';
   static const String busTrackingMap = '/bus-tracking-map';
   static const String progressiveOnboarding = '/progressive-onboarding';
+  static const String popularRoutes = '/popular-routes';
 
   static Map<String, WidgetBuilder> routes = {
     initial: (context) => const SplashScreen(),
     splashScreen: (context) => const SplashScreen(),
     login: (context) {
-      final arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final arguments =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
       return LoginScreen(
         email: arguments?['email'],
         name: arguments?['name'],
@@ -108,6 +110,8 @@ class AppRoutes {
               {};
       return ProgressiveOnboardingScreen(arguments: arguments);
     },
+    popularRoutes: (context) =>
+        const SearchBooking(), // Use SearchBooking for popular routes
     // TODO: Add your other routes here
   };
 }

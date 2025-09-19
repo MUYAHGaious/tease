@@ -24,7 +24,6 @@ class CustomMenuDrawer extends StatefulWidget {
 
 class _CustomMenuDrawerState extends State<CustomMenuDrawer>
     with TickerProviderStateMixin {
-
   List<Map<String, dynamic>> _availableMenuItems = [];
   UserModel? _currentUser;
 
@@ -76,7 +75,8 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
     // Smart feature access based on roles
     if (user != null) {
       // School/University features
-      if (user.isUniversityAffiliated || user.affiliations.contains('ict_university')) {
+      if (user.isUniversityAffiliated ||
+          user.affiliations.contains('ict_university')) {
         items.add({
           'icon': Icons.school,
           'title': 'School Bus Services',
@@ -143,8 +143,11 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
       }
 
       // Agency access for non-affiliated users
-      if (!user.affiliations.contains('agency') && 
-          !user.isScheduleManager && !user.isDriver && !user.isConductor && !user.isBookingClerk) {
+      if (!user.affiliations.contains('agency') &&
+          !user.isScheduleManager &&
+          !user.isDriver &&
+          !user.isConductor &&
+          !user.isBookingClerk) {
         items.add({
           'icon': Icons.business_outlined,
           'title': 'Join as Agency Staff',
@@ -161,10 +164,11 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
 
   Future<void> _handleSchoolBusAccess() async {
     Navigator.pop(context); // Close drawer
-    
+
     // Check if user has cached university onboarding progress
-    final cachedProgress = await OnboardingCacheService.getProgress('school_bus_onboarding');
-    
+    final cachedProgress =
+        await OnboardingCacheService.getProgress('school_bus_onboarding');
+
     if (cachedProgress != null && cachedProgress.isValid) {
       // Resume from cache
       Navigator.pushNamed(
@@ -190,10 +194,10 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
 
   Future<void> _handleAgencyAccess() async {
     Navigator.pop(context); // Close drawer
-    
+
     // Check if user has cached agency onboarding progress
     final cachedProgress = await OnboardingCacheService.getProgress('agency');
-    
+
     if (cachedProgress != null && cachedProgress.isValid) {
       // Resume from cache
       Navigator.pushNamed(
@@ -220,7 +224,7 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
   void _handleMenuItemTap(Map<String, dynamic> item) {
     HapticFeedback.selectionClick();
     Navigator.pop(context);
-    
+
     if (item.containsKey('onTap')) {
       item['onTap']();
     } else if (item.containsKey('route')) {
@@ -231,7 +235,9 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
   Widget _glassDrawerItem(IconData icon, String title, String route) {
     return ListTile(
       leading: Icon(icon, color: Colors.white),
-      title: Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
+      title: Text(title,
+          style: const TextStyle(
+              color: Colors.white, fontWeight: FontWeight.w500)),
       onTap: () {
         HapticFeedback.selectionClick();
         Navigator.pop(context);
@@ -315,7 +321,8 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
                 ),
                 SizedBox(height: 0.5.h),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 2.5.w, vertical: 0.3.h),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 2.5.w, vertical: 0.3.h),
                   decoration: BoxDecoration(
                     color: primaryColor,
                     borderRadius: BorderRadius.circular(8),
@@ -376,14 +383,14 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
 
   String _getUserStatusText() {
     if (_currentUser == null) return 'Guest User';
-    
+
     List<String> roles = [];
     if (_currentUser!.isUniversityAffiliated) roles.add('ICT University');
     if (_currentUser!.isScheduleManager) roles.add('Manager');
     if (_currentUser!.isDriver) roles.add('Driver');
     if (_currentUser!.isConductor) roles.add('Conductor');
     if (_currentUser!.isBookingClerk) roles.add('Clerk');
-    
+
     if (roles.isEmpty) return 'Standard User';
     return roles.join(' • ');
   }
@@ -463,7 +470,8 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
   }
 
   // Build modern menu section with clean design
-  Widget _buildMenuSection(String title, List<Map<String, dynamic>> items, IconData sectionIcon) {
+  Widget _buildMenuSection(
+      String title, List<Map<String, dynamic>> items, IconData sectionIcon) {
     if (items.isEmpty) return const SizedBox();
 
     return Column(
@@ -526,10 +534,12 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
                   ? primaryColor.withOpacity(0.05)
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(12),
-              border: isSpecial ? Border.all(
-                color: primaryColor.withOpacity(0.3),
-                width: 1,
-              ) : null,
+              border: isSpecial
+                  ? Border.all(
+                      color: primaryColor.withOpacity(0.3),
+                      width: 1,
+                    )
+                  : null,
             ),
             child: Row(
               children: [
@@ -563,10 +573,11 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      if (item.containsKey('badge')) ..[
+                      if (item.containsKey('badge')) ...[
                         SizedBox(height: 0.3.h),
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.2.h),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 2.w, vertical: 0.2.h),
                           decoration: BoxDecoration(
                             color: _getModernBadgeColor(item),
                             borderRadius: BorderRadius.circular(6),

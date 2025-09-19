@@ -43,8 +43,9 @@ class _ProfileSettingsState extends State<ProfileSettings>
     "membershipTier": "Gold Member",
     "loyaltyPoints": 2450,
     "nextTierPoints": 3000,
-    "phone": "+1 (555) 123-4567",
-    "dateOfBirth": "1990-03-15",
+    "membershipLevel": "VIP",
+    "phone": "+237 6 12 34 56 78",
+    "dateOfBirth": "2004-09-16",
     "preferredSeat": "Window",
     "savedRoutes": ["New York - Boston", "Boston - Philadelphia"],
   };
@@ -58,6 +59,7 @@ class _ProfileSettingsState extends State<ProfileSettings>
       "holderName": "SARAH JOHNSON",
       "expiryDate": "12/26",
       "isDefault": true,
+      "cardColor": "black",
     },
     {
       "id": 2,
@@ -66,6 +68,34 @@ class _ProfileSettingsState extends State<ProfileSettings>
       "holderName": "SARAH JOHNSON",
       "expiryDate": "08/25",
       "isDefault": false,
+      "cardColor": "gold",
+    },
+    {
+      "id": 3,
+      "type": "American Express",
+      "lastFour": "1234",
+      "holderName": "SARAH JOHNSON",
+      "expiryDate": "06/27",
+      "isDefault": false,
+      "cardColor": "red",
+    },
+    {
+      "id": 4,
+      "type": "Discover",
+      "lastFour": "5678",
+      "holderName": "SARAH JOHNSON",
+      "expiryDate": "03/28",
+      "isDefault": false,
+      "cardColor": "orange",
+    },
+    {
+      "id": 5,
+      "type": "PayPal",
+      "lastFour": "9012",
+      "holderName": "SARAH JOHNSON",
+      "expiryDate": "11/26",
+      "isDefault": false,
+      "cardColor": "blue",
     },
   ];
 
@@ -188,7 +218,7 @@ class _ProfileSettingsState extends State<ProfileSettings>
       builder: (context) => AlertDialog(
         title: Text(
           "Delete Account",
-          style: TextStyle(color: AppTheme.lightTheme.colorScheme.error),
+          style: TextStyle(color: AppTheme.errorLight),
         ),
         content: const Text(
             "This action cannot be undone. All your data will be permanently deleted."),
@@ -200,7 +230,7 @@ class _ProfileSettingsState extends State<ProfileSettings>
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.lightTheme.colorScheme.error,
+              backgroundColor: AppTheme.errorLight,
             ),
             child: const Text("Delete Account"),
           ),
@@ -300,7 +330,7 @@ class _ProfileSettingsState extends State<ProfileSettings>
                 title: "Payment Methods",
                 children: [
                   Container(
-                    height: 20.h,
+                    height: 15.h, // Further reduced height to prevent overflow
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       padding: EdgeInsets.symmetric(horizontal: 4.w),
@@ -313,12 +343,10 @@ class _ProfileSettingsState extends State<ProfileSettings>
                               width: 70.w,
                               margin: EdgeInsets.only(right: 4.w),
                               decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerHighest,
+                                color: AppTheme.surfaceLight,
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: Theme.of(context).dividerColor,
+                                  color: AppTheme.primaryLight.withOpacity(0.2),
                                   style: BorderStyle.solid,
                                 ),
                               ),
@@ -327,8 +355,7 @@ class _ProfileSettingsState extends State<ProfileSettings>
                                 children: [
                                   CustomIconWidget(
                                     iconName: 'add_circle_outline',
-                                    color:
-                                        AppTheme.lightTheme.colorScheme.primary,
+                                    color: AppTheme.primaryLight,
                                     size: 10.w,
                                   ),
                                   SizedBox(height: 1.h),
@@ -338,8 +365,7 @@ class _ProfileSettingsState extends State<ProfileSettings>
                                         .textTheme
                                         .bodyMedium
                                         ?.copyWith(
-                                          color: AppTheme
-                                              .lightTheme.colorScheme.primary,
+                                          color: AppTheme.primaryLight,
                                           fontWeight: FontWeight.w500,
                                         ),
                                   ),

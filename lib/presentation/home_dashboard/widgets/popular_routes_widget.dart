@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
+import '../../../theme/app_theme.dart';
+
+// 2025 Design Constants
+const Color primaryColor = Color(0xFF20B2AA);
+const double cardBorderRadius = 16.0;
 
 class PopularRoutesWidget extends StatefulWidget {
   final Function(String) onRouteTap;
@@ -15,11 +21,7 @@ class PopularRoutesWidget extends StatefulWidget {
   State<PopularRoutesWidget> createState() => _PopularRoutesWidgetState();
 }
 
-class _PopularRoutesWidgetState extends State<PopularRoutesWidget>
-    with TickerProviderStateMixin {
-  late AnimationController _animationController;
-  late List<Animation<double>> _fadeAnimations;
-  late List<Animation<Offset>> _slideAnimations;
+class _PopularRoutesWidgetState extends State<PopularRoutesWidget> {
   bool _isLoading = true;
 
   final List<Map<String, dynamic>> _popularRoutes = [
@@ -76,67 +78,29 @@ class _PopularRoutesWidgetState extends State<PopularRoutesWidget>
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    );
-
-    _fadeAnimations = List.generate(_popularRoutes.length, (index) {
-      return Tween<double>(
-        begin: 0.0,
-        end: 1.0,
-      ).animate(CurvedAnimation(
-        parent: _animationController,
-        curve: Interval(
-          index * 0.1,
-          0.6 + (index * 0.1),
-          curve: Curves.easeOut,
-        ),
-      ));
-    });
-
-    _slideAnimations = List.generate(_popularRoutes.length, (index) {
-      return Tween<Offset>(
-        begin: const Offset(0.0, 0.5),
-        end: Offset.zero,
-      ).animate(CurvedAnimation(
-        parent: _animationController,
-        curve: Interval(
-          index * 0.1,
-          0.7 + (index * 0.1),
-          curve: Curves.easeOutCubic,
-        ),
-      ));
-    });
-
     _simulateLoading();
   }
 
   void _simulateLoading() async {
-    await Future.delayed(const Duration(milliseconds: 800));
+    // Simplified loading - no complex animations
+    await Future.delayed(const Duration(milliseconds: 500));
     if (mounted) {
       setState(() {
         _isLoading = false;
       });
-      _animationController.forward();
     }
   }
 
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
+  // Modern skeleton loader - clean and simple
   Widget _buildSkeletonItem() {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
       padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        color: AppTheme.surfaceLight,
+        borderRadius: BorderRadius.circular(cardBorderRadius),
         border: Border.all(
-          color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
+          color: AppTheme.onSurfaceLight.withOpacity(0.1),
           width: 1,
         ),
       ),
@@ -146,8 +110,7 @@ class _PopularRoutesWidgetState extends State<PopularRoutesWidget>
             width: 15.w,
             height: 15.w,
             decoration: BoxDecoration(
-              color: AppTheme.lightTheme.colorScheme.outline
-                  .withValues(alpha: 0.2),
+              color: AppTheme.onSurfaceLight.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
           ),
@@ -160,8 +123,7 @@ class _PopularRoutesWidgetState extends State<PopularRoutesWidget>
                   width: 60.w,
                   height: 2.h,
                   decoration: BoxDecoration(
-                    color: AppTheme.lightTheme.colorScheme.outline
-                        .withValues(alpha: 0.2),
+                    color: AppTheme.onSurfaceLight.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -170,8 +132,7 @@ class _PopularRoutesWidgetState extends State<PopularRoutesWidget>
                   width: 40.w,
                   height: 1.5.h,
                   decoration: BoxDecoration(
-                    color: AppTheme.lightTheme.colorScheme.outline
-                        .withValues(alpha: 0.2),
+                    color: AppTheme.onSurfaceLight.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -182,8 +143,7 @@ class _PopularRoutesWidgetState extends State<PopularRoutesWidget>
             width: 15.w,
             height: 2.h,
             decoration: BoxDecoration(
-              color: AppTheme.lightTheme.colorScheme.outline
-                  .withValues(alpha: 0.2),
+              color: AppTheme.onSurfaceLight.withOpacity(0.1),
               borderRadius: BorderRadius.circular(4),
             ),
           ),
@@ -192,210 +152,209 @@ class _PopularRoutesWidgetState extends State<PopularRoutesWidget>
     );
   }
 
+  // Modern 2025 route card - clean design with consistent styling
   Widget _buildRouteItem(Map<String, dynamic> route, int index) {
-    return AnimatedBuilder(
-      animation: _animationController,
-      builder: (context, child) {
-        return FadeTransition(
-          opacity: _fadeAnimations[index],
-          child: SlideTransition(
-            position: _slideAnimations[index],
-            child: GestureDetector(
-              onTap: () => widget.onRouteTap(route['id']),
-              child: Container(
-                margin: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
-                decoration: BoxDecoration(
-                  color: AppTheme.lightTheme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: AppTheme.lightTheme.colorScheme.outline
-                        .withValues(alpha: 0.2),
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppTheme.lightTheme.colorScheme.shadow
-                          .withValues(alpha: 0.08),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceLight,
+        borderRadius: BorderRadius.circular(cardBorderRadius),
+        border: Border.all(
+          color: AppTheme.onSurfaceLight.withOpacity(0.1),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.onSurfaceLight.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            widget.onRouteTap(route['id']);
+          },
+          borderRadius: BorderRadius.circular(cardBorderRadius),
+          child: Padding(
+            padding: EdgeInsets.all(4.w),
+            child: Row(
+              children: [
+                // Route image with modern styling
+                Stack(
+                  children: [
+                    Container(
+                      width: 15.w,
+                      height: 15.w,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppTheme.onSurfaceLight.withOpacity(0.1),
+                          width: 1,
+                        ),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(11),
+                        child: CustomImageWidget(
+                          imageUrl: route['image'],
+                          width: 15.w,
+                          height: 15.w,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
+                    // Modern discount badge
+                    if (route['discount'] != null)
+                      Positioned(
+                        top: -2,
+                        right: -2,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 1.5.w,
+                            vertical: 0.5.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            route['discount'],
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 8.sp,
+                            ),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Stack(
+                SizedBox(width: 4.w),
+
+                // Route details with modern typography
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
-                        padding: EdgeInsets.all(4.w),
-                        child: Row(
-                          children: [
-                            Stack(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: CustomImageWidget(
-                                    imageUrl: route['image'],
-                                    width: 15.w,
-                                    height: 15.w,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                if (route['discount'] != null)
-                                  Positioned(
-                                    top: 0,
-                                    right: 0,
-                                    child: Container(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 1.w,
-                                        vertical: 0.5.w,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: AppTheme
-                                            .lightTheme.colorScheme.secondary,
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        route['discount'],
-                                        style: AppTheme
-                                            .lightTheme.textTheme.labelSmall
-                                            ?.copyWith(
-                                          color: AppTheme.lightTheme.colorScheme
-                                              .onSecondary,
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 8.sp,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                            SizedBox(width: 4.w),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          '${route['from']} → ${route['to']}',
-                                          style: AppTheme
-                                              .lightTheme.textTheme.titleMedium
-                                              ?.copyWith(
-                                            color: AppTheme.lightTheme
-                                                .colorScheme.onSurface,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      Row(
-                                        children: [
-                                          CustomIconWidget(
-                                            iconName: 'star',
-                                            color: const Color(0xFFFFB300),
-                                            size: 4.w,
-                                          ),
-                                          SizedBox(width: 1.w),
-                                          Text(
-                                            route['rating'].toString(),
-                                            style: AppTheme
-                                                .lightTheme.textTheme.bodySmall
-                                                ?.copyWith(
-                                              color: AppTheme.lightTheme
-                                                  .colorScheme.onSurface
-                                                  .withValues(alpha: 0.7),
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 1.h),
-                                  Row(
-                                    children: [
-                                      CustomIconWidget(
-                                        iconName: 'access_time',
-                                        color: AppTheme
-                                            .lightTheme.colorScheme.onSurface
-                                            .withValues(alpha: 0.6),
-                                        size: 4.w,
-                                      ),
-                                      SizedBox(width: 1.w),
-                                      Text(
-                                        route['duration'],
-                                        style: AppTheme
-                                            .lightTheme.textTheme.bodySmall
-                                            ?.copyWith(
-                                          color: AppTheme
-                                              .lightTheme.colorScheme.onSurface
-                                              .withValues(alpha: 0.7),
-                                        ),
-                                      ),
-                                      SizedBox(width: 3.w),
-                                      CustomIconWidget(
-                                        iconName: 'directions_bus',
-                                        color: AppTheme
-                                            .lightTheme.colorScheme.onSurface
-                                            .withValues(alpha: 0.6),
-                                        size: 4.w,
-                                      ),
-                                      SizedBox(width: 1.w),
-                                      Expanded(
-                                        child: Text(
-                                          route['frequency'],
-                                          style: AppTheme
-                                              .lightTheme.textTheme.bodySmall
-                                              ?.copyWith(
-                                            color: AppTheme.lightTheme
-                                                .colorScheme.onSurface
-                                                .withValues(alpha: 0.7),
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                      // Route and rating row
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '${route['from']} → ${route['to']}',
+                              style: TextStyle(
+                                color: AppTheme.onSurfaceLight,
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w600,
                               ),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                          ),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 2.w,
+                              vertical: 0.3.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFB300).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(
-                                  route['price'],
-                                  style: AppTheme
-                                      .lightTheme.textTheme.titleLarge
-                                      ?.copyWith(
-                                    color:
-                                        AppTheme.lightTheme.colorScheme.primary,
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                                Icon(
+                                  Icons.star,
+                                  color: const Color(0xFFFFB300),
+                                  size: 3.w,
                                 ),
-                                SizedBox(height: 0.5.h),
+                                SizedBox(width: 0.5.w),
                                 Text(
-                                  'per person',
-                                  style: AppTheme.lightTheme.textTheme.bodySmall
-                                      ?.copyWith(
-                                    color: AppTheme
-                                        .lightTheme.colorScheme.onSurface
-                                        .withValues(alpha: 0.6),
+                                  route['rating'].toString(),
+                                  style: TextStyle(
+                                    color: const Color(0xFFFFB300),
+                                    fontSize: 9.sp,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 1.h),
+
+                      // Details row with modern icons
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.access_time,
+                            color: AppTheme.onSurfaceLight.withOpacity(0.6),
+                            size: 3.5.w,
+                          ),
+                          SizedBox(width: 1.w),
+                          Text(
+                            route['duration'],
+                            style: TextStyle(
+                              color: AppTheme.onSurfaceLight.withOpacity(0.7),
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          SizedBox(width: 3.w),
+                          Icon(
+                            Icons.directions_bus,
+                            color: primaryColor.withOpacity(0.7),
+                            size: 3.5.w,
+                          ),
+                          SizedBox(width: 1.w),
+                          Expanded(
+                            child: Text(
+                              route['frequency'],
+                              style: TextStyle(
+                                color: AppTheme.onSurfaceLight.withOpacity(0.7),
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
-              ),
+
+                // Modern price display
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      route['price'],
+                      style: TextStyle(
+                        color: primaryColor,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(height: 0.3.h),
+                    Text(
+                      'per person',
+                      style: TextStyle(
+                        color: AppTheme.onSurfaceLight.withOpacity(0.6),
+                        fontSize: 9.sp,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -404,6 +363,7 @@ class _PopularRoutesWidgetState extends State<PopularRoutesWidget>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Modern section header
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 5.w),
           child: Row(
@@ -411,18 +371,44 @@ class _PopularRoutesWidgetState extends State<PopularRoutesWidget>
             children: [
               Text(
                 'Popular Routes',
-                style: AppTheme.lightTheme.textTheme.headlineSmall?.copyWith(
-                  color: AppTheme.lightTheme.colorScheme.onSurface,
-                  fontWeight: FontWeight.w600,
+                style: TextStyle(
+                  color: AppTheme.onSurfaceLight,
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              TextButton(
-                onPressed: () => widget.onRouteTap('/all-routes'),
-                child: Text(
-                  'View All',
-                  style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.lightTheme.colorScheme.primary,
-                    fontWeight: FontWeight.w500,
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    widget.onRouteTap('/all-routes');
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 3.w,
+                      vertical: 1.h,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'View All',
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(width: 1.w),
+                        Icon(
+                          Icons.arrow_forward,
+                          color: primaryColor,
+                          size: 4.w,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

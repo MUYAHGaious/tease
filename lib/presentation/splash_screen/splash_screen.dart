@@ -54,8 +54,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   void _startSplashTimer() {
-    // Navigate after 2.5 seconds for optimal user experience with image
-    Future.delayed(const Duration(milliseconds: 2500), () {
+    // Navigate after 3 seconds for optimal user experience
+    Future.delayed(const Duration(milliseconds: 3000), () {
       if (mounted) {
         _navigateToNextScreen();
       }
@@ -69,15 +69,29 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
       if (isLoggedIn) {
         // User is logged in, go to home dashboard
-        Navigator.pushReplacementNamed(context, '/home-dashboard');
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/home-dashboard');
+        }
         return;
       }
 
-      // Always go to welcome screen for auth flow
-      Navigator.pushReplacementNamed(context, '/welcome');
+      // Check if this is first time user
+      final isFirstTime = await _checkFirstTimeUser();
+      
+      if (mounted) {
+        if (isFirstTime) {
+          // First time user, go to onboarding
+          Navigator.pushReplacementNamed(context, '/onboarding-flow');
+        } else {
+          // Returning user, go to welcome screen
+          Navigator.pushReplacementNamed(context, '/welcome');
+        }
+      }
     } catch (e) {
       // If there's any error, go to welcome screen
-      Navigator.pushReplacementNamed(context, '/welcome');
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/welcome');
+      }
     }
   }
 
@@ -122,41 +136,133 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             ],
           ),
         ),
-        child: Image.asset(
-          'assets/images/bus.png',
-          width: 100.w,
-          height: 100.h,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            print('Image loading error: $error');
-            return Container(
+        child: Stack(
+          children: [
+            // Background image
+            Image.asset(
+              'assets/images/bus.png',
               width: 100.w,
               height: 100.h,
-              color: Colors.black,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.directions_bus,
-                      color: Colors.white,
-                      size: 20.w,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                print('Image loading error: $error');
+                return Container(
+                  width: 100.w,
+                  height: 100.h,
+                  color: Colors.transparent,
+                );
+              },
+            ),
+            
+            // Main content overlay
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Animated logo
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: Container(
+                      width: 25.w,
+                      height: 25.w,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.3),
+                          width: 3,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            blurRadius: 20,
+                            spreadRadius: 5,
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.directions_bus,
+                        color: Colors.white,
+                        size: 12.w,
+                      ),
                     ),
-                    SizedBox(height: 4.h),
-                    Text(
+                  ),
+                  
+                  SizedBox(height: 4.h),
+                  
+                  // App title
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: Text(
                       'TEASE',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 24.sp,
+                        fontSize: 36.sp,
                         fontWeight: FontWeight.w900,
-                        letterSpacing: 3.0,
+                        letterSpacing: 4.0,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.4),
+                            offset: const Offset(0, 3),
+                            blurRadius: 6,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  
+                  SizedBox(height: 1.h),
+                  
+                  // Subtitle
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: Text(
+                      'Transport Excellence & Accessibility',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w400,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            // Loading indicator at bottom
+            Positioned(
+              bottom: 8.h,
+              left: 0,
+              right: 0,
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: Column(
+                  children: [
+                    Container(
+                      width: 6.w,
+                      height: 6.w,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Colors.white.withValues(alpha: 0.8),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      'Loading your experience...',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.8),
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 ),
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
     );

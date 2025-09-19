@@ -721,10 +721,10 @@ class AppTheme {
     double blurRadius = 10.0,
   }) {
     return BoxDecoration(
-      color: backgroundColor ?? surfaceLight.withValues(alpha: 0.8),
+      color: backgroundColor ?? surfaceLight.withOpacity(0.8),
       borderRadius: BorderRadius.circular(borderRadius),
       border: Border.all(
-        color: Colors.white.withValues(alpha: 0.2),
+        color: Colors.white.withOpacity(0.2),
         width: 1,
       ),
       boxShadow: [

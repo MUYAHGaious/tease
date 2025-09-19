@@ -31,8 +31,8 @@ class UserHeaderWidget extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: AppTheme.lightTheme.colorScheme.secondary,
-                    width: 2,
+                    color: AppTheme.primaryLight,
+                    width: 3,
                   ),
                 ),
                 child: ClipOval(
@@ -50,10 +50,10 @@ class UserHeaderWidget extends StatelessWidget {
                 child: GestureDetector(
                   onTap: onEditProfile,
                   child: Container(
-                    width: 6.w,
-                    height: 6.w,
+                    width: 7.w,
+                    height: 7.w,
                     decoration: BoxDecoration(
-                      color: AppTheme.lightTheme.colorScheme.secondary,
+                      color: AppTheme.primaryLight,
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: Theme.of(context).scaffoldBackgroundColor,
@@ -62,7 +62,7 @@ class UserHeaderWidget extends StatelessWidget {
                     ),
                     child: CustomIconWidget(
                       iconName: 'edit',
-                      color: AppTheme.lightTheme.colorScheme.onSecondary,
+                      color: AppTheme.onPrimaryLight,
                       size: 3.w,
                     ),
                   ),
@@ -88,26 +88,38 @@ class UserHeaderWidget extends StatelessWidget {
           ),
           SizedBox(height: 1.h),
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
+            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.2.h),
             decoration: BoxDecoration(
-              color: AppTheme.lightTheme.colorScheme.secondary
-                  .withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(20),
+              gradient: LinearGradient(
+                colors: [
+                  Colors.amber.withOpacity(0.2),
+                  Colors.orange.withOpacity(0.2),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(25),
+              border: Border.all(
+                color: Colors.amber.withOpacity(0.5),
+                width: 1,
+              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 CustomIconWidget(
                   iconName: 'star',
-                  color: AppTheme.lightTheme.colorScheme.secondary,
-                  size: 4.w,
+                  color: Colors.amber,
+                  size: 5.w,
                 ),
                 SizedBox(width: 1.w),
                 Text(
                   userData["membershipTier"] as String,
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: AppTheme.lightTheme.colorScheme.primary,
-                        fontWeight: FontWeight.w600,
+                        color: Colors.amber.shade700,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12.sp,
+                        letterSpacing: 0.5,
                       ),
                 ),
               ],
@@ -148,10 +160,9 @@ class UserHeaderWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           child: LinearProgressIndicator(
             value: progress,
-            backgroundColor:
-                Theme.of(context).colorScheme.surfaceContainerHighest,
+            backgroundColor: AppTheme.surfaceVariantLight,
             valueColor: AlwaysStoppedAnimation<Color>(
-              AppTheme.lightTheme.colorScheme.secondary,
+              AppTheme.primaryLight,
             ),
             minHeight: 1.h,
           ),

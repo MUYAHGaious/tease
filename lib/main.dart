@@ -72,7 +72,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         routes: AppRoutes.routes,
         initialRoute:
-            AppRoutes.welcome, // Start with the welcome screen
+            AppRoutes.initial, // Start with the splash screen
       );
     });
   }

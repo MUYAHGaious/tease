@@ -70,14 +70,13 @@ class _AnimatedToggleWidgetState extends State<AnimatedToggleWidget>
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(3.w),
                 color: widget.value
-                    ? AppTheme.lightTheme.colorScheme.secondary
-                    : Theme.of(context).colorScheme.surfaceContainerHighest,
+                    ? AppTheme.primaryLight
+                    : AppTheme.surfaceVariantLight,
                 boxShadow: [
                   BoxShadow(
                     color: widget.value
-                        ? AppTheme.lightTheme.colorScheme.secondary
-                            .withValues(alpha: 0.3)
-                        : Colors.black.withValues(alpha: 0.1),
+                        ? AppTheme.primaryLight.withOpacity(0.3)
+                        : Colors.black.withOpacity(0.1),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -98,7 +97,7 @@ class _AnimatedToggleWidgetState extends State<AnimatedToggleWidget>
                         color: Colors.white,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
+                            color: Colors.black.withOpacity(0.2),
                             blurRadius: 4,
                             offset: const Offset(0, 1),
                           ),

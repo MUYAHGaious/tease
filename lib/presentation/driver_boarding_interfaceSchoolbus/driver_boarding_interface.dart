@@ -336,7 +336,7 @@ class _DriverBoardingInterfaceState extends State<DriverBoardingInterface> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildEmergencyContact('School Office', '+1 (555) 123-4567'),
+            _buildEmergencyContact('School Office', '+237 6 12 34 56 78'),
             SizedBox(height: 1.h),
             _buildEmergencyContact('Transportation Dept', '+1 (555) 987-6543'),
             SizedBox(height: 1.h),

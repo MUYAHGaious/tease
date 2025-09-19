@@ -23,7 +23,7 @@ class _ParentDashboardState extends State<ParentDashboard>
   final Map<String, dynamic> parentData = {
     "name": "Sarah Johnson",
     "email": "sarah.johnson@email.com",
-    "phone": "+1 (555) 123-4567",
+    "phone": "+237 6 12 34 56 78",
     "notificationCount": 3,
   };
 

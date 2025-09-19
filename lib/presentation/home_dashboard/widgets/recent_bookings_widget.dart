@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
+import '../../../theme/app_theme.dart';
+
+// 2025 Design Constants
+const Color primaryColor = Color(0xFF20B2AA);
+const double cardBorderRadius = 16.0;
 
 class RecentBookingsWidget extends StatefulWidget {
   final Function(String) onBookingTap;
@@ -15,11 +21,7 @@ class RecentBookingsWidget extends StatefulWidget {
   State<RecentBookingsWidget> createState() => _RecentBookingsWidgetState();
 }
 
-class _RecentBookingsWidgetState extends State<RecentBookingsWidget>
-    with TickerProviderStateMixin {
-  late AnimationController _animationController;
-  late List<Animation<Offset>> _slideAnimations;
-  late List<Animation<double>> _fadeAnimations;
+class _RecentBookingsWidgetState extends State<RecentBookingsWidget> {
 
   final List<Map<String, dynamic>> _recentBookings = [
     {
@@ -63,250 +65,217 @@ class _RecentBookingsWidgetState extends State<RecentBookingsWidget>
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1200),
-      vsync: this,
-    );
-
-    _slideAnimations = List.generate(_recentBookings.length, (index) {
-      return Tween<Offset>(
-        begin: const Offset(1.0, 0.0),
-        end: Offset.zero,
-      ).animate(CurvedAnimation(
-        parent: _animationController,
-        curve: Interval(
-          index * 0.2,
-          0.6 + (index * 0.2),
-          curve: Curves.easeOutCubic,
-        ),
-      ));
-    });
-
-    _fadeAnimations = List.generate(_recentBookings.length, (index) {
-      return Tween<double>(
-        begin: 0.0,
-        end: 1.0,
-      ).animate(CurvedAnimation(
-        parent: _animationController,
-        curve: Interval(
-          index * 0.15,
-          0.5 + (index * 0.15),
-          curve: Curves.easeOut,
-        ),
-      ));
-    });
-
-    _animationController.forward();
   }
 
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
+  // Modern status colors - consistent with design system
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'confirmed':
-        return const Color(0xFF20B2AA);
+        return Colors.green;
       case 'pending':
-        return const Color(0xFFFF9800);
+        return Colors.orange;
       case 'cancelled':
-        return const Color(0xFFf44336);
+        return Colors.red;
       default:
-        return AppTheme.lightTheme.colorScheme.onSurface.withValues(alpha: 0.6);
+        return AppTheme.onSurfaceLight.withOpacity(0.6);
     }
   }
 
+  // Modern 2025 booking card - clean design
   Widget _buildBookingCard(Map<String, dynamic> booking, int index) {
-    return AnimatedBuilder(
-      animation: _animationController,
-      builder: (context, child) {
-        return FadeTransition(
-          opacity: _fadeAnimations[index],
-          child: SlideTransition(
-            position: _slideAnimations[index],
-            child: GestureDetector(
-              onTap: () => widget.onBookingTap(booking['id']),
-              child: Container(
-                width: 80.w,
-                margin: EdgeInsets.only(right: 4.w),
-                decoration: BoxDecoration(
-                  color: AppTheme.lightTheme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: AppTheme.lightTheme.colorScheme.outline
-                        .withValues(alpha: 0.2),
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppTheme.lightTheme.colorScheme.shadow
-                          .withValues(alpha: 0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+    return Container(
+      width: 80.w,
+      margin: EdgeInsets.only(right: 4.w),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceLight,
+        borderRadius: BorderRadius.circular(cardBorderRadius),
+        border: Border.all(
+          color: AppTheme.onSurfaceLight.withOpacity(0.1),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.onSurfaceLight.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            widget.onBookingTap(booking['id']);
+          },
+          borderRadius: BorderRadius.circular(cardBorderRadius),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(cardBorderRadius),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Modern image with status badge
+                Stack(
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      height: 10.h, // Reduced image height
+                      decoration: BoxDecoration(
+                        color: AppTheme.onSurfaceLight.withOpacity(0.1),
+                      ),
+                      child: CustomImageWidget(
+                        imageUrl: booking['image'],
+                        width: double.infinity,
+                        height: 10.h,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    // Modern status badge
+                    Positioned(
+                      top: 3.w,
+                      right: 3.w,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 2.5.w,
+                          vertical: 0.8.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _getStatusColor(booking['status']),
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: _getStatusColor(booking['status']).withOpacity(0.3),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          booking['status'],
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 9.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
+
+                // Compact card content to prevent overflow
+                Padding(
+                  padding: EdgeInsets.all(3.w), // Reduced padding
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min, // Prevent overflow
                     children: [
-                      Stack(
+                      // Route and price row
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          CustomImageWidget(
-                            imageUrl: booking['image'],
-                            width: double.infinity,
-                            height: 12.h,
-                            fit: BoxFit.cover,
+                          Expanded(
+                            child: Text(
+                              booking['route'],
+                              style: TextStyle(
+                                color: AppTheme.onSurfaceLight,
+                                fontSize: 13.sp, // Slightly smaller
+                                fontWeight: FontWeight.w600,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                          Positioned(
-                            top: 2.w,
-                            right: 2.w,
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 2.w,
-                                vertical: 1.w,
-                              ),
-                              decoration: BoxDecoration(
-                                color: _getStatusColor(booking['status']),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                booking['status'],
-                                style: AppTheme.lightTheme.textTheme.labelSmall
-                                    ?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+                          Text(
+                            booking['price'],
+                            style: TextStyle(
+                              color: primaryColor,
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ],
                       ),
-                      Padding(
-                        padding: EdgeInsets.all(4.w),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      SizedBox(height: 1.h), // Reduced spacing
+
+                      // Date and time row with compact design
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_today,
+                            color: AppTheme.onSurfaceLight.withOpacity(0.6),
+                            size: 3.w, // Smaller icons
+                          ),
+                          SizedBox(width: 0.5.w),
+                          Expanded(
+                            child: Text(
+                              '${booking['date']} • ${booking['time']}',
+                              style: TextStyle(
+                                color: AppTheme.onSurfaceLight.withOpacity(0.7),
+                                fontSize: 9.sp, // Smaller text
+                                fontWeight: FontWeight.w500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 0.8.h), // Reduced spacing
+
+                      // Compact seat and operator row
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 1.5.w,
+                              vertical: 0.3.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: primaryColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Expanded(
-                                  child: Text(
-                                    booking['route'],
-                                    style: AppTheme
-                                        .lightTheme.textTheme.titleMedium
-                                        ?.copyWith(
-                                      color: AppTheme
-                                          .lightTheme.colorScheme.onSurface,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                                Icon(
+                                  Icons.airline_seat_recline_normal,
+                                  color: primaryColor,
+                                  size: 2.5.w,
                                 ),
+                                SizedBox(width: 0.5.w),
                                 Text(
-                                  booking['price'],
-                                  style: AppTheme
-                                      .lightTheme.textTheme.titleSmall
-                                      ?.copyWith(
-                                    color:
-                                        AppTheme.lightTheme.colorScheme.primary,
-                                    fontWeight: FontWeight.w700,
+                                  booking['seatNumber'],
+                                  style: TextStyle(
+                                    color: primaryColor,
+                                    fontSize: 8.sp,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],
                             ),
-                            SizedBox(height: 1.h),
-                            Row(
-                              children: [
-                                CustomIconWidget(
-                                  iconName: 'calendar_today',
-                                  color: AppTheme
-                                      .lightTheme.colorScheme.onSurface
-                                      .withValues(alpha: 0.6),
-                                  size: 4.w,
-                                ),
-                                SizedBox(width: 1.w),
-                                Text(
-                                  booking['date'],
-                                  style: AppTheme.lightTheme.textTheme.bodySmall
-                                      ?.copyWith(
-                                    color: AppTheme
-                                        .lightTheme.colorScheme.onSurface
-                                        .withValues(alpha: 0.7),
-                                  ),
-                                ),
-                                SizedBox(width: 3.w),
-                                CustomIconWidget(
-                                  iconName: 'access_time',
-                                  color: AppTheme
-                                      .lightTheme.colorScheme.onSurface
-                                      .withValues(alpha: 0.6),
-                                  size: 4.w,
-                                ),
-                                SizedBox(width: 1.w),
-                                Text(
-                                  booking['time'],
-                                  style: AppTheme.lightTheme.textTheme.bodySmall
-                                      ?.copyWith(
-                                    color: AppTheme
-                                        .lightTheme.colorScheme.onSurface
-                                        .withValues(alpha: 0.7),
-                                  ),
-                                ),
-                              ],
+                          ),
+                          Flexible(
+                            child: Text(
+                              booking['busOperator'],
+                              style: TextStyle(
+                                color: AppTheme.onSurfaceLight.withOpacity(0.7),
+                                fontSize: 8.sp, // Smaller text
+                                fontWeight: FontWeight.w500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.end,
                             ),
-                            SizedBox(height: 1.h),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    CustomIconWidget(
-                                      iconName: 'airline_seat_recline_normal',
-                                      color: AppTheme
-                                          .lightTheme.colorScheme.onSurface
-                                          .withValues(alpha: 0.6),
-                                      size: 4.w,
-                                    ),
-                                    SizedBox(width: 1.w),
-                                    Text(
-                                      'Seat ${booking['seatNumber']}',
-                                      style: AppTheme
-                                          .lightTheme.textTheme.bodySmall
-                                          ?.copyWith(
-                                        color: AppTheme
-                                            .lightTheme.colorScheme.onSurface
-                                            .withValues(alpha: 0.7),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Text(
-                                  booking['busOperator'],
-                                  style: AppTheme.lightTheme.textTheme.bodySmall
-                                      ?.copyWith(
-                                    color: AppTheme
-                                        .lightTheme.colorScheme.onSurface
-                                        .withValues(alpha: 0.7),
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
-              ),
+              ],
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -315,6 +284,7 @@ class _RecentBookingsWidgetState extends State<RecentBookingsWidget>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Modern section header
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 5.w),
           child: Row(
@@ -322,18 +292,44 @@ class _RecentBookingsWidgetState extends State<RecentBookingsWidget>
             children: [
               Text(
                 'Recent Bookings',
-                style: AppTheme.lightTheme.textTheme.headlineSmall?.copyWith(
-                  color: AppTheme.lightTheme.colorScheme.onSurface,
-                  fontWeight: FontWeight.w600,
+                style: TextStyle(
+                  color: AppTheme.onSurfaceLight,
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              TextButton(
-                onPressed: () => widget.onBookingTap('/trip-history'),
-                child: Text(
-                  'View All',
-                  style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.lightTheme.colorScheme.primary,
-                    fontWeight: FontWeight.w500,
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    widget.onBookingTap('/trip-history');
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 3.w,
+                      vertical: 1.h,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'View All',
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(width: 1.w),
+                        Icon(
+                          Icons.arrow_forward,
+                          color: primaryColor,
+                          size: 4.w,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -342,7 +338,7 @@ class _RecentBookingsWidgetState extends State<RecentBookingsWidget>
         ),
         SizedBox(height: 2.h),
         SizedBox(
-          height: 25.h,
+          height: 25.h, // Optimized height
           child: ListView.builder(
             padding: EdgeInsets.only(left: 5.w),
             scrollDirection: Axis.horizontal,

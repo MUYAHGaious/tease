@@ -313,7 +313,7 @@ class _QuickAccessTilesWidgetState extends State<QuickAccessTilesWidget>
           children: [
             const Text('Need help? Contact us:'),
             SizedBox(height: 2.h),
-            _buildSupportOption(Icons.phone, 'Call: +1-800-BUS-HELP'),
+            _buildSupportOption(Icons.phone, 'Call: +237 6 12 34 56 78'),
             SizedBox(height: 1.h),
             _buildSupportOption(Icons.email, 'Email: support@schoolbuspro.com'),
             SizedBox(height: 1.h),

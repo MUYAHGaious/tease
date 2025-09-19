@@ -4,13 +4,7 @@ import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
 import '../../widgets/global_bottom_navigation.dart';
-import './widgets/date_picker_widget.dart';
-import './widgets/filter_bottom_sheet_widget.dart';
-import './widgets/origin_destination_widget.dart';
-import './widgets/predictive_suggestions_widget.dart';
-import './widgets/premium_search_results_widget.dart';
-import '../../services/bus_service.dart';
-import '../../models/bus_models.dart';
+import '../../theme/app_theme.dart';
 
 class SearchBooking extends StatefulWidget {
   const SearchBooking({super.key});
@@ -29,27 +23,127 @@ class _SearchBookingState extends State<SearchBooking>
   String _origin = '';
   String _destination = '';
   DateTime? _selectedDate;
-  bool _showSuggestions = false;
   bool _isSearching = false;
   bool _hasSearched = false;
-  Map<String, dynamic> _currentFilters = {};
+  bool _showSuggestions = false;
   List<Map<String, dynamic>> _searchResults = [];
-  String _searchError = '';
+  List<Map<String, dynamic>> _suggestions = [];
 
   final ScrollController _scrollController = ScrollController();
-  final FocusNode _searchFocusNode = FocusNode();
+  final FocusNode _originFocusNode = FocusNode();
+  final FocusNode _destinationFocusNode = FocusNode();
+
+  // Popular routes for suggestions
+  final List<Map<String, dynamic>> _popularRoutes = [
+    {
+      'from': 'Douala',
+      'to': 'Yaoundé',
+      'price': '6,500 XAF',
+      'duration': '4h 30m'
+    },
+    {
+      'from': 'Yaoundé',
+      'to': 'Bamenda',
+      'price': '8,000 XAF',
+      'duration': '6h 15m'
+    },
+    {
+      'from': 'Douala',
+      'to': 'Bafoussam',
+      'price': '7,200 XAF',
+      'duration': '5h 45m'
+    },
+    {
+      'from': 'Bamenda',
+      'to': 'Garoua',
+      'price': '12,000 XAF',
+      'duration': '8h 30m'
+    },
+    {
+      'from': 'Yaoundé',
+      'to': 'Maroua',
+      'price': '15,000 XAF',
+      'duration': '10h 15m'
+    },
+  ];
+
+  // Search tips
+  final List<Map<String, dynamic>> _searchTips = [
+    {
+      'icon': Icons.schedule,
+      'tip': 'Book early for better prices',
+      'color': AppTheme.primaryLight
+    },
+    {
+      'icon': Icons.star,
+      'tip': 'Check ratings before booking',
+      'color': AppTheme.warningLight
+    },
+    {
+      'icon': Icons.wifi,
+      'tip': 'Look for WiFi amenities',
+      'color': AppTheme.successLight
+    },
+    {
+      'icon': Icons.local_offer,
+      'tip': 'Compare prices across operators',
+      'color': AppTheme.successLight
+    },
+  ];
+
+  // Recent searches
+  final List<Map<String, dynamic>> _recentSearches = [
+    {'from': 'Douala', 'to': 'Yaoundé', 'date': 'Today', 'price': '6,500 XAF'},
+    {
+      'from': 'Yaoundé',
+      'to': 'Bamenda',
+      'date': 'Yesterday',
+      'price': '8,000 XAF'
+    },
+    {
+      'from': 'Douala',
+      'to': 'Bafoussam',
+      'date': '2 days ago',
+      'price': '7,200 XAF'
+    },
+  ];
+
+  // Featured tickets
+  final List<Map<String, dynamic>> _featuredTickets = [
+    {
+      'title': 'Weekend Special',
+      'subtitle': 'Save up to 20%',
+      'icon': Icons.weekend,
+      'color': AppTheme.primaryLight,
+      'validUntil': 'Dec 31, 2024'
+    },
+    {
+      'title': 'Student Discount',
+      'subtitle': '15% off with ID',
+      'icon': Icons.school,
+      'color': AppTheme.successLight,
+      'validUntil': 'Always'
+    },
+    {
+      'title': 'Group Booking',
+      'subtitle': '5+ passengers',
+      'icon': Icons.groups,
+      'color': AppTheme.successLight,
+      'validUntil': 'Always'
+    },
+  ];
 
   @override
   void initState() {
     super.initState();
 
     _headerController = AnimationController(
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 600),
       vsync: this,
     );
 
     _searchController = AnimationController(
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 400),
       vsync: this,
     );
 
@@ -62,7 +156,7 @@ class _SearchBookingState extends State<SearchBooking>
     ));
 
     _searchAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
+      begin: const Offset(0, 0.2),
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: _searchController,
@@ -71,15 +165,27 @@ class _SearchBookingState extends State<SearchBooking>
 
     // Start animations
     _headerController.forward();
-    Future.delayed(const Duration(milliseconds: 200), () {
+    Future.delayed(const Duration(milliseconds: 150), () {
       _searchController.forward();
     });
 
-    _searchFocusNode.addListener(() {
-      setState(() {
-        _showSuggestions = _searchFocusNode.hasFocus &&
-            (_origin.isNotEmpty || _destination.isNotEmpty);
-      });
+    // Focus listeners for suggestions
+    _originFocusNode.addListener(() {
+      if (_originFocusNode.hasFocus) {
+        setState(() {
+          _showSuggestions = true;
+          _suggestions = _getSuggestions(_origin);
+        });
+      }
+    });
+
+    _destinationFocusNode.addListener(() {
+      if (_destinationFocusNode.hasFocus) {
+        setState(() {
+          _showSuggestions = true;
+          _suggestions = _getSuggestions(_destination);
+        });
+      }
     });
   }
 
@@ -88,22 +194,18 @@ class _SearchBookingState extends State<SearchBooking>
     _headerController.dispose();
     _searchController.dispose();
     _scrollController.dispose();
-    _searchFocusNode.dispose();
+    _originFocusNode.dispose();
+    _destinationFocusNode.dispose();
     super.dispose();
   }
 
-  void _handleOriginChanged(String value) {
-    setState(() {
-      _origin = value;
-      _showSuggestions = value.isNotEmpty || _destination.isNotEmpty;
-    });
-  }
+  List<Map<String, dynamic>> _getSuggestions(String query) {
+    if (query.isEmpty) return _popularRoutes;
 
-  void _handleDestinationChanged(String value) {
-    setState(() {
-      _destination = value;
-      _showSuggestions = _origin.isNotEmpty || value.isNotEmpty;
-    });
+    return _popularRoutes.where((route) {
+      return route['from'].toLowerCase().contains(query.toLowerCase()) ||
+          route['to'].toLowerCase().contains(query.toLowerCase());
+    }).toList();
   }
 
   void _handleSwap() {
@@ -121,34 +223,20 @@ class _SearchBookingState extends State<SearchBooking>
     });
   }
 
-  void _handleSuggestionSelected(String origin, String destination) {
-    setState(() {
-      _origin = origin;
-      _destination = destination;
-      _showSuggestions = false;
-    });
-    _searchFocusNode.unfocus();
-    HapticFeedback.selectionClick();
-  }
-
-  void _showFilterBottomSheet() {
-    HapticFeedback.lightImpact();
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => FilterBottomSheetWidget(
-        currentFilters: _currentFilters,
-        onFiltersApplied: _handleFiltersApplied,
-      ),
-    );
-  }
-
-  void _handleFiltersApplied(Map<String, dynamic> filters) {
-    setState(() {
-      _currentFilters = filters;
-    });
-    _performSearch();
+  void _handleSuggestionTap(Map<String, dynamic> suggestion) {
+    if (_originFocusNode.hasFocus) {
+      setState(() {
+        _origin = suggestion['from'];
+        _showSuggestions = false;
+      });
+    } else if (_destinationFocusNode.hasFocus) {
+      setState(() {
+        _destination = suggestion['to'];
+        _showSuggestions = false;
+      });
+    }
+    _originFocusNode.unfocus();
+    _destinationFocusNode.unfocus();
   }
 
   Future<void> _performSearch() async {
@@ -157,15 +245,11 @@ class _SearchBookingState extends State<SearchBooking>
         SnackBar(
           content: Text(
             'Please enter both origin and destination',
-            style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-              color: AppTheme.lightTheme.colorScheme.onError,
-            ),
+            style: TextStyle(color: AppTheme.onErrorLight, fontSize: 12.sp),
           ),
-          backgroundColor: AppTheme.lightTheme.colorScheme.error,
+          backgroundColor: AppTheme.errorLight,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       );
       return;
@@ -175,152 +259,66 @@ class _SearchBookingState extends State<SearchBooking>
       _isSearching = true;
       _hasSearched = false;
       _showSuggestions = false;
-      _searchError = '';
     });
 
-    _searchFocusNode.unfocus();
+    _originFocusNode.unfocus();
+    _destinationFocusNode.unfocus();
     HapticFeedback.lightImpact();
 
-    try {
-      // Create search query - for demo, we'll use city names
-      // In production, you'd convert these to coordinates
-      final fromCoords = _getCityCoordinates(_origin);
-      final toCoords = _getCityCoordinates(_destination);
-      
-      final result = await BusService.searchRoutes(
-        from: '$fromCoords',
-        to: '$toCoords',
-        radius: _currentFilters['radius']?.toDouble() ?? 10.0,
-        date: _selectedDate,
-        busType: _currentFilters['busType'],
-      );
+    // Simulate search delay
+    await Future.delayed(const Duration(seconds: 1));
 
-      if (mounted) {
-        setState(() {
-          _isSearching = false;
-          _hasSearched = true;
-          
-          if (result.success) {
-            _searchResults = (result.data as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [];
-            _searchError = '';
-          } else {
-            _searchResults = [];
-            _searchError = result.message;
-          }
-        });
-
-        // If no results found, show fallback mock data for demo purposes
-        if (_searchResults.isEmpty && _searchError.isEmpty) {
-          _showMockResults();
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isSearching = false;
-          _hasSearched = true;
-          _searchResults = [];
-          _searchError = 'Search failed. Please try again.';
-        });
-        
-        // Show mock results as fallback for demo
-        _showMockResults();
-      }
+    if (mounted) {
+      setState(() {
+        _isSearching = false;
+        _hasSearched = true;
+        _searchResults = _getMockResults();
+      });
     }
   }
 
-  // Helper method to get city coordinates (mock implementation)
-  String _getCityCoordinates(String cityName) {
-    // In production, you'd use a geocoding service
-    final mockCoordinates = {
-      'douala': '4.0483,-9.7043',
-      'yaoundé': '3.8480,11.5021',
-      'bamenda': '5.9597,10.1486',
-      'bafoussam': '5.4781,10.4167',
-      'garoua': '9.3265,13.3969',
-      'maroua': '10.5915,14.3176',
-    };
-    
-    final normalizedCity = cityName.toLowerCase().trim();
-    return mockCoordinates[normalizedCity] ?? '4.0483,-9.7043'; // Default to Douala
-  }
-
-  // Fallback mock results for demo purposes
-  void _showMockResults() {
-    setState(() {
-      _searchResults = [
-            {
-              'id': 'bus_001',
-              'operator': 'Cameroon Express',
-              'route': '$_origin → $_destination',
-              'departure': '08:00 AM',
-              'arrival': '02:30 PM',
-              'duration': '6h 30m',
-              'price': 45.99,
-              'originalPrice': 55.99,
-              'busType': 'AC Seater',
-              'availableSeats': 12,
-              'totalSeats': 45,
-              'amenities': ['WiFi', 'AC', 'Movies'],
-              'rating': 4.3,
-              'reviews': 156,
-              'image': 'https://images.pexels.com/photos/1098365/pexels-photo-1098365.jpeg?auto=compress&cs=tinysrgb&w=800',
-            },
-            {
-              'id': 'bus_002',
-              'operator': 'Cameroon Express',
-              'route': '$_origin → $_destination',
-              'departure': '10:15 AM',
-              'arrival': '04:30 PM',
-              'duration': '6h 15m',
-              'price': 39.99,
-              'originalPrice': 49.99,
-              'busType': 'AC Seater',
-              'availableSeats': 8,
-              'totalSeats': 45,
-              'amenities': ['WiFi', 'AC', 'Movies'],
-              'rating': 4.2,
-              'reviews': 189,
-              'image': 'https://images.pexels.com/photos/1098365/pexels-photo-1098365.jpeg?auto=compress&cs=tinysrgb&w=800',
-            },
-            {
-              'id': 'bus_003',
-              'operator': 'Central Voyages',
-              'route': '$_origin → $_destination',
-              'departure': '01:20 PM',
-              'arrival': '07:45 PM',
-              'duration': '6h 25m',
-              'price': 52.99,
-              'originalPrice': 62.99,
-              'busType': 'Luxury AC',
-              'availableSeats': 15,
-              'totalSeats': 45,
-              'amenities': ['WiFi', 'AC', 'Charging Port', 'Meals', 'Reclining Seats'],
-              'rating': 4.7,
-              'reviews': 312,
-              'image': 'https://images.pexels.com/photos/1098364/pexels-photo-1098364.jpeg?auto=compress&cs=tinysrgb&w=800',
-            },
-            {
-              'id': 'bus_004',
-              'operator': 'Guaranty Express',
-              'route': '$_origin → $_destination',
-              'departure': '06:00 PM',
-              'arrival': '11:30 PM',
-              'duration': '5h 30m',
-              'price': 58.99,
-              'originalPrice': 68.99,
-              'busType': 'Volvo AC',
-              'availableSeats': 20,
-              'totalSeats': 40,
-              'amenities': ['WiFi', 'Entertainment', 'USB Charging', 'Snacks', 'Reading Light'],
-              'rating': 4.6,
-              'reviews': 445,
-              'image': 'https://images.pexels.com/photos/1098365/pexels-photo-1098365.jpeg?auto=compress&cs=tinysrgb&w=800',
-            },
-          ];
-      _hasSearched = true;
-      _isSearching = false;
-    });
+  List<Map<String, dynamic>> _getMockResults() {
+    return [
+      {
+        'id': 'bus_001',
+        'operator': 'Cameroon Express',
+        'route': '$_origin → $_destination',
+        'departure': '08:00',
+        'arrival': '14:30',
+        'duration': '6h 30m',
+        'price': 45000,
+        'busType': 'AC Seater',
+        'availableSeats': 12,
+        'rating': 4.3,
+        'amenities': ['WiFi', 'AC'],
+      },
+      {
+        'id': 'bus_002',
+        'operator': 'Central Voyages',
+        'route': '$_origin → $_destination',
+        'departure': '10:15',
+        'arrival': '16:30',
+        'duration': '6h 15m',
+        'price': 52000,
+        'busType': 'Luxury AC',
+        'availableSeats': 8,
+        'rating': 4.7,
+        'amenities': ['WiFi', 'AC', 'Meals'],
+      },
+      {
+        'id': 'bus_003',
+        'operator': 'Guaranty Express',
+        'route': '$_origin → $_destination',
+        'departure': '13:20',
+        'arrival': '19:45',
+        'duration': '6h 25m',
+        'price': 48000,
+        'busType': 'Volvo AC',
+        'availableSeats': 15,
+        'rating': 4.6,
+        'amenities': ['WiFi', 'Charging'],
+      },
+    ];
   }
 
   void _handleResultTap(Map<String, dynamic> result) {
@@ -328,130 +326,910 @@ class _SearchBookingState extends State<SearchBooking>
     Navigator.pushNamed(context, '/seat-selection');
   }
 
-  void _handleSaveRoute(Map<String, dynamic> result) {
-    HapticFeedback.lightImpact();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Route saved to favorites',
-          style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-            color: AppTheme.lightTheme.colorScheme.onPrimary,
-          ),
-        ),
-        backgroundColor: AppTheme.lightTheme.colorScheme.primary,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+  Widget _buildHeader() {
+    return FadeTransition(
+      opacity: _headerAnimation,
+      child: Container(
+        padding: EdgeInsets.fromLTRB(4.w, 1.h, 4.w, 2.h),
+        child: Row(
+          children: [
+            GestureDetector(
+              onTap: () {
+                HapticFeedback.selectionClick();
+                Navigator.pop(context);
+              },
+              child: Container(
+                padding: EdgeInsets.all(2.w),
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceLight,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primaryLight.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.arrow_back_ios_new,
+                  color: AppTheme.primaryLight,
+                  size: 4.w,
+                ),
+              ),
+            ),
+            SizedBox(width: 3.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Search Buses',
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.onSurfaceLight,
+                    ),
+                  ),
+                  Text(
+                    'Find your perfect journey',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: AppTheme.onSurfaceVariantLight,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  void _handleShareRoute(Map<String, dynamic> result) {
-    HapticFeedback.lightImpact();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Route shared successfully',
-          style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-            color: AppTheme.lightTheme.colorScheme.onPrimary,
-          ),
+  Widget _buildSearchForm() {
+    return SlideTransition(
+      position: _searchAnimation,
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 4.w),
+        padding: EdgeInsets.all(3.w),
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceLight,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.primaryLight.withOpacity(0.08),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        backgroundColor: AppTheme.lightTheme.colorScheme.primary,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+        child: Column(
+          children: [
+            // Origin Field
+            _buildLocationField(
+              label: 'From',
+              hint: 'Enter departure city',
+              value: _origin,
+              focusNode: _originFocusNode,
+              onChanged: (value) {
+                setState(() {
+                  _origin = value;
+                  _suggestions = _getSuggestions(value);
+                });
+              },
+            ),
+
+            SizedBox(height: 1.5.h),
+
+            // Swap Button
+            Center(
+              child: GestureDetector(
+                onTap: _handleSwap,
+                child: Container(
+                  padding: EdgeInsets.all(1.5.w),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryLight.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.swap_vert,
+                    color: AppTheme.primaryLight,
+                    size: 4.w,
+                  ),
+                ),
+              ),
+            ),
+
+            SizedBox(height: 1.5.h),
+
+            // Destination Field
+            _buildLocationField(
+              label: 'To',
+              hint: 'Enter destination city',
+              value: _destination,
+              focusNode: _destinationFocusNode,
+              onChanged: (value) {
+                setState(() {
+                  _destination = value;
+                  _suggestions = _getSuggestions(value);
+                });
+              },
+            ),
+
+            SizedBox(height: 2.h),
+
+            // Date Picker
+            _buildDatePicker(),
+
+            SizedBox(height: 2.h),
+
+            // Search Button
+            _buildSearchButton(),
+          ],
         ),
       ),
     );
   }
 
-  void _handlePriceAlert(Map<String, dynamic> result) {
-    HapticFeedback.lightImpact();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Price alert set for this route',
-          style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-            color: AppTheme.lightTheme.colorScheme.onPrimary,
+  Widget _buildLocationField({
+    required String label,
+    required String hint,
+    required String value,
+    required FocusNode focusNode,
+    required Function(String) onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.onSurfaceLight,
           ),
         ),
-        backgroundColor: AppTheme.lightTheme.colorScheme.primary,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+        SizedBox(height: 0.8.h),
+        Container(
+          decoration: BoxDecoration(
+            color: AppTheme.surfaceVariantLight.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: focusNode.hasFocus
+                  ? AppTheme.primaryLight
+                  : AppTheme.surfaceVariantLight,
+              width: focusNode.hasFocus ? 1.5 : 1,
+            ),
+          ),
+          child: TextField(
+            focusNode: focusNode,
+            onChanged: onChanged,
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: AppTheme.onSurfaceLight,
+              fontWeight: FontWeight.w500,
+            ),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(
+                color: AppTheme.onSurfaceVariantLight,
+                fontSize: 14.sp,
+              ),
+              prefixIcon: Icon(
+                Icons.location_on_outlined,
+                color: AppTheme.primaryLight,
+                size: 4.w,
+              ),
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 3.w,
+                vertical: 2.h,
+              ),
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 
-  int _getActiveFilterCount() {
-    int count = 0;
-    _currentFilters.forEach((key, value) {
-      if (value is List && value.isNotEmpty) count++;
-      if (value is RangeValues) count++;
-    });
-    return count;
+  Widget _buildDatePicker() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Travel Date',
+          style: TextStyle(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.onSurfaceLight,
+          ),
+        ),
+        SizedBox(height: 0.8.h),
+        GestureDetector(
+          onTap: () async {
+            final date = await showDatePicker(
+              context: context,
+              initialDate: _selectedDate ?? DateTime.now(),
+              firstDate: DateTime.now(),
+              lastDate: DateTime.now().add(const Duration(days: 365)),
+              builder: (context, child) {
+                return Theme(
+                  data: Theme.of(context).copyWith(
+                    colorScheme: ColorScheme.light(
+                      primary: AppTheme.primaryLight,
+                      onPrimary: AppTheme.onPrimaryLight,
+                      surface: AppTheme.surfaceLight,
+                      onSurface: AppTheme.onSurfaceLight,
+                    ),
+                  ),
+                  child: child!,
+                );
+              },
+            );
+            if (date != null) {
+              _handleDateSelected(date);
+            }
+          },
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 2.h),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceVariantLight.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: AppTheme.surfaceVariantLight,
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.calendar_today_outlined,
+                  color: AppTheme.primaryLight,
+                  size: 4.w,
+                ),
+                SizedBox(width: 2.w),
+                Text(
+                  _selectedDate != null
+                      ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
+                      : 'Select travel date',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: _selectedDate != null
+                        ? AppTheme.onSurfaceLight
+                        : AppTheme.onSurfaceVariantLight,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
-
-  Widget _buildAppBar() {
+  Widget _buildSearchButton() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppTheme.successLight, // Teal color instead of gradient
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.successLight.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: _performSearch,
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            padding: EdgeInsets.symmetric(vertical: 2.h),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (_isSearching)
+                  SizedBox(
+                    width: 4.w,
+                    height: 4.w,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppTheme.onPrimaryLight,
+                      ),
+                    ),
+                  )
+                else
+                  Icon(
+                    Icons.search,
+                    color: AppTheme.onPrimaryLight,
+                    size: 4.w,
+                  ),
+                SizedBox(width: 2.w),
+                Text(
+                  _isSearching ? 'Searching...' : 'Search Buses',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.onPrimaryLight,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSuggestions() {
+    if (!_showSuggestions || _suggestions.isEmpty)
+      return const SizedBox.shrink();
+
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 4.w),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceLight,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryLight.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.all(3.w),
+            child: Text(
+              'Popular Routes',
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.onSurfaceLight,
+              ),
+            ),
+          ),
+          ..._suggestions
+              .map((suggestion) => _buildSuggestionItem(suggestion))
+              .toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSuggestionItem(Map<String, dynamic> suggestion) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _handleSuggestionTap(suggestion),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.5.h),
+          child: Row(
+            children: [
+              Icon(
+                Icons.location_on_outlined,
+                color: AppTheme.primaryLight,
+                size: 4.w,
+              ),
+              SizedBox(width: 2.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${suggestion['from']} → ${suggestion['to']}',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.onSurfaceLight,
+                      ),
+                    ),
+                    Text(
+                      '${suggestion['duration']} • ${suggestion['price']}',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: AppTheme.onSurfaceVariantLight,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: AppTheme.onSurfaceVariantLight,
+                size: 3.w,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchResults() {
+    if (!_hasSearched) return const SizedBox.shrink();
+
+    return Container(
+      margin: EdgeInsets.fromLTRB(4.w, 2.h, 4.w, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'Available Buses',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.onSurfaceLight,
+                ),
+              ),
+              SizedBox(width: 2.w),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryLight.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '${_searchResults.length} found',
+                  style: TextStyle(
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.primaryLight,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 1.5.h),
+          ..._searchResults.map((result) => _buildBusCard(result)).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBusCard(Map<String, dynamic> result) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 1.5.h),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceLight,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryLight.withOpacity(0.06),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _handleResultTap(result),
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: EdgeInsets.all(3.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            result['operator'],
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.onSurfaceLight,
+                            ),
+                          ),
+                          SizedBox(height: 0.3.h),
+                          Text(
+                            result['busType'],
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              color: AppTheme.onSurfaceVariantLight,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 1.5.w, vertical: 0.3.h),
+                      decoration: BoxDecoration(
+                        color: AppTheme.successLight.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.star,
+                            color: AppTheme.warningLight,
+                            size: 2.5.w,
+                          ),
+                          SizedBox(width: 0.5.w),
+                          Text(
+                            result['rating'].toString(),
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.onSurfaceLight,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 1.5.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildTimeInfo('Departure', result['departure']),
+                    ),
+                    Container(
+                      width: 1,
+                      height: 3.h,
+                      color: AppTheme.surfaceVariantLight,
+                    ),
+                    Expanded(
+                      child: _buildTimeInfo('Arrival', result['arrival']),
+                    ),
+                    Container(
+                      width: 1,
+                      height: 3.h,
+                      color: AppTheme.surfaceVariantLight,
+                    ),
+                    Expanded(
+                      child: _buildTimeInfo('Duration', result['duration']),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 1.5.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Available Seats',
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              color: AppTheme.onSurfaceVariantLight,
+                            ),
+                          ),
+                          SizedBox(height: 0.3.h),
+                          Text(
+                            '${result['availableSeats']} seats left',
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.successLight,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '${result['price']} XAF',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.primaryLight,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimeInfo(String label, String value) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 9.sp,
+            color: AppTheme.onSurfaceVariantLight,
+          ),
+        ),
+        SizedBox(height: 0.3.h),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 11.sp,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.onSurfaceLight,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSearchTips() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 4.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Search Tips',
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.onSurfaceLight,
+            ),
+          ),
+          SizedBox(height: 1.h),
+          Container(
+            padding: EdgeInsets.all(3.w),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceLight,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primaryLight.withOpacity(0.06),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              children: _searchTips.map((tip) => _buildTipItem(tip)).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTipItem(Map<String, dynamic> tip) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 1.h),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () {
-              HapticFeedback.selectionClick();
-              Navigator.pop(context);
-            },
-            child: Container(
-              padding: EdgeInsets.all(2.w),
-              decoration: BoxDecoration(
-                color: AppTheme.lightTheme.colorScheme.surface.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
-                  width: 1,
-                ),
-              ),
-              child: Icon(
-                Icons.arrow_back,
-                color: AppTheme.lightTheme.colorScheme.onSurface,
-                size: 6.w,
-              ),
+          Container(
+            padding: EdgeInsets.all(2.w),
+            decoration: BoxDecoration(
+              color: tip['color'].withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              tip['icon'],
+              color: tip['color'],
+              size: 4.w,
             ),
           ),
-          SizedBox(width: 4.w),
+          SizedBox(width: 3.w),
           Expanded(
             child: Text(
-              'Search Buses',
-              style: AppTheme.lightTheme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppTheme.lightTheme.colorScheme.onSurface,
+              tip['tip'],
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w500,
+                color: AppTheme.onSurfaceLight,
               ),
             ),
           ),
-          GestureDetector(
-            onTap: () {
-              HapticFeedback.selectionClick();
-              _showFilterBottomSheet();
-            },
-            child: Container(
-              padding: EdgeInsets.all(2.w),
-              decoration: BoxDecoration(
-                color: AppTheme.lightTheme.colorScheme.surface.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
-                  width: 1,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecentSearches() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 4.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Recent Searches',
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.onSurfaceLight,
+            ),
+          ),
+          SizedBox(height: 1.h),
+          Container(
+            padding: EdgeInsets.all(3.w),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceLight,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primaryLight.withOpacity(0.06),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              children: _recentSearches
+                  .map((search) => _buildRecentSearchItem(search))
+                  .toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecentSearchItem(Map<String, dynamic> search) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _origin = search['from'];
+            _destination = search['to'];
+          });
+        },
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 1.h),
+          child: Row(
+            children: [
+              Icon(
+                Icons.history,
+                color: AppTheme.onSurfaceVariantLight,
+                size: 4.w,
+              ),
+              SizedBox(width: 3.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${search['from']} → ${search['to']}',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.onSurfaceLight,
+                      ),
+                    ),
+                    Text(
+                      '${search['date']} • ${search['price']}',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: AppTheme.onSurfaceVariantLight,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              child: Icon(
-                Icons.tune,
-                color: AppTheme.lightTheme.colorScheme.onSurface,
-                size: 6.w,
+              Icon(
+                Icons.arrow_forward_ios,
+                color: AppTheme.onSurfaceVariantLight,
+                size: 3.w,
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFeaturedTickets() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 4.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Featured Offers',
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.onSurfaceLight,
+            ),
+          ),
+          SizedBox(height: 1.h),
+          Container(
+            padding: EdgeInsets.all(3.w),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceLight,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primaryLight.withOpacity(0.06),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              children: _featuredTickets
+                  .map((ticket) => _buildTicketItem(ticket))
+                  .toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTicketItem(Map<String, dynamic> ticket) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 0.5.h),
+      padding: EdgeInsets.all(2.w),
+      decoration: BoxDecoration(
+        color: ticket['color'].withOpacity(0.05),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: ticket['color'].withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(2.w),
+            decoration: BoxDecoration(
+              color: ticket['color'].withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              ticket['icon'],
+              color: ticket['color'],
+              size: 4.w,
+            ),
+          ),
+          SizedBox(width: 3.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  ticket['title'],
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.onSurfaceLight,
+                  ),
+                ),
+                Text(
+                  ticket['subtitle'],
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    color: AppTheme.onSurfaceVariantLight,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            ticket['validUntil'],
+            style: TextStyle(
+              fontSize: 10.sp,
+              color: ticket['color'],
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -462,211 +1240,37 @@ class _SearchBookingState extends State<SearchBooking>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppTheme.lightTheme.colorScheme.primary.withValues(alpha: 0.05),
-              AppTheme.lightTheme.scaffoldBackgroundColor,
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // App Bar
-              _buildAppBar(),
-              
-              // Search Form
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  child: Column(
-                    children: [
-                      SlideTransition(
-                        position: _searchAnimation,
-                        child: Column(
-                          children: [
-                            SizedBox(height: 3.h),
+      backgroundColor: AppTheme.backgroundLight,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            _buildHeader(),
 
-                            // Origin/Destination Widget
-                            Focus(
-                              focusNode: _searchFocusNode,
-                              child: OriginDestinationWidget(
-                                origin: _origin,
-                                destination: _destination,
-                                onOriginChanged: _handleOriginChanged,
-                                onDestinationChanged: _handleDestinationChanged,
-                                onSwap: _handleSwap,
-                              ),
-                            ),
-
-                            SizedBox(height: 2.h),
-
-                            // Date Picker Widget
-                            DatePickerWidget(
-                              selectedDate: _selectedDate,
-                              onDateSelected: _handleDateSelected,
-                            ),
-
-                            SizedBox(height: 2.h),
-
-                            // Search and Filter Buttons
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 4.w),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(16),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(alpha: 0.1),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 4),
-                                          ),
-                                        ],
-                                      ),
-                                      child: ElevatedButton(
-                                        onPressed: _performSearch,
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: AppTheme.lightTheme.colorScheme.primary,
-                                          foregroundColor: Colors.white,
-                                          padding: EdgeInsets.symmetric(vertical: 2.5.h),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(16),
-                                          ),
-                                          elevation: 0,
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.search,
-                                              color: Colors.white,
-                                              size: 6.w,
-                                            ),
-                                            SizedBox(width: 3.w),
-                                            Text(
-                                              'Search Buses',
-                                              style: TextStyle(
-                                                fontSize: 14.sp,
-                                                fontWeight: FontWeight.w600,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(width: 3.w),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(16),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.1),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Material(
-                                      color: _getActiveFilterCount() > 0
-                                          ? AppTheme.lightTheme.colorScheme.secondary
-                                          : Colors.white,
-                                      borderRadius: BorderRadius.circular(16),
-                                      child: InkWell(
-                                        onTap: _showFilterBottomSheet,
-                                        borderRadius: BorderRadius.circular(16),
-                                        child: Container(
-                                          padding: EdgeInsets.all(4.w),
-                                          child: Stack(
-                                            children: [
-                                              Icon(
-                                                Icons.tune,
-                                                color: _getActiveFilterCount() > 0
-                                                    ? Colors.white
-                                                    : Colors.grey[600],
-                                                size: 6.w,
-                                              ),
-                                              if (_getActiveFilterCount() > 0)
-                                                Positioned(
-                                                  right: -2,
-                                                  top: -2,
-                                                  child: Container(
-                                                    width: 4.w,
-                                                    height: 4.w,
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.red,
-                                                      shape: BoxShape.circle,
-                                                    ),
-                                                    child: Center(
-                                                      child: Text(
-                                                        '${_getActiveFilterCount()}',
-                                                        style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize: 8.sp,
-                                                          fontWeight: FontWeight.w600,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            SizedBox(height: 3.h),
-                          ],
-                        ),
-                      ),
-
-                      // Predictive Suggestions
-                      if (_showSuggestions)
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          margin: EdgeInsets.symmetric(horizontal: 4.w),
-                          child: PredictiveSuggestionsWidget(
-                            query: _origin.isNotEmpty ? _origin : _destination,
-                            isVisible: _showSuggestions,
-                            onSuggestionSelected: _handleSuggestionSelected,
-                          ),
-                        ),
-
-                      // Search Results
-                      if (_hasSearched || _isSearching)
-                        Container(
-                          constraints: BoxConstraints(minHeight: 50.h),
-                          child: PremiumSearchResultsWidget(
-                            isLoading: _isSearching,
-                            results: _searchResults,
-                            onResultTap: _handleResultTap,
-                            onSaveRoute: _handleSaveRoute,
-                            onShareRoute: _handleShareRoute,
-                            onPriceAlert: _handlePriceAlert,
-                          ),
-                        ),
-
-                      SizedBox(height: 10.h),
+            // Search Form
+            Expanded(
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  children: [
+                    _buildSearchForm(),
+                    SizedBox(height: 2.h),
+                    _buildSuggestions(),
+                    if (!_hasSearched) ...[
+                      _buildSearchTips(),
+                      SizedBox(height: 2.h),
+                      _buildRecentSearches(),
+                      SizedBox(height: 2.h),
+                      _buildFeaturedTickets(),
                     ],
-                  ),
+                    _buildSearchResults(),
+                    SizedBox(height: 8.h),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       bottomNavigationBar: GlobalBottomNavigation(

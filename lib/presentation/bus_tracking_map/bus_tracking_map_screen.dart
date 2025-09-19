@@ -76,7 +76,7 @@ class _BusTrackingMapScreenState extends State<BusTrackingMapScreen>
       'distanceToBus': 0.8,
       'etaToBus': 3,
       'status': 'walking',
-      'parentPhone': '+1 (555) 123-4567',
+      'parentPhone': '+237 6 12 34 56 78',
     },
     {
       'id': 'student_2',
