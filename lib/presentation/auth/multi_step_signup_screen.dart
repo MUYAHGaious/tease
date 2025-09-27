@@ -686,6 +686,34 @@ class _MultiStepSignupScreenState extends State<MultiStepSignupScreen>
             ),
           ),
         ],
+
+        SizedBox(height: 2.h),
+
+        // Login Link
+        Center(
+          child: GestureDetector(
+            onTap: () => Navigator.pushReplacementNamed(context, '/login'),
+            child: RichText(
+              text: TextSpan(
+                style: GoogleFonts.inter(
+                  fontSize: 11.sp,
+                  color: Colors.white.withOpacity(0.7),
+                ),
+                children: [
+                  const TextSpan(text: "Already have an account? "),
+                  TextSpan(
+                    text: "Log in",
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
