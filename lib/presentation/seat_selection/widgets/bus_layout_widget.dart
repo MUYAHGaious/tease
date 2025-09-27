@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-import '../../../../core/app_export.dart';
+import '../../../../theme/theme_notifier.dart';
 
 class BusLayoutWidget extends StatefulWidget {
   final List<Map<String, dynamic>> seats;
@@ -30,12 +31,12 @@ class _BusLayoutWidgetState extends State<BusLayoutWidget>
   void initState() {
     super.initState();
     _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
     _pulseAnimation = Tween<double>(
       begin: 1.0,
-      end: 1.1,
+      end: 1.05,
     ).animate(CurvedAnimation(
       parent: _pulseController,
       curve: Curves.easeInOut,
@@ -54,18 +55,18 @@ class _BusLayoutWidgetState extends State<BusLayoutWidget>
     final status = seat['status'] as String;
 
     if (widget.selectedSeats.contains(seatId)) {
-      return AppTheme.lightTheme.colorScheme.secondary;
+      return const Color(0xFF4CAF50); // Selected - Green
     }
 
     switch (status) {
       case 'available':
-        return AppTheme.lightTheme.colorScheme.primary;
+        return const Color(0xFF008B8B); // Available - Teal
       case 'occupied':
-        return AppTheme.lightTheme.colorScheme.onSurfaceVariant;
+        return const Color(0xFF757575); // Occupied - Grey
       case 'premium':
-        return AppTheme.lightTheme.colorScheme.tertiary;
+        return const Color(0xFFFF9800); // Premium - Orange
       default:
-        return AppTheme.lightTheme.colorScheme.onSurfaceVariant;
+        return const Color(0xFF757575);
     }
   }
 
@@ -84,39 +85,33 @@ class _BusLayoutWidgetState extends State<BusLayoutWidget>
           child: GestureDetector(
             onTap: isAvailable ? () => widget.onSeatTap(seatId) : null,
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
+              duration: const Duration(milliseconds: 200),
               curve: Curves.easeInOut,
-              width: 12.w * widget.zoomLevel,
-              height: 12.w * widget.zoomLevel,
-              margin: EdgeInsets.all(1.w),
+              width: 10.w * widget.zoomLevel,
+              height: 10.w * widget.zoomLevel,
+              margin: EdgeInsets.all(0.8.w),
               decoration: BoxDecoration(
                 color: _getSeatColor(seat),
-                borderRadius: BorderRadius.circular(2.w),
+                borderRadius: BorderRadius.circular(1.5.w),
                 border: Border.all(
-                  color: isSelected
-                      ? AppTheme.lightTheme.colorScheme.secondary
-                      : Colors.transparent,
-                  width: 2,
+                  color: isSelected ? Colors.white : Colors.transparent,
+                  width: 1.5,
                 ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: AppTheme.lightTheme.colorScheme.secondary
-                              .withValues(alpha: 0.3),
-                          blurRadius: 8,
-                          spreadRadius: 2,
-                        ),
-                      ]
-                    : null,
+                boxShadow: [
+                  BoxShadow(
+                    color: _getSeatColor(seat).withOpacity(0.3),
+                    blurRadius: isSelected ? 6 : 2,
+                    spreadRadius: isSelected ? 1 : 0,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Center(
                 child: Text(
                   seatNumber,
-                  style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
-                    color: isAvailable
-                        ? AppTheme.lightTheme.colorScheme.onPrimary
-                        : AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                    fontSize: (8 * widget.zoomLevel).sp,
+                  style: GoogleFonts.inter(
+                    color: Colors.white,
+                    fontSize: (7 * widget.zoomLevel).sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -131,13 +126,17 @@ class _BusLayoutWidgetState extends State<BusLayoutWidget>
   Widget _buildDriverSection() {
     return Container(
       width: double.infinity,
-      height: 8.h,
-      margin: EdgeInsets.only(bottom: 4.h),
+      height: 6.h,
+      margin: EdgeInsets.only(bottom: 3.h),
       decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(2.w),
+        color: ThemeNotifier().isDarkMode
+            ? Colors.white.withOpacity(0.1)
+            : Colors.grey[100],
+        borderRadius: BorderRadius.circular(1.5.w),
         border: Border.all(
-          color: AppTheme.lightTheme.colorScheme.outline,
+          color: ThemeNotifier().isDarkMode
+              ? Colors.white.withOpacity(0.2)
+              : Colors.grey.withOpacity(0.3),
           width: 1,
         ),
       ),
@@ -147,27 +146,31 @@ class _BusLayoutWidgetState extends State<BusLayoutWidget>
             flex: 3,
             child: Container(
               decoration: BoxDecoration(
-                color: AppTheme.lightTheme.colorScheme.surface,
+                color: ThemeNotifier().isDarkMode
+                    ? Colors.white.withOpacity(0.05)
+                    : Colors.white,
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(2.w),
-                  bottomLeft: Radius.circular(2.w),
+                  topLeft: Radius.circular(1.5.w),
+                  bottomLeft: Radius.circular(1.5.w),
                 ),
               ),
               child: Center(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CustomIconWidget(
-                      iconName: 'drive_eta',
-                      color: AppTheme.lightTheme.colorScheme.primary,
-                      size: 6.w,
+                    Icon(
+                      Icons.drive_eta,
+                      color: const Color(0xFF008B8B),
+                      size: 4.w,
                     ),
-                    SizedBox(width: 2.w),
+                    SizedBox(width: 1.5.w),
                     Text(
                       'Driver',
-                      style:
-                          AppTheme.lightTheme.textTheme.labelMedium?.copyWith(
-                        color: AppTheme.lightTheme.colorScheme.onSurface,
+                      style: GoogleFonts.inter(
+                        color: ThemeNotifier().isDarkMode
+                            ? Colors.white70
+                            : Colors.black87,
+                        fontSize: 10.sp,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -180,17 +183,21 @@ class _BusLayoutWidgetState extends State<BusLayoutWidget>
             flex: 1,
             child: Container(
               decoration: BoxDecoration(
-                color: AppTheme.lightTheme.colorScheme.surfaceContainerHighest,
+                color: ThemeNotifier().isDarkMode
+                    ? Colors.white.withOpacity(0.1)
+                    : Colors.grey[100],
                 borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(2.w),
-                  bottomRight: Radius.circular(2.w),
+                  topRight: Radius.circular(1.5.w),
+                  bottomRight: Radius.circular(1.5.w),
                 ),
               ),
               child: Center(
-                child: CustomIconWidget(
-                  iconName: 'door_front',
-                  color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                  size: 5.w,
+                child: Icon(
+                  Icons.door_front_door,
+                  color: ThemeNotifier().isDarkMode
+                      ? Colors.white60
+                      : Colors.grey[600],
+                  size: 4.w,
                 ),
               ),
             ),
@@ -203,41 +210,102 @@ class _BusLayoutWidgetState extends State<BusLayoutWidget>
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(4.w),
+      padding: EdgeInsets.all(3.w),
       decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(4.w),
+        color: ThemeNotifier().isDarkMode
+            ? Colors.white.withOpacity(0.05)
+            : Colors.white,
+        borderRadius: BorderRadius.circular(3.w),
         border: Border.all(
-          color: AppTheme.lightTheme.colorScheme.outline,
-          width: 2,
+          color: ThemeNotifier().isDarkMode
+              ? Colors.white.withOpacity(0.15)
+              : Colors.grey.withOpacity(0.3),
+          width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.lightTheme.colorScheme.shadow,
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: ThemeNotifier().isDarkMode
+                ? Colors.black.withOpacity(0.3)
+                : Colors.grey.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: Column(
-        children: [
-          _buildDriverSection(),
-          Expanded(
-            child: GridView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                childAspectRatio: 1.0,
-                crossAxisSpacing: 1.w,
-                mainAxisSpacing: 1.w,
-              ),
-              itemCount: widget.seats.length,
-              itemBuilder: (context, index) {
-                return _buildSeat(widget.seats[index], index);
-              },
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SizedBox(
+            height: constraints.maxHeight,
+            child: Column(
+              children: [
+                _buildDriverSection(),
+                Expanded(
+                  child: Row(
+                    children: [
+                      // Left side seats (2 columns)
+                      Expanded(
+                        flex: 2,
+                        child: GridView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 1.0,
+                            crossAxisSpacing: 1.w,
+                            mainAxisSpacing: 1.w,
+                          ),
+                          itemCount: (widget.seats.length / 2).ceil(),
+                          itemBuilder: (context, index) {
+                            if (index * 2 < widget.seats.length) {
+                              return _buildSeat(
+                                  widget.seats[index * 2], index * 2);
+                            }
+                            return const SizedBox();
+                          },
+                        ),
+                      ),
+                      SizedBox(width: 1.w),
+                      Container(
+                        width: 2.w,
+                        decoration: BoxDecoration(
+                          color: ThemeNotifier().isDarkMode
+                              ? Colors.white.withOpacity(0.1)
+                              : Colors.grey[200],
+                          borderRadius: BorderRadius.circular(1.w),
+                        ),
+                      ),
+                      SizedBox(width: 1.w),
+                      // Right side seats (2 columns)
+                      Expanded(
+                        flex: 2,
+                        child: GridView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 1.0,
+                            crossAxisSpacing: 1.w,
+                            mainAxisSpacing: 1.w,
+                          ),
+                          itemCount: (widget.seats.length / 2).ceil(),
+                          itemBuilder: (context, index) {
+                            if (index * 2 + 1 < widget.seats.length) {
+                              return _buildSeat(
+                                  widget.seats[index * 2 + 1], index * 2 + 1);
+                            }
+                            return const SizedBox();
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }

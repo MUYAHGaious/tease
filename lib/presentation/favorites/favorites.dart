@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-import '../../core/app_export.dart';
-import '../../theme/app_theme.dart';
+import '../../theme/theme_notifier.dart';
 import '../../widgets/global_bottom_navigation.dart';
 
 class Favorites extends StatefulWidget {
@@ -14,6 +14,19 @@ class Favorites extends StatefulWidget {
 }
 
 class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
+  // Theme-aware colors
+  Color get primaryColor => const Color(0xFF008B8B);
+  Color get backgroundColor =>
+      ThemeNotifier().isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
+  Color get surfaceColor =>
+      ThemeNotifier().isDarkMode ? const Color(0xFF2D2D2D) : Colors.white;
+  Color get textColor =>
+      ThemeNotifier().isDarkMode ? Colors.white : Colors.black87;
+  Color get onSurfaceVariantColor =>
+      ThemeNotifier().isDarkMode ? Colors.white70 : Colors.black54;
+  Color get borderColor => ThemeNotifier().isDarkMode
+      ? Colors.white.withOpacity(0.2)
+      : Colors.grey.withOpacity(0.3);
   int _selectedSegment = 0;
   String _searchQuery = '';
   bool _isRefreshing = false;
@@ -38,7 +51,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
       "color": Color(0xFF1a4d3a),
     },
     {
-      "id": "FAV002", 
+      "id": "FAV002",
       "type": "operator",
       "title": "Cameroon Express",
       "subtitle": "Premium bus operator",
@@ -51,7 +64,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
     },
     {
       "id": "FAV003",
-      "type": "route", 
+      "type": "route",
       "title": "Yaoundé → Bamenda",
       "subtitle": "Scenic mountain route • 5h journey",
       "operator": "Mountain Express",
@@ -78,8 +91,13 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    ThemeNotifier().addListener(_onThemeChanged);
     _initializeAnimations();
     _startAnimations();
+  }
+
+  void _onThemeChanged() {
+    setState(() {});
   }
 
   void _initializeAnimations() {
@@ -119,6 +137,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    ThemeNotifier().removeListener(_onThemeChanged);
     _slideAnimationController.dispose();
     _fadeAnimationController.dispose();
     super.dispose();
@@ -132,11 +151,17 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
 
   List<Map<String, dynamic>> get _filteredFavorites {
     var filtered = _allFavorites;
-    
+
     if (_searchQuery.isNotEmpty) {
-      filtered = filtered.where((item) =>
-          item['title'].toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          item['subtitle'].toLowerCase().contains(_searchQuery.toLowerCase())).toList();
+      filtered = filtered
+          .where((item) =>
+              item['title']
+                  .toLowerCase()
+                  .contains(_searchQuery.toLowerCase()) ||
+              item['subtitle']
+                  .toLowerCase()
+                  .contains(_searchQuery.toLowerCase()))
+          .toList();
     }
 
     if (_selectedSegment == 1) {
@@ -156,13 +181,13 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppTheme.lightTheme.colorScheme.primary.withValues(alpha: 0.05),
+            primaryColor.withOpacity(0.05),
             Colors.white,
           ],
         ),
         border: Border(
           bottom: BorderSide(
-            color: Colors.grey[200]!,
+            color: borderColor,
             width: 1,
           ),
         ),
@@ -179,7 +204,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
                   child: Container(
                     padding: EdgeInsets.all(2.w),
                     decoration: BoxDecoration(
-                      color: AppTheme.lightTheme.colorScheme.surface,
+                      color: surfaceColor,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
@@ -191,7 +216,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
                     ),
                     child: Icon(
                       Icons.arrow_back,
-                      color: AppTheme.lightTheme.colorScheme.onSurface,
+                      color: textColor,
                       size: 6.w,
                     ),
                   ),
@@ -203,15 +228,17 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
                     children: [
                       Text(
                         'My Favorites',
-                        style: AppTheme.lightTheme.textTheme.headlineSmall?.copyWith(
+                        style: GoogleFonts.inter(
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.w700,
-                          color: AppTheme.lightTheme.colorScheme.onSurface,
+                          color: textColor,
                         ),
                       ),
                       Text(
                         '${_filteredFavorites.length} saved items',
-                        style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                          color: AppTheme.lightTheme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          color: textColor.withOpacity(0.6),
                         ),
                       ),
                     ],
@@ -232,10 +259,10 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
   Widget _buildSearchBar() {
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surface,
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
+          color: borderColor.withOpacity(0.2),
         ),
         boxShadow: [
           BoxShadow(
@@ -249,12 +276,13 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
         onChanged: (value) => setState(() => _searchQuery = value),
         decoration: InputDecoration(
           hintText: 'Search favorites...',
-          hintStyle: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-            color: AppTheme.lightTheme.colorScheme.onSurface.withValues(alpha: 0.5),
+          hintStyle: GoogleFonts.inter(
+            fontSize: 14.sp,
+            color: textColor.withOpacity(0.5),
           ),
           prefixIcon: Icon(
             Icons.search,
-            color: AppTheme.lightTheme.colorScheme.onSurface.withValues(alpha: 0.5),
+            color: textColor.withOpacity(0.5),
           ),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
@@ -266,10 +294,10 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
   Widget _buildSegmentedControl() {
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surface.withValues(alpha: 0.8),
+        color: surfaceColor.withOpacity(0.8),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
+          color: borderColor.withOpacity(0.2),
         ),
       ),
       child: Row(
@@ -293,18 +321,15 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 1.5.h),
           decoration: BoxDecoration(
-            color: isSelected 
-                ? AppTheme.lightTheme.colorScheme.primary
-                : Colors.transparent,
+            color: isSelected ? primaryColor : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
             title,
             textAlign: TextAlign.center,
-            style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-              color: isSelected 
-                  ? Colors.white
-                  : AppTheme.lightTheme.colorScheme.onSurface.withValues(alpha: 0.7),
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              color: isSelected ? Colors.white : textColor.withOpacity(0.7),
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
             ),
           ),
@@ -327,10 +352,10 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
           child: Container(
             padding: EdgeInsets.all(4.w),
             decoration: BoxDecoration(
-              color: AppTheme.lightTheme.colorScheme.surface,
+              color: surfaceColor,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.1),
+                color: borderColor.withOpacity(0.1),
               ),
               boxShadow: [
                 BoxShadow(
@@ -348,7 +373,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
                     Container(
                       padding: EdgeInsets.all(3.w),
                       decoration: BoxDecoration(
-                        color: (favorite['color'] as Color).withValues(alpha: 0.1),
+                        color: (favorite['color'] as Color).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
@@ -364,16 +389,18 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
                         children: [
                           Text(
                             favorite['title'],
-                            style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+                            style: GoogleFonts.inter(
+                              fontSize: 16.sp,
                               fontWeight: FontWeight.w700,
-                              color: AppTheme.lightTheme.colorScheme.onSurface,
+                              color: textColor,
                             ),
                           ),
                           SizedBox(height: 0.5.h),
                           Text(
                             favorite['subtitle'],
-                            style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
-                              color: AppTheme.lightTheme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            style: GoogleFonts.inter(
+                              fontSize: 12.sp,
+                              color: textColor.withOpacity(0.6),
                             ),
                           ),
                         ],
@@ -387,7 +414,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
                       child: Container(
                         padding: EdgeInsets.all(2.w),
                         decoration: BoxDecoration(
-                          color: Colors.red.withValues(alpha: 0.1),
+                          color: Colors.red.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Icon(
@@ -408,16 +435,18 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
                         children: [
                           Text(
                             'Price',
-                            style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
-                              color: AppTheme.lightTheme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            style: GoogleFonts.inter(
+                              fontSize: 12.sp,
+                              color: textColor.withOpacity(0.6),
                             ),
                           ),
                           SizedBox(height: 0.5.h),
                           Text(
                             favorite['price'],
-                            style: AppTheme.lightTheme.textTheme.titleSmall?.copyWith(
+                            style: GoogleFonts.inter(
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
-                              color: AppTheme.lightTheme.colorScheme.primary,
+                              color: primaryColor,
                             ),
                           ),
                         ],
@@ -429,8 +458,9 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
                         children: [
                           Text(
                             'Rating',
-                            style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
-                              color: AppTheme.lightTheme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            style: GoogleFonts.inter(
+                              fontSize: 12.sp,
+                              color: textColor.withOpacity(0.6),
                             ),
                           ),
                           SizedBox(height: 0.5.h),
@@ -444,7 +474,8 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
                               SizedBox(width: 1.w),
                               Text(
                                 '${favorite['rating']}',
-                                style: AppTheme.lightTheme.textTheme.titleSmall?.copyWith(
+                                style: GoogleFonts.inter(
+                                  fontSize: 14.sp,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -459,14 +490,16 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
                         children: [
                           Text(
                             'Frequency',
-                            style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
-                              color: AppTheme.lightTheme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            style: GoogleFonts.inter(
+                              fontSize: 12.sp,
+                              color: textColor.withOpacity(0.6),
                             ),
                           ),
                           SizedBox(height: 0.5.h),
                           Text(
                             favorite['frequency'],
-                            style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+                            style: GoogleFonts.inter(
+                              fontSize: 12.sp,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -492,29 +525,31 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
             width: 30.w,
             height: 30.w,
             decoration: BoxDecoration(
-              color: AppTheme.lightTheme.colorScheme.primary.withValues(alpha: 0.1),
+              color: primaryColor.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.favorite_border,
-              color: AppTheme.lightTheme.colorScheme.primary,
+              color: primaryColor,
               size: 15.w,
             ),
           ),
           SizedBox(height: 4.h),
           Text(
             'No favorites yet',
-            style: AppTheme.lightTheme.textTheme.headlineSmall?.copyWith(
+            style: GoogleFonts.inter(
+              fontSize: 18.sp,
               fontWeight: FontWeight.w600,
-              color: AppTheme.lightTheme.colorScheme.onSurface,
+              color: textColor,
             ),
           ),
           SizedBox(height: 2.h),
           Text(
             'Start exploring routes and operators\nto add them to your favorites',
             textAlign: TextAlign.center,
-            style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-              color: AppTheme.lightTheme.colorScheme.onSurface.withValues(alpha: 0.6),
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              color: textColor.withOpacity(0.6),
             ),
           ),
         ],
@@ -525,7 +560,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
+      backgroundColor: backgroundColor,
       body: Column(
         children: [
           FadeTransition(
@@ -535,7 +570,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
           Expanded(
             child: RefreshIndicator(
               onRefresh: _handleRefresh,
-              color: AppTheme.lightTheme.colorScheme.primary,
+              color: primaryColor,
               child: _filteredFavorites.isEmpty
                   ? SingleChildScrollView(
                       physics: const AlwaysScrollableScrollPhysics(),

@@ -5,7 +5,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 // 2025 Premium Design Constants
-const Color primaryColor = Color(0xFF20B2AA);
+const Color primaryColor = Color(0xFF008B8B);
 const Color premiumGlass = Color(0x1AFFFFFF);
 const Color premiumBorder = Color(0x33FFFFFF);
 const double cardBorderRadius = 20.0;

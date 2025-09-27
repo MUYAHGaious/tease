@@ -10,7 +10,8 @@ class ForgotPasswordScreen extends StatefulWidget {
   State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
 
-class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> with TickerProviderStateMixin {
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
+    with TickerProviderStateMixin {
   final TextEditingController emailController = TextEditingController();
   bool isLoading = false;
   late AnimationController _animationController;
@@ -41,11 +42,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> with Ticker
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Colors.black,
-                  Colors.grey[900]!,
-                  Colors.black,
-                ],
+                colors: [Colors.black, Colors.grey[900]!, Colors.black],
               ),
             ),
           ),
@@ -144,7 +141,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> with Ticker
                       child: BackdropFilter(
                         filter: ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
                         child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 6.w,
+                            vertical: 4.h,
+                          ),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               begin: Alignment.topLeft,
@@ -191,34 +191,49 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> with Ticker
                                   borderRadius: BorderRadius.circular(16),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFF20B2AA).withOpacity(0.2),
+                                      color: const Color(
+                                        0xFF008B8B,
+                                      ).withOpacity(0.2),
                                       blurRadius: 15,
                                       offset: const Offset(0, 5),
                                     ),
                                   ],
                                 ),
-                                child: TextField(
-                                  controller: emailController,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 10.sp,
-                                    color: Colors.black87,
-                                    fontWeight: FontWeight.w500,
+                                child: Theme(
+                                  data: Theme.of(context).copyWith(
+                                    inputDecorationTheme: InputDecorationTheme(
+                                      fillColor: Colors.white,
+                                      filled: true,
+                                      border: InputBorder.none,
+                                      enabledBorder: InputBorder.none,
+                                      focusedBorder: InputBorder.none,
+                                      errorBorder: InputBorder.none,
+                                      focusedErrorBorder: InputBorder.none,
+                                    ),
                                   ),
-                                  decoration: InputDecoration(
-                                    hintText: 'Email',
-                                    hintStyle: GoogleFonts.inter(
-                                      color: Colors.grey[500],
+                                  child: TextField(
+                                    controller: emailController,
+                                    style: GoogleFonts.inter(
                                       fontSize: 10.sp,
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.w500,
                                     ),
-                                    border: InputBorder.none,
-                                    contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 5.w,
-                                      vertical: 1.8.h,
-                                    ),
-                                    prefixIcon: Icon(
-                                      Icons.email_outlined,
-                                      color: const Color(0xFF20B2AA),
-                                      size: 22,
+                                    decoration: InputDecoration(
+                                      hintText: 'Email',
+                                      hintStyle: GoogleFonts.inter(
+                                        color: Colors.black54,
+                                        fontSize: 10.sp,
+                                      ),
+                                      border: InputBorder.none,
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 5.w,
+                                        vertical: 1.8.h,
+                                      ),
+                                      prefixIcon: Icon(
+                                        Icons.email_outlined,
+                                        color: const Color(0xFF008B8B),
+                                        size: 22,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -231,21 +246,28 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> with Ticker
                                 height: 6.5.h,
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
-                                    colors: [Color(0xFF20B2AA), Color(0xFF48CAE4)],
+                                    colors: [
+                                      Color(0xFF008B8B),
+                                      Color(0xFF48CAE4),
+                                    ],
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                   ),
                                   borderRadius: BorderRadius.circular(16),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFF20B2AA).withOpacity(0.4),
+                                      color: const Color(
+                                        0xFF008B8B,
+                                      ).withOpacity(0.4),
                                       blurRadius: 20,
                                       offset: const Offset(0, 8),
                                     ),
                                   ],
                                 ),
                                 child: ElevatedButton(
-                                  onPressed: isLoading ? null : _handleResetPassword,
+                                  onPressed: isLoading
+                                      ? null
+                                      : _handleResetPassword,
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.transparent,
                                     shadowColor: Colors.transparent,
@@ -259,7 +281,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> with Ticker
                                           width: 24,
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2.5,
-                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                  Colors.white,
+                                                ),
                                           ),
                                         )
                                       : Text(
@@ -287,13 +312,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> with Ticker
                                         color: Colors.grey[400],
                                       ),
                                       children: [
-                                        const TextSpan(text: "Remember your password? "),
+                                        const TextSpan(
+                                          text: "Remember your password? ",
+                                        ),
                                         TextSpan(
                                           text: "Back to Login",
                                           style: GoogleFonts.inter(
-                                            color: const Color(0xFF20B2AA),
+                                            color: const Color(0xFF008B8B),
                                             fontWeight: FontWeight.w600,
-                                            decoration: TextDecoration.underline,
+                                            decoration:
+                                                TextDecoration.underline,
                                           ),
                                         ),
                                       ],
@@ -350,7 +378,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> with Ticker
       SnackBar(
         content: Text(
           message,
-          style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w500),
+          style: GoogleFonts.inter(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+          ),
         ),
         backgroundColor: Colors.black87,
         behavior: SnackBarBehavior.floating,

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-import '../../../../core/app_export.dart';
+import '../../../../theme/theme_notifier.dart';
 
 class PassengerAssignmentWidget extends StatefulWidget {
   final List<Map<String, dynamic>> selectedSeats;
   final Function(int seatId, Map<String, String> passengerInfo)
-      onPassengerAssigned;
+  onPassengerAssigned;
 
   const PassengerAssignmentWidget({
     Key? key,
@@ -50,16 +51,21 @@ class _PassengerAssignmentWidgetState extends State<PassengerAssignmentWidget> {
       margin: EdgeInsets.only(bottom: 3.h),
       padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surface,
+        color: ThemeNotifier().isDarkMode
+            ? Colors.white.withOpacity(0.1)
+            : Colors.white,
         borderRadius: BorderRadius.circular(3.w),
         border: Border.all(
-          color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.3),
+          color: ThemeNotifier().isDarkMode
+              ? Colors.white.withOpacity(0.2)
+              : Colors.grey.withOpacity(0.3),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color:
-                AppTheme.lightTheme.colorScheme.shadow.withValues(alpha: 0.1),
+            color: ThemeNotifier().isDarkMode
+                ? Colors.black.withOpacity(0.3)
+                : Colors.grey.withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -74,14 +80,15 @@ class _PassengerAssignmentWidgetState extends State<PassengerAssignmentWidget> {
                 width: 8.w,
                 height: 8.w,
                 decoration: BoxDecoration(
-                  color: AppTheme.lightTheme.colorScheme.secondary,
+                  color: const Color(0xFF008B8B),
                   borderRadius: BorderRadius.circular(2.w),
                 ),
                 child: Center(
                   child: Text(
                     seatNumber,
-                    style: AppTheme.lightTheme.textTheme.labelMedium?.copyWith(
+                    style: GoogleFonts.inter(
                       color: Colors.white,
+                      fontSize: 10.sp,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -90,8 +97,11 @@ class _PassengerAssignmentWidgetState extends State<PassengerAssignmentWidget> {
               SizedBox(width: 3.w),
               Text(
                 'Passenger for Seat $seatNumber',
-                style: AppTheme.lightTheme.textTheme.titleSmall?.copyWith(
-                  color: AppTheme.lightTheme.colorScheme.onSurface,
+                style: GoogleFonts.inter(
+                  color: ThemeNotifier().isDarkMode
+                      ? Colors.white
+                      : Colors.black87,
+                  fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -100,15 +110,55 @@ class _PassengerAssignmentWidgetState extends State<PassengerAssignmentWidget> {
           SizedBox(height: 3.h),
           TextFormField(
             controller: _nameControllers[seatId],
+            style: GoogleFonts.inter(
+              color: ThemeNotifier().isDarkMode ? Colors.white : Colors.black87,
+              fontSize: 12.sp,
+            ),
             decoration: InputDecoration(
               labelText: 'Full Name',
+              labelStyle: GoogleFonts.inter(
+                color: ThemeNotifier().isDarkMode
+                    ? Colors.white70
+                    : Colors.black54,
+                fontSize: 12.sp,
+              ),
               hintText: 'Enter passenger name',
-              prefixIcon: Padding(
-                padding: EdgeInsets.all(3.w),
-                child: CustomIconWidget(
-                  iconName: 'person',
-                  color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                  size: 5.w,
+              hintStyle: GoogleFonts.inter(
+                color: ThemeNotifier().isDarkMode
+                    ? Colors.white60
+                    : Colors.grey[500],
+                fontSize: 12.sp,
+              ),
+              prefixIcon: Icon(
+                Icons.person,
+                color: const Color(0xFF008B8B),
+                size: 5.w,
+              ),
+              filled: true,
+              fillColor: ThemeNotifier().isDarkMode
+                  ? Colors.white.withOpacity(0.05)
+                  : Colors.grey[50],
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(2.w),
+                borderSide: BorderSide(
+                  color: ThemeNotifier().isDarkMode
+                      ? Colors.white.withOpacity(0.2)
+                      : Colors.grey.withOpacity(0.3),
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(2.w),
+                borderSide: BorderSide(
+                  color: ThemeNotifier().isDarkMode
+                      ? Colors.white.withOpacity(0.2)
+                      : Colors.grey.withOpacity(0.3),
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(2.w),
+                borderSide: const BorderSide(
+                  color: Color(0xFF008B8B),
+                  width: 2,
                 ),
               ),
             ),
@@ -122,15 +172,57 @@ class _PassengerAssignmentWidgetState extends State<PassengerAssignmentWidget> {
                 child: TextFormField(
                   controller: _ageControllers[seatId],
                   keyboardType: TextInputType.number,
+                  style: GoogleFonts.inter(
+                    color: ThemeNotifier().isDarkMode
+                        ? Colors.white
+                        : Colors.black87,
+                    fontSize: 12.sp,
+                  ),
                   decoration: InputDecoration(
                     labelText: 'Age',
+                    labelStyle: GoogleFonts.inter(
+                      color: ThemeNotifier().isDarkMode
+                          ? Colors.white70
+                          : Colors.black54,
+                      fontSize: 12.sp,
+                    ),
                     hintText: 'Age',
-                    prefixIcon: Padding(
-                      padding: EdgeInsets.all(3.w),
-                      child: CustomIconWidget(
-                        iconName: 'cake',
-                        color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                        size: 5.w,
+                    hintStyle: GoogleFonts.inter(
+                      color: ThemeNotifier().isDarkMode
+                          ? Colors.white60
+                          : Colors.grey[500],
+                      fontSize: 12.sp,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.cake,
+                      color: const Color(0xFF008B8B),
+                      size: 5.w,
+                    ),
+                    filled: true,
+                    fillColor: ThemeNotifier().isDarkMode
+                        ? Colors.white.withOpacity(0.05)
+                        : Colors.grey[50],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(2.w),
+                      borderSide: BorderSide(
+                        color: ThemeNotifier().isDarkMode
+                            ? Colors.white.withOpacity(0.2)
+                            : Colors.grey.withOpacity(0.3),
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(2.w),
+                      borderSide: BorderSide(
+                        color: ThemeNotifier().isDarkMode
+                            ? Colors.white.withOpacity(0.2)
+                            : Colors.grey.withOpacity(0.3),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(2.w),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF008B8B),
+                        width: 2,
                       ),
                     ),
                   ),
@@ -143,10 +235,14 @@ class _PassengerAssignmentWidgetState extends State<PassengerAssignmentWidget> {
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 2.h),
                   decoration: BoxDecoration(
-                    color: AppTheme.lightTheme.colorScheme.surface,
+                    color: ThemeNotifier().isDarkMode
+                        ? Colors.white.withOpacity(0.05)
+                        : Colors.grey[50],
                     borderRadius: BorderRadius.circular(2.w),
                     border: Border.all(
-                      color: AppTheme.lightTheme.colorScheme.outline,
+                      color: ThemeNotifier().isDarkMode
+                          ? Colors.white.withOpacity(0.2)
+                          : Colors.grey.withOpacity(0.3),
                       width: 1,
                     ),
                   ),
@@ -154,9 +250,11 @@ class _PassengerAssignmentWidgetState extends State<PassengerAssignmentWidget> {
                     child: DropdownButton<String>(
                       value: _genderSelections[seatId],
                       isExpanded: true,
-                      icon: CustomIconWidget(
-                        iconName: 'arrow_drop_down',
-                        color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                      icon: Icon(
+                        Icons.arrow_drop_down,
+                        color: ThemeNotifier().isDarkMode
+                            ? Colors.white70
+                            : Colors.grey[600],
                         size: 6.w,
                       ),
                       items: ['Male', 'Female', 'Other'].map((String value) {
@@ -164,9 +262,11 @@ class _PassengerAssignmentWidgetState extends State<PassengerAssignmentWidget> {
                           value: value,
                           child: Text(
                             value,
-                            style: AppTheme.lightTheme.textTheme.bodyMedium
-                                ?.copyWith(
-                              color: AppTheme.lightTheme.colorScheme.onSurface,
+                            style: GoogleFonts.inter(
+                              color: ThemeNotifier().isDarkMode
+                                  ? Colors.white
+                                  : Colors.black87,
+                              fontSize: 12.sp,
                             ),
                           ),
                         );
@@ -205,12 +305,15 @@ class _PassengerAssignmentWidgetState extends State<PassengerAssignmentWidget> {
       width: double.infinity,
       padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surface,
+        color: ThemeNotifier().isDarkMode
+            ? Colors.white.withOpacity(0.1)
+            : Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(6.w)),
         boxShadow: [
           BoxShadow(
-            color:
-                AppTheme.lightTheme.colorScheme.shadow.withValues(alpha: 0.2),
+            color: ThemeNotifier().isDarkMode
+                ? Colors.black.withOpacity(0.3)
+                : Colors.grey.withOpacity(0.2),
             blurRadius: 20,
             offset: const Offset(0, -8),
           ),
@@ -229,23 +332,28 @@ class _PassengerAssignmentWidgetState extends State<PassengerAssignmentWidget> {
               width: 12.w,
               height: 1.w,
               decoration: BoxDecoration(
-                color: AppTheme.lightTheme.colorScheme.outline,
+                color: ThemeNotifier().isDarkMode
+                    ? Colors.white.withOpacity(0.3)
+                    : Colors.grey[400],
                 borderRadius: BorderRadius.circular(0.5.w),
               ),
             ),
           ),
           Row(
             children: [
-              CustomIconWidget(
-                iconName: 'assignment_ind',
-                color: AppTheme.lightTheme.colorScheme.primary,
+              Icon(
+                Icons.assignment_ind,
+                color: const Color(0xFF008B8B),
                 size: 6.w,
               ),
               SizedBox(width: 3.w),
               Text(
                 'Passenger Details',
-                style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
-                  color: AppTheme.lightTheme.colorScheme.onSurface,
+                style: GoogleFonts.inter(
+                  color: ThemeNotifier().isDarkMode
+                      ? Colors.white
+                      : Colors.black87,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
                 ),
               ),

@@ -89,15 +89,15 @@ class _FloatingActionWidgetState extends State<FloatingActionWidget>
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    AppTheme.lightTheme.colorScheme.primary,
-                    AppTheme.lightTheme.colorScheme.primary
+                    Theme.of(context).colorScheme.primary,
+                    Theme.of(context).colorScheme.primary
                         .withValues(alpha: 0.8),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: AppTheme.lightTheme.colorScheme.primary
+                    color: Theme.of(context).colorScheme.primary
                         .withValues(alpha: 0.3),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
@@ -122,7 +122,7 @@ class _FloatingActionWidgetState extends State<FloatingActionWidget>
                     SizedBox(width: 2.w),
                     Text(
                       'Book Now',
-                      style: AppTheme.lightTheme.textTheme.labelLarge?.copyWith(
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
                       ),

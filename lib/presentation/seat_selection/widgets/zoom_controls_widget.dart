@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
-import '../../../../core/app_export.dart';
+import '../../../../theme/theme_notifier.dart';
 
 class ZoomControlsWidget extends StatelessWidget {
   final double zoomLevel;
@@ -18,7 +18,7 @@ class ZoomControlsWidget extends StatelessWidget {
   }) : super(key: key);
 
   Widget _buildZoomButton({
-    required String iconName,
+    required IconData icon,
     required VoidCallback onTap,
     required bool isEnabled,
   }) {
@@ -28,13 +28,16 @@ class ZoomControlsWidget extends StatelessWidget {
       height: 12.w,
       decoration: BoxDecoration(
         color: isEnabled
-            ? AppTheme.lightTheme.colorScheme.primary
-            : AppTheme.lightTheme.colorScheme.surfaceContainerHighest,
+            ? const Color(0xFF008B8B)
+            : ThemeNotifier().isDarkMode
+            ? Colors.white.withOpacity(0.1)
+            : Colors.grey[200],
         borderRadius: BorderRadius.circular(3.w),
         boxShadow: [
           BoxShadow(
-            color:
-                AppTheme.lightTheme.colorScheme.shadow.withValues(alpha: 0.2),
+            color: ThemeNotifier().isDarkMode
+                ? Colors.black.withOpacity(0.3)
+                : Colors.grey.withOpacity(0.2),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -46,11 +49,13 @@ class ZoomControlsWidget extends StatelessWidget {
           onTap: isEnabled ? onTap : null,
           borderRadius: BorderRadius.circular(3.w),
           child: Center(
-            child: CustomIconWidget(
-              iconName: iconName,
+            child: Icon(
+              icon,
               color: isEnabled
-                  ? AppTheme.lightTheme.colorScheme.onPrimary
-                  : AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                  ? Colors.white
+                  : ThemeNotifier().isDarkMode
+                  ? Colors.white60
+                  : Colors.grey[600],
               size: 6.w,
             ),
           ),
@@ -64,16 +69,21 @@ class ZoomControlsWidget extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(2.w),
       decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surface.withValues(alpha: 0.9),
+        color: ThemeNotifier().isDarkMode
+            ? Colors.white.withOpacity(0.1)
+            : Colors.white.withOpacity(0.9),
         borderRadius: BorderRadius.circular(4.w),
         border: Border.all(
-          color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.3),
+          color: ThemeNotifier().isDarkMode
+              ? Colors.white.withOpacity(0.2)
+              : Colors.grey.withOpacity(0.3),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color:
-                AppTheme.lightTheme.colorScheme.shadow.withValues(alpha: 0.15),
+            color: ThemeNotifier().isDarkMode
+                ? Colors.black.withOpacity(0.3)
+                : Colors.grey.withOpacity(0.15),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -83,7 +93,7 @@ class ZoomControlsWidget extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildZoomButton(
-            iconName: 'add',
+            icon: Icons.add,
             onTap: onZoomIn,
             isEnabled: zoomLevel < 2.0,
           ),
@@ -92,13 +102,15 @@ class ZoomControlsWidget extends StatelessWidget {
             width: 8.w,
             height: 0.5.w,
             decoration: BoxDecoration(
-              color: AppTheme.lightTheme.colorScheme.outline,
+              color: ThemeNotifier().isDarkMode
+                  ? Colors.white.withOpacity(0.3)
+                  : Colors.grey[400],
               borderRadius: BorderRadius.circular(0.25.w),
             ),
           ),
           SizedBox(height: 2.w),
           _buildZoomButton(
-            iconName: 'remove',
+            icon: Icons.remove,
             onTap: onZoomOut,
             isEnabled: zoomLevel > 0.5,
           ),
@@ -107,13 +119,15 @@ class ZoomControlsWidget extends StatelessWidget {
             width: 8.w,
             height: 0.5.w,
             decoration: BoxDecoration(
-              color: AppTheme.lightTheme.colorScheme.outline,
+              color: ThemeNotifier().isDarkMode
+                  ? Colors.white.withOpacity(0.3)
+                  : Colors.grey[400],
               borderRadius: BorderRadius.circular(0.25.w),
             ),
           ),
           SizedBox(height: 2.w),
           _buildZoomButton(
-            iconName: 'center_focus_strong',
+            icon: Icons.center_focus_strong,
             onTap: onResetZoom,
             isEnabled: zoomLevel != 1.0,
           ),

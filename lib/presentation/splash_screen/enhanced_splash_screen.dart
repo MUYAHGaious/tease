@@ -129,8 +129,8 @@ class _EnhancedSplashScreenState extends State<EnhancedSplashScreen>
     String route;
 
     if (user.affiliation == null || user.position == null) {
-      // User hasn't completed onboarding
-      route = '/professional-onboarding';
+      // User hasn't completed welcome
+      route = '/login';
     } else if (user.isConductor || user.isDriver) {
       // Staff with operational roles
       route = '/conductor-dashboard';
@@ -196,7 +196,8 @@ class _EnhancedSplashScreenState extends State<EnhancedSplashScreen>
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.white.withValues(alpha: 0.2),
+                                      color:
+                                          Colors.white.withValues(alpha: 0.2),
                                       blurRadius: 20,
                                       spreadRadius: 5,
                                     ),
@@ -221,7 +222,8 @@ class _EnhancedSplashScreenState extends State<EnhancedSplashScreen>
                             return Opacity(
                               opacity: _textAnimation.value,
                               child: Transform.translate(
-                                offset: Offset(0, 30 * (1 - _textAnimation.value)),
+                                offset:
+                                    Offset(0, 30 * (1 - _textAnimation.value)),
                                 child: Column(
                                   children: [
                                     ShaderMask(
@@ -248,7 +250,8 @@ class _EnhancedSplashScreenState extends State<EnhancedSplashScreen>
                                       'Transport Excellence & Service',
                                       style: TextStyle(
                                         fontSize: 14.sp,
-                                        color: Colors.white.withValues(alpha: 0.8),
+                                        color:
+                                            Colors.white.withValues(alpha: 0.8),
                                         fontWeight: FontWeight.w300,
                                         letterSpacing: 1.2,
                                       ),

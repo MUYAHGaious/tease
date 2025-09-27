@@ -4,10 +4,12 @@ import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
+import '../../../core/app_state.dart';
 import '../../../theme/app_theme.dart';
+import '../../../services/role_ui_service.dart';
 
 // 2025 Design Constants
-const Color primaryColor = Color(0xFF20B2AA);
+const Color primaryColor = Color(0xFF008B8B);
 const double headerPadding = 16.0;
 
 class GreetingHeaderWidget extends StatefulWidget {
@@ -20,33 +22,109 @@ class GreetingHeaderWidget extends StatefulWidget {
 class _GreetingHeaderWidgetState extends State<GreetingHeaderWidget> {
   int _currentTipIndex = 0;
 
-  // Modern 2025 Tips - More contextual and helpful
-  final List<Map<String, dynamic>> _modernTips = [
-    {
-      'icon': Icons.flash_on,
-      'tip': 'Tap Quick Book for instant reservations',
-      'color': Colors.orange,
-    },
-    {
-      'icon': Icons.favorite,
-      'tip': 'Save frequent routes to Favorites',
-      'color': Colors.red,
-    },
-    {
-      'icon': Icons.schedule,
-      'tip': 'Check real-time schedules and delays',
-      'color': Colors.blue,
-    },
-    {
-      'icon': Icons.qr_code,
-      'tip': 'Show QR tickets for contactless boarding',
-      'color': primaryColor,
-    },
-  ];
+  // Role-based tips
+  List<Map<String, dynamic>> _getRoleTips() {
+    final appState = AppState();
+    final user = appState.currentUser;
+
+    if (user != null) {
+      switch (user.role) {
+        case 'conductor':
+        case 'driver':
+          return [
+            {
+              'icon': Icons.qr_code_scanner,
+              'tip': 'Scan tickets efficiently for quick boarding',
+              'color': Colors.blue,
+            },
+            {
+              'icon': Icons.bus_alert,
+              'tip': 'Update bus status regularly',
+              'color': Colors.orange,
+            },
+            {
+              'icon': Icons.emergency,
+              'tip': 'Emergency button is always available',
+              'color': Colors.red,
+            },
+          ];
+        case 'booking_clerk':
+        case 'schedule_manager':
+          return [
+            {
+              'icon': Icons.analytics,
+              'tip': 'Check daily reports for insights',
+              'color': Colors.purple,
+            },
+            {
+              'icon': Icons.airline_seat_recline_normal,
+              'tip': 'Monitor seat availability closely',
+              'color': primaryColor,
+            },
+            {
+              'icon': Icons.schedule,
+              'tip': 'Optimize routes for better efficiency',
+              'color': Colors.blue,
+            },
+          ];
+        default:
+          if (user.canAccessSchoolBus) {
+            return [
+              {
+                'icon': Icons.school,
+                'tip': 'Book campus shuttle in advance',
+                'color': primaryColor,
+              },
+              {
+                'icon': Icons.schedule,
+                'tip': 'Check university bus schedules',
+                'color': Colors.blue,
+              },
+              {
+                'icon': Icons.favorite,
+                'tip': 'Save your regular campus routes',
+                'color': Colors.red,
+              },
+            ];
+          }
+      }
+    }
+
+    // Default tips for regular users
+    return [
+      {
+        'icon': Icons.flash_on,
+        'tip': 'Tap Quick Book for instant reservations',
+        'color': Colors.orange,
+      },
+      {
+        'icon': Icons.favorite,
+        'tip': 'Save frequent routes to Favorites',
+        'color': Colors.red,
+      },
+      {
+        'icon': Icons.schedule,
+        'tip': 'Check real-time schedules and delays',
+        'color': Colors.blue,
+      },
+      {
+        'icon': Icons.qr_code,
+        'tip': 'Show QR tickets for contactless boarding',
+        'color': primaryColor,
+      },
+    ];
+  }
 
   String _getGreeting() {
+    final appState = AppState();
+    final user = appState.currentUser;
+
+    if (user != null) {
+      return RoleUIService.getRoleGreeting(user);
+    }
+
     final hour = DateTime.now().hour;
-    const userName = 'Alex'; // This would come from user data in real app
+    const userName = 'Guest';
 
     if (hour < 12) {
       return 'Good Morning, $userName!';
@@ -79,7 +157,8 @@ class _GreetingHeaderWidgetState extends State<GreetingHeaderWidget> {
     Timer.periodic(const Duration(seconds: 4), (timer) {
       if (mounted) {
         setState(() {
-          _currentTipIndex = (_currentTipIndex + 1) % _modernTips.length;
+          final tips = _getRoleTips();
+          _currentTipIndex = (_currentTipIndex + 1) % tips.length;
         });
       } else {
         timer.cancel();
@@ -137,7 +216,7 @@ class _GreetingHeaderWidgetState extends State<GreetingHeaderWidget> {
                       style: TextStyle(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w700,
-                        color: AppTheme.onSurfaceLight,
+                        color: Theme.of(context).colorScheme.onSurface,
                         letterSpacing: 0.2,
                       ),
                       maxLines: 1,
@@ -149,7 +228,10 @@ class _GreetingHeaderWidgetState extends State<GreetingHeaderWidget> {
                       style: TextStyle(
                         fontSize: 11.sp,
                         fontWeight: FontWeight.w400,
-                        color: AppTheme.onSurfaceLight.withOpacity(0.7),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.7),
                       ),
                     ),
                   ],
@@ -162,15 +244,21 @@ class _GreetingHeaderWidgetState extends State<GreetingHeaderWidget> {
                 child: Container(
                   padding: EdgeInsets.all(2.5.w),
                   decoration: BoxDecoration(
-                    color: AppTheme.surfaceLight,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: AppTheme.onSurfaceLight.withOpacity(0.1),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.1),
                       width: 1,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme.onSurfaceLight.withOpacity(0.08),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.08),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -197,11 +285,12 @@ class _GreetingHeaderWidgetState extends State<GreetingHeaderWidget> {
               padding: EdgeInsets.symmetric(
                   horizontal: 4.w, vertical: 1.h), // Reduced from 1.5.h to 1.h
               decoration: BoxDecoration(
-                color: _modernTips[_currentTipIndex]['color'].withOpacity(0.1),
+                color:
+                    _getRoleTips()[_currentTipIndex]['color'].withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color:
-                      _modernTips[_currentTipIndex]['color'].withOpacity(0.2),
+                  color: _getRoleTips()[_currentTipIndex]['color']
+                      .withOpacity(0.2),
                   width: 1,
                 ),
               ),
@@ -210,11 +299,11 @@ class _GreetingHeaderWidgetState extends State<GreetingHeaderWidget> {
                   Container(
                     padding: EdgeInsets.all(2.w),
                     decoration: BoxDecoration(
-                      color: _modernTips[_currentTipIndex]['color'],
+                      color: _getRoleTips()[_currentTipIndex]['color'],
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
-                      _modernTips[_currentTipIndex]['icon'],
+                      _getRoleTips()[_currentTipIndex]['icon'],
                       color: Colors.white,
                       size: 4.w,
                     ),
@@ -222,12 +311,13 @@ class _GreetingHeaderWidgetState extends State<GreetingHeaderWidget> {
                   SizedBox(width: 3.w),
                   Expanded(
                     child: Text(
-                      _modernTips[_currentTipIndex]['tip'],
+                      _getRoleTips()[_currentTipIndex]['tip'],
                       style: TextStyle(
                         fontSize: 11.sp,
                         fontWeight: FontWeight.w500,
-                        color: AppTheme
-                            .onSurfaceLight, // Same color as greeting message
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface, // Same color as greeting message
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -235,8 +325,8 @@ class _GreetingHeaderWidgetState extends State<GreetingHeaderWidget> {
                   ),
                   Icon(
                     Icons.lightbulb_outline,
-                    color:
-                        _modernTips[_currentTipIndex]['color'].withOpacity(0.7),
+                    color: _getRoleTips()[_currentTipIndex]['color']
+                        .withOpacity(0.7),
                     size: 4.w,
                   ),
                 ],

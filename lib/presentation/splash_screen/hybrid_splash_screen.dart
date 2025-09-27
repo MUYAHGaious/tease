@@ -116,12 +116,12 @@ class _HybridSplashScreenState extends State<HybridSplashScreen>
       final isFirstTime = await _checkFirstTimeUser();
 
       if (isFirstTime) {
-        Navigator.pushReplacementNamed(context, '/onboarding-flow');
+        Navigator.pushReplacementNamed(context, '/login');
       } else {
         Navigator.pushReplacementNamed(context, '/login');
       }
     } catch (e) {
-      Navigator.pushReplacementNamed(context, '/onboarding-flow');
+      Navigator.pushReplacementNamed(context, '/login');
     }
   }
 
@@ -139,8 +139,8 @@ class _HybridSplashScreenState extends State<HybridSplashScreen>
   Future<bool> _checkFirstTimeUser() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
-      return !hasSeenOnboarding;
+      final hasSeenWelcome = prefs.getBool('has_seen_welcome') ?? false;
+      return !hasSeenWelcome;
     } catch (e) {
       return true;
     }

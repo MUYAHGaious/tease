@@ -7,7 +7,7 @@ class AppTheme {
   AppTheme._();
 
   // Teal/Turquoise Color Palette (matching hero image)
-  static const Color primaryLight = Color(0xFF20B2AA); // Medium turquoise
+  static const Color primaryLight = Color(0xFF008B8B); // Medium turquoise
   static const Color primaryVariantLight = Color(0xFF48CAE4); // Light turquoise
   static const Color secondaryLight = Color(0xFF0077B6); // Deep blue accent
   static const Color secondaryVariantLight =
@@ -28,13 +28,13 @@ class AppTheme {
   // Additional semantic colors
   static const Color warningLight = Color(0xFFf39c12); // Orange warning
   static const Color successLight =
-      Color(0xFF20B2AA); // Teal success (matching primary)
+      Color(0xFF008B8B); // Teal success (matching primary)
   static const Color neutralLight = Color(0xFF95a5a6); // Gray neutral
 
   // Dark theme variants (maintaining teal/turquoise philosophy)
   static const Color primaryDark =
       Color(0xFF48CAE4); // Light turquoise for dark mode
-  static const Color primaryVariantDark = Color(0xFF20B2AA); // Medium turquoise
+  static const Color primaryVariantDark = Color(0xFF008B8B); // Medium turquoise
   static const Color secondaryDark =
       Color(0xFF0077B6); // Deep blue (consistent)
   static const Color secondaryVariantDark =

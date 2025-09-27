@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
 import 'dart:ui';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/app_export.dart';
 import '../../../theme/app_theme.dart';
+import '../../../theme/theme_notifier.dart';
 import '../../../core/app_state.dart';
 import '../../../models/user_model.dart';
-import '../../../services/onboarding_cache_service.dart';
 
 // 2025 Design Constants - No gradients, solid colors only
-const Color primaryColor = Color(0xFF20B2AA);
 const double maxDrawerWidth = 280.0; // Material Design 3 spec
 const double cardElevation = 2.0;
 const double sectionSpacing = 24.0;
@@ -26,65 +26,167 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
     with TickerProviderStateMixin {
   List<Map<String, dynamic>> _availableMenuItems = [];
   UserModel? _currentUser;
+  String _userAffiliation = 'regular';
+  String _userRole = 'passenger';
+  String _affiliationTitle = 'Public Transport';
+
+  // Theme-aware colors that prevent glitching
+  Color get primaryColor => const Color(0xFF008B8B);
+  Color get backgroundColor => ThemeNotifier().isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
+  Color get textColor => ThemeNotifier().isDarkMode ? Colors.white : Colors.black87;
+  Color get surfaceColor => ThemeNotifier().isDarkMode ? const Color(0xFF2D2D2D) : Colors.white;
+  Color get onSurfaceColor => ThemeNotifier().isDarkMode ? Colors.white70 : Colors.black54;
 
   @override
   void initState() {
     super.initState();
+    ThemeNotifier().addListener(_onThemeChanged);
     _loadUserAndMenuItems();
   }
 
-  void _loadUserAndMenuItems() {
+  @override
+  void dispose() {
+    ThemeNotifier().removeListener(_onThemeChanged);
+    super.dispose();
+  }
+
+  void _onThemeChanged() {
+    setState(() {});
+  }
+
+  void _loadUserAndMenuItems() async {
+    // Load user selections from SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    _userAffiliation = prefs.getString('user_affiliation') ?? 'regular';
+    _userRole = prefs.getString('user_role') ?? 'passenger';
+    _affiliationTitle = prefs.getString('user_affiliation_title') ?? 'Public Transport';
+
     _currentUser = AppState().currentUser;
-    _availableMenuItems = _getMenuItemsForUser(_currentUser);
+    _availableMenuItems = _getMenuItemsForAffiliation();
     setState(() {});
   }
 
   List<Map<String, dynamic>> _getMenuItemsForUser(UserModel? user) {
     List<Map<String, dynamic>> items = [
-      // Core features available to all users
+      // Core Booking Features
       {
         'icon': Icons.search,
         'title': 'Search & Book Tickets',
         'route': '/search-booking',
         'requiresAuth': false,
-        'category': 'core',
+        'category': 'booking',
       },
+      {
+        'icon': Icons.event_seat,
+        'title': 'Seat Selection',
+        'route': '/seat-selection',
+        'requiresAuth': false,
+        'category': 'booking',
+      },
+      {
+        'icon': Icons.person_add,
+        'title': 'Passenger Details',
+        'route': '/passenger-details',
+        'requiresAuth': false,
+        'category': 'booking',
+      },
+      {
+        'icon': Icons.payment,
+        'title': 'Payment Gateway',
+        'route': '/payment-gateway',
+        'requiresAuth': false,
+        'category': 'booking',
+      },
+      {
+        'icon': Icons.check_circle,
+        'title': 'Booking Confirmation',
+        'route': '/booking-confirmation',
+        'requiresAuth': false,
+        'category': 'booking',
+      },
+
+      // My Tickets & Travel
       {
         'icon': Icons.confirmation_num,
         'title': 'My Tickets',
         'route': '/my-tickets',
         'requiresAuth': true,
-        'category': 'core',
+        'category': 'travel',
       },
       {
-        'icon': Icons.wallet,
-        'title': 'Wallet & Profile',
+        'icon': Icons.qr_code,
+        'title': 'QR Code Display',
+        'route': '/qr-code-display',
+        'requiresAuth': true,
+        'category': 'travel',
+      },
+      {
+        'icon': Icons.location_on,
+        'title': 'Bus Tracking Map',
+        'route': '/bus-tracking-map',
+        'requiresAuth': false,
+        'category': 'travel',
+      },
+      {
+        'icon': Icons.favorite,
+        'title': 'Favorites',
+        'route': '/favorites',
+        'requiresAuth': true,
+        'category': 'travel',
+      },
+
+      // Account & Settings
+      {
+        'icon': Icons.person,
+        'title': 'Profile Settings',
         'route': '/profile-settings',
         'requiresAuth': true,
-        'category': 'core',
+        'category': 'account',
       },
       {
-        'icon': Icons.local_offer,
-        'title': 'Special Offers',
-        'route': '/booking-confirmation',
+        'icon': Icons.mic,
+        'title': 'Voice AI Assistant',
+        'route': '/voice-ai',
         'requiresAuth': false,
-        'category': 'core',
+        'category': 'account',
       },
     ];
 
     // Smart feature access based on roles
     if (user != null) {
       // School/University features
-      if (user.isUniversityAffiliated ||
-          user.affiliations.contains('ict_university')) {
-        items.add({
-          'icon': Icons.school,
-          'title': 'School Bus Services',
-          'route': '/school-bus-home',
-          'requiresAuth': true,
-          'category': 'university',
-          'badge': 'ICT University',
-        });
+      if (user.isUniversityAffiliated || user.canAccessSchoolBus) {
+        items.addAll([
+          {
+            'icon': Icons.school,
+            'title': 'University Services',
+            'route': '/school-bus-home',
+            'requiresAuth': true,
+            'category': 'university',
+            'badge': 'ICT University',
+          },
+          {
+            'icon': Icons.directions_bus,
+            'title': 'Campus Shuttle Booking',
+            'route': '/bus-booking-form',
+            'requiresAuth': true,
+            'category': 'university',
+          },
+          {
+            'icon': Icons.history,
+            'title': 'School Bus History',
+            'route': '/booking-history',
+            'requiresAuth': true,
+            'category': 'university',
+          },
+          {
+            'icon': Icons.qr_code_scanner,
+            'title': 'School Bus QR Code',
+            'route': '/qr-code-display',
+            'requiresAuth': true,
+            'category': 'university',
+          },
+        ]);
       } else {
         // On-demand access to school bus features
         items.add({
@@ -99,25 +201,45 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
 
       // Agency/Professional features
       if (user.isScheduleManager) {
-        items.add({
-          'icon': Icons.admin_panel_settings,
-          'title': 'Schedule Manager',
-          'route': '/admin-dashboard',
-          'requiresAuth': true,
-          'category': 'management',
-          'badge': 'Manager',
-        });
+        items.addAll([
+          {
+            'icon': Icons.admin_panel_settings,
+            'title': 'Admin Route Management',
+            'route': '/admin-route-management',
+            'requiresAuth': true,
+            'category': 'management',
+            'badge': 'Manager',
+          },
+          {
+            'icon': Icons.dashboard,
+            'title': 'Schedule Dashboard',
+            'route': '/admin-dashboard',
+            'requiresAuth': true,
+            'category': 'management',
+            'badge': 'Manager',
+          },
+        ]);
       }
 
       if (user.isDriver) {
-        items.add({
-          'icon': Icons.directions_bus,
-          'title': 'Driver Dashboard',
-          'route': '/driver-boarding-interface',
-          'requiresAuth': true,
-          'category': 'operations',
-          'badge': 'Driver',
-        });
+        items.addAll([
+          {
+            'icon': Icons.directions_bus,
+            'title': 'Driver Boarding Interface',
+            'route': '/driver-boarding-interface',
+            'requiresAuth': true,
+            'category': 'operations',
+            'badge': 'Driver',
+          },
+          {
+            'icon': Icons.qr_code_scanner,
+            'title': 'Scan Passenger QR',
+            'route': '/driver-boarding-interface',
+            'requiresAuth': true,
+            'category': 'operations',
+            'badge': 'Driver',
+          },
+        ]);
       }
 
       if (user.isConductor) {
@@ -142,6 +264,18 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
         });
       }
 
+      // Parent Dashboard for school bus
+      if (user.canAccessSchoolBus) {
+        items.add({
+          'icon': Icons.family_restroom,
+          'title': 'Parent Dashboard',
+          'route': '/parent-dashboard',
+          'requiresAuth': true,
+          'category': 'university',
+          'badge': 'Parent',
+        });
+      }
+
       // Agency access for non-affiliated users
       if (!user.affiliations.contains('agency') &&
           !user.isScheduleManager &&
@@ -162,67 +296,147 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
     return items;
   }
 
+  // New method that uses affiliation data from SharedPreferences
+  List<Map<String, dynamic>> _getMenuItemsForAffiliation() {
+    List<Map<String, dynamic>> items = [
+      // Core Booking Features (always available)
+      {
+        'icon': Icons.search,
+        'title': 'Search & Book Tickets',
+        'route': '/search-booking',
+        'requiresAuth': false,
+        'category': 'booking',
+      },
+      {
+        'icon': Icons.confirmation_num,
+        'title': 'My Tickets',
+        'route': '/my-tickets',
+        'requiresAuth': true,
+        'category': 'travel',
+      },
+      {
+        'icon': Icons.location_on,
+        'title': 'Bus Tracking Map',
+        'route': '/bus-tracking-map',
+        'requiresAuth': false,
+        'category': 'travel',
+      },
+      {
+        'icon': Icons.person,
+        'title': 'Profile Settings',
+        'route': '/profile-settings',
+        'requiresAuth': true,
+        'category': 'account',
+      },
+    ];
+
+    // Add features based on affiliation
+    if (_userAffiliation == 'ict_university') {
+      items.addAll([
+        {
+          'icon': Icons.school,
+          'title': 'University Services',
+          'route': '/school-bus-home',
+          'requiresAuth': true,
+          'category': 'university',
+          'badge': 'ICT University',
+        },
+        {
+          'icon': Icons.directions_bus,
+          'title': 'Campus Shuttle',
+          'route': '/bus-booking-form-schoolbus',
+          'requiresAuth': true,
+          'category': 'university',
+        },
+      ]);
+
+      // Role-specific features
+      if (_userRole == 'bus_driver' || _userRole == 'bus_coordinator') {
+        items.add({
+          'icon': Icons.admin_panel_settings,
+          'title': 'Bus Management',
+          'route': '/bus-management',
+          'requiresAuth': true,
+          'category': 'management',
+        });
+      }
+    }
+
+    if (_userAffiliation == 'agency') {
+      items.addAll([
+        {
+          'icon': Icons.business,
+          'title': 'Agency Dashboard',
+          'route': '/agency-dashboard',
+          'requiresAuth': true,
+          'category': 'agency',
+        },
+        {
+          'icon': Icons.schedule,
+          'title': 'Route Management',
+          'route': '/route-management',
+          'requiresAuth': true,
+          'category': 'agency',
+        },
+      ]);
+
+      // Agency role-specific features
+      if (_userRole == 'schedule_manager') {
+        items.add({
+          'icon': Icons.edit_calendar,
+          'title': 'Schedule Manager',
+          'route': '/schedule-management',
+          'requiresAuth': true,
+          'category': 'management',
+        });
+      }
+
+      if (_userRole == 'booking_clerk') {
+        items.add({
+          'icon': Icons.receipt_long,
+          'title': 'Booking Management',
+          'route': '/booking-management',
+          'requiresAuth': true,
+          'category': 'management',
+        });
+      }
+    }
+
+    return items;
+  }
+
+  Future<void> _toggleTheme() async {
+    await ThemeNotifier().toggleTheme();
+
+    // Trigger haptic feedback
+    HapticFeedback.lightImpact();
+
+    // Refresh the menu items to update the icon
+    _availableMenuItems = _getMenuItemsForAffiliation();
+    setState(() {});
+  }
+
   Future<void> _handleSchoolBusAccess() async {
     Navigator.pop(context); // Close drawer
-
-    // Check if user has cached university onboarding progress
-    final cachedProgress =
-        await OnboardingCacheService.getProgress('school_bus_onboarding');
-
-    if (cachedProgress != null && cachedProgress.isValid) {
-      // Resume from cache
-      Navigator.pushNamed(
-        context,
-        '/progressive-onboarding',
-        arguments: {
-          'sessionType': 'school_bus_onboarding',
-          'resumeFrom': cachedProgress.currentStep,
-          'cachedData': cachedProgress.collectedData,
-        },
-      );
-    } else {
-      // Start fresh onboarding
-      Navigator.pushNamed(
-        context,
-        '/progressive-onboarding',
-        arguments: {
-          'sessionType': 'school_bus_onboarding',
-        },
-      );
-    }
+    Navigator.pushNamed(context, '/school-bus-home');
   }
 
   Future<void> _handleAgencyAccess() async {
     Navigator.pop(context); // Close drawer
-
-    // Check if user has cached agency onboarding progress
-    final cachedProgress = await OnboardingCacheService.getProgress('agency');
-
-    if (cachedProgress != null && cachedProgress.isValid) {
-      // Resume from cache
-      Navigator.pushNamed(
-        context,
-        '/progressive-onboarding',
-        arguments: {
-          'sessionType': 'agency',
-          'resumeFrom': cachedProgress.currentStep,
-          'cachedData': cachedProgress.collectedData,
-        },
-      );
-    } else {
-      // Start fresh onboarding
-      Navigator.pushNamed(
-        context,
-        '/progressive-onboarding',
-        arguments: {
-          'sessionType': 'agency',
-        },
-      );
-    }
+    Navigator.pushNamed(context, '/home-dashboard');
   }
 
   void _handleMenuItemTap(Map<String, dynamic> item) {
     HapticFeedback.selectionClick();
+
+    // Handle special actions
+    if (item.containsKey('action')) {
+      if (item['action'] == 'toggle_theme') {
+        _toggleTheme();
+        return; // Don't close drawer for theme toggle
+      }
+    }
+
     Navigator.pop(context);
 
     if (item.containsKey('onTap')) {
@@ -349,14 +563,20 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
   // Modern 2025 color system - simplified and consistent
   Color _getModernIconBg(Map<String, dynamic> item) {
     switch (item['category']) {
-      case 'ondemand':
-        return primaryColor.withOpacity(0.15);
+      case 'booking':
+        return primaryColor.withOpacity(0.1);
+      case 'travel':
+        return Colors.orange.withOpacity(0.1);
       case 'university':
         return Colors.blue.withOpacity(0.1);
       case 'management':
         return Colors.purple.withOpacity(0.1);
       case 'operations':
         return Colors.green.withOpacity(0.1);
+      case 'account':
+        return Colors.grey.withOpacity(0.1);
+      case 'ondemand':
+        return primaryColor.withOpacity(0.15);
       default:
         return primaryColor.withOpacity(0.1);
     }
@@ -364,14 +584,20 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
 
   Color _getModernIconColor(Map<String, dynamic> item) {
     switch (item['category']) {
-      case 'ondemand':
+      case 'booking':
         return primaryColor;
+      case 'travel':
+        return Colors.orange.shade600;
       case 'university':
         return Colors.blue.shade600;
       case 'management':
         return Colors.purple.shade600;
       case 'operations':
         return Colors.green.shade600;
+      case 'account':
+        return Colors.grey.shade600;
+      case 'ondemand':
+        return primaryColor;
       default:
         return primaryColor;
     }
@@ -405,9 +631,9 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
       itemBuilder: (context, index) {
         final category = categories[index];
         return _buildMenuSection(
-          category['title'],
-          category['items'],
-          category['icon'],
+          category['title'] as String,
+          List<Map<String, dynamic>>.from(category['items']),
+          category['icon'] as IconData,
         );
       },
     );
@@ -419,7 +645,7 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
 
     // Group items by category
     for (final item in _availableMenuItems) {
-      final category = item['category'] ?? 'core';
+      final category = item['category'] ?? 'booking';
       categorizedMenu.putIfAbsent(category, () => []);
       categorizedMenu[category]!.add(item);
     }
@@ -427,11 +653,19 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
     // Create sections with proper ordering and icons
     final sections = <Map<String, dynamic>>[];
 
-    if (categorizedMenu.containsKey('core')) {
+    if (categorizedMenu.containsKey('booking')) {
       sections.add({
-        'title': 'Main Services',
-        'icon': Icons.stars,
-        'items': categorizedMenu['core']!,
+        'title': 'Book & Pay',
+        'icon': Icons.credit_card,
+        'items': categorizedMenu['booking']!,
+      });
+    }
+
+    if (categorizedMenu.containsKey('travel')) {
+      sections.add({
+        'title': 'My Travel',
+        'icon': Icons.luggage,
+        'items': categorizedMenu['travel']!,
       });
     }
 
@@ -456,6 +690,14 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
           'items': workItems,
         });
       }
+    }
+
+    if (categorizedMenu.containsKey('account')) {
+      sections.add({
+        'title': 'Account & Support',
+        'icon': Icons.account_circle,
+        'items': categorizedMenu['account']!,
+      });
     }
 
     if (categorizedMenu.containsKey('ondemand')) {
@@ -650,15 +892,51 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
 
           SizedBox(height: 2.h),
 
-          // Logout with emphasis
-          _buildBottomActionItem(
-            icon: Icons.logout,
-            label: 'Sign Out',
-            isDestructive: true,
-            onTap: () {
-              HapticFeedback.selectionClick();
-              _showLogoutConfirmation();
-            },
+          // Theme toggle and Logout section
+          Row(
+            children: [
+              // Theme toggle button
+              Expanded(
+                flex: 1,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.5.h),
+                  child: IconButton(
+                    icon: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      transitionBuilder: (child, animation) {
+                        return RotationTransition(
+                          turns: Tween<double>(
+                            begin: 0.0,
+                            end: 1.0,
+                          ).animate(animation),
+                          child: FadeTransition(opacity: animation, child: child),
+                        );
+                      },
+                      child: Icon(
+                        ThemeNotifier().isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                        key: ValueKey(ThemeNotifier().isDarkMode),
+                        color: AppTheme.onSurfaceLight.withOpacity(0.8),
+                        size: 4.5.w,
+                      ),
+                    ),
+                    onPressed: _toggleTheme,
+                  ),
+                ),
+              ),
+              // Logout button
+              Expanded(
+                flex: 3,
+                child: _buildBottomActionItem(
+                  icon: Icons.logout,
+                  label: 'Sign Out',
+                  isDestructive: true,
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    _showLogoutConfirmation();
+                  },
+                ),
+              ),
+            ],
           ),
         ],
       ),

@@ -14,7 +14,10 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMixin {
   final TextEditingController emailController = TextEditingController();
-  final TextEditingController nameController = TextEditingController();
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController idCardController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
   bool isPasswordVisible = false;
@@ -40,20 +43,48 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: const Color(0xFF008B8B),
       body: Stack(
         children: [
-          // Background gradient
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.black,
-                  Colors.grey[900]!,
-                  Colors.black,
-                ],
+          // Background - sharp cut teal upper 50%, black lower 50%
+          Column(
+            children: [
+              Expanded(
+                flex: 1,
+                child: Container(
+                  width: double.infinity,
+                  color: const Color(0xFF008B8B),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Container(
+                  width: double.infinity,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+
+          // Enhanced image with full coverage - outside SafeArea
+          Positioned(
+            top: 0,
+            right: 0,
+            left: 0,
+            child: Container(
+              height: 80.h,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(30),
+                  bottomRight: Radius.circular(15),
+                ),
+                child: Image.asset(
+                  'assets/images/n.jpg',
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                  alignment: Alignment.centerLeft,
+                ),
               ),
             ),
           ),
@@ -92,29 +123,6 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
                   ),
                 ),
 
-                // Enhanced image with full coverage
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  left: 0,
-                  child: Container(
-                    height: 75.h,
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(30),
-                        bottomRight: Radius.circular(15),
-                      ),
-                      child: Image.asset(
-                        'assets/images/n.jpg',
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
-                        alignment: Alignment.centerLeft,
-                      ),
-                    ),
-                  ),
-                ),
-
                 // Title outside container
                 Positioned(
                   left: 6.w,
@@ -124,7 +132,7 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
                     child: Text(
                       'Sign up',
                       style: GoogleFonts.poppins(
-                        fontSize: 28.sp,
+                        fontSize: 36.sp,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
                         letterSpacing: 1.5,
@@ -200,7 +208,95 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
                           ),
                           SizedBox(height: 2.h),
 
-                          // Name Input
+                          // First Name and Last Name Row
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.95),
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF20B2AA).withOpacity(0.2),
+                                        blurRadius: 15,
+                                        offset: const Offset(0, 5),
+                                      ),
+                                    ],
+                                  ),
+                                  child: TextField(
+                                    controller: firstNameController,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 10.sp,
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    decoration: InputDecoration(
+                                      hintText: 'First Name',
+                                      hintStyle: GoogleFonts.inter(
+                                        color: Colors.grey[500],
+                                        fontSize: 10.sp,
+                                      ),
+                                      border: InputBorder.none,
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 4.w,
+                                        vertical: 1.8.h,
+                                      ),
+                                      prefixIcon: Icon(
+                                        Icons.person_outline,
+                                        color: const Color(0xFF20B2AA),
+                                        size: 20,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 2.w),
+                              Expanded(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.95),
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF20B2AA).withOpacity(0.2),
+                                        blurRadius: 15,
+                                        offset: const Offset(0, 5),
+                                      ),
+                                    ],
+                                  ),
+                                  child: TextField(
+                                    controller: lastNameController,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 10.sp,
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    decoration: InputDecoration(
+                                      hintText: 'Last Name',
+                                      hintStyle: GoogleFonts.inter(
+                                        color: Colors.grey[500],
+                                        fontSize: 10.sp,
+                                      ),
+                                      border: InputBorder.none,
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 4.w,
+                                        vertical: 1.8.h,
+                                      ),
+                                      prefixIcon: Icon(
+                                        Icons.person_outline,
+                                        color: const Color(0xFF20B2AA),
+                                        size: 20,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 1.5.h),
+
+                          // Phone Input
                           Container(
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.95),
@@ -214,14 +310,15 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
                               ],
                             ),
                             child: TextField(
-                              controller: nameController,
+                              controller: phoneController,
+                              keyboardType: TextInputType.phone,
                               style: GoogleFonts.inter(
                                 fontSize: 10.sp,
                                 color: Colors.black87,
                                 fontWeight: FontWeight.w500,
                               ),
                               decoration: InputDecoration(
-                                hintText: 'Name',
+                                hintText: 'Phone Number',
                                 hintStyle: GoogleFonts.inter(
                                   color: Colors.grey[500],
                                   fontSize: 10.sp,
@@ -232,14 +329,55 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
                                   vertical: 1.8.h,
                                 ),
                                 prefixIcon: Icon(
-                                  Icons.person_outline,
+                                  Icons.phone_outlined,
                                   color: const Color(0xFF20B2AA),
                                   size: 22,
                                 ),
                               ),
                             ),
                           ),
-                          SizedBox(height: 2.h),
+                          SizedBox(height: 1.5.h),
+
+                          // ID Card Input
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.95),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF20B2AA).withOpacity(0.2),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: TextField(
+                              controller: idCardController,
+                              style: GoogleFonts.inter(
+                                fontSize: 10.sp,
+                                color: Colors.black87,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              decoration: InputDecoration(
+                                hintText: 'ID Card Number',
+                                hintStyle: GoogleFonts.inter(
+                                  color: Colors.grey[500],
+                                  fontSize: 10.sp,
+                                ),
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 5.w,
+                                  vertical: 1.8.h,
+                                ),
+                                prefixIcon: Icon(
+                                  Icons.credit_card_outlined,
+                                  color: const Color(0xFF20B2AA),
+                                  size: 22,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 1.5.h),
 
                           // Password Input
                           Container(
@@ -343,15 +481,11 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
                             width: double.infinity,
                             height: 6.5.h,
                             decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF20B2AA), Color(0xFF48CAE4)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
+                              color: const Color(0xFF008B8B),
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF20B2AA).withOpacity(0.4),
+                                  color: const Color(0xFF008B8B).withOpacity(0.4),
                                   blurRadius: 20,
                                   offset: const Offset(0, 8),
                                 ),
@@ -430,6 +564,16 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
   }
 
   void _handleSignup() async {
+    if (firstNameController.text.trim().isEmpty) {
+      _showSnackBar('Please enter your first name');
+      return;
+    }
+
+    if (lastNameController.text.trim().isEmpty) {
+      _showSnackBar('Please enter your last name');
+      return;
+    }
+
     if (emailController.text.trim().isEmpty) {
       _showSnackBar('Please enter your email address');
       return;
@@ -440,8 +584,13 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
       return;
     }
 
-    if (nameController.text.trim().isEmpty) {
-      _showSnackBar('Please enter your full name');
+    if (phoneController.text.trim().isEmpty) {
+      _showSnackBar('Please enter your phone number');
+      return;
+    }
+
+    if (idCardController.text.trim().isEmpty) {
+      _showSnackBar('Please enter your ID card number');
       return;
     }
 
@@ -457,10 +606,16 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
 
     setState(() => isLoading = false);
 
-    // Navigate to login screen
+    // Navigate to login screen with user data
     Navigator.pushReplacementNamed(context, '/login', arguments: {
       'email': emailController.text.trim(),
-      'name': nameController.text.trim(),
+      'name': '${firstNameController.text.trim()} ${lastNameController.text.trim()}',
+      'userData': {
+        'firstName': firstNameController.text.trim(),
+        'lastName': lastNameController.text.trim(),
+        'phone': phoneController.text.trim(),
+        'idCardNumber': idCardController.text.trim(),
+      }
     });
   }
 
@@ -487,7 +642,10 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
   void dispose() {
     _animationController.dispose();
     emailController.dispose();
-    nameController.dispose();
+    firstNameController.dispose();
+    lastNameController.dispose();
+    phoneController.dispose();
+    idCardController.dispose();
     passwordController.dispose();
     super.dispose();
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../../theme/theme_notifier.dart';
 import '../../../core/app_export.dart';
 
 class QuickAccessTilesWidget extends StatefulWidget {
@@ -10,73 +11,56 @@ class QuickAccessTilesWidget extends StatefulWidget {
   State<QuickAccessTilesWidget> createState() => _QuickAccessTilesWidgetState();
 }
 
-class _QuickAccessTilesWidgetState extends State<QuickAccessTilesWidget>
-    with TickerProviderStateMixin {
-  late AnimationController _bounceController;
-  late List<Animation<double>> _bounceAnimations;
+class _QuickAccessTilesWidgetState extends State<QuickAccessTilesWidget> {
+  // Theme-aware colors that prevent glitching
+  Color get primaryColor => const Color(0xFF008B8B);
+  Color get backgroundColor => ThemeNotifier().isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
+  Color get textColor => ThemeNotifier().isDarkMode ? Colors.white : Colors.black87;
+  Color get surfaceColor => ThemeNotifier().isDarkMode ? const Color(0xFF2D2D2D) : Colors.white;
+  Color get onSurfaceColor => ThemeNotifier().isDarkMode ? Colors.white70 : Colors.black54;
 
-  final List<Map<String, dynamic>> _quickAccessTiles = [
+  late final List<Map<String, dynamic>> _quickAccessTiles;
+
+  @override
+  void initState() {
+    super.initState();
+    _quickAccessTiles = [
     {
       'title': 'My Bookings',
       'icon': Icons.bookmark,
-      'color': AppTheme.primaryLight,
+      'color': primaryColor,
       'route': AppRoutes.bookingHistory,
     },
     {
       'title': 'Live Tracking',
       'icon': Icons.gps_fixed,
-      'color': AppTheme.successLight,
+      'color': Colors.green,
       'route': null,
     },
     {
       'title': 'Wallet Balance',
       'icon': Icons.account_balance_wallet,
-      'color': AppTheme.secondaryLight,
+      'color': Colors.orange,
       'route': null,
     },
     {
       'title': 'Customer Support',
       'icon': Icons.support_agent,
-      'color': AppTheme.warningLight,
+      'color': Colors.blue,
       'route': null,
     },
   ];
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeAnimations();
-  }
-
-  void _initializeAnimations() {
-    _bounceController = AnimationController(
-      duration: const Duration(milliseconds: 1800),
-      vsync: this,
-    );
-
-    _bounceAnimations = List.generate(
-      _quickAccessTiles.length,
-      (index) => Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(
-          parent: _bounceController,
-          curve: Interval(
-            index * 0.15,
-            0.6 + (index * 0.15),
-            curve: Curves.bounceOut,
-          ),
-        ),
-      ),
-    );
-
-    Future.delayed(const Duration(milliseconds: 1000), () {
-      if (mounted) _bounceController.forward();
-    });
+    ThemeNotifier().addListener(_onThemeChanged);
   }
 
   @override
   void dispose() {
-    _bounceController.dispose();
+    ThemeNotifier().removeListener(_onThemeChanged);
     super.dispose();
+  }
+
+  void _onThemeChanged() {
+    setState(() {});
   }
 
   @override
@@ -88,10 +72,12 @@ class _QuickAccessTilesWidgetState extends State<QuickAccessTilesWidget>
           padding: EdgeInsets.symmetric(horizontal: 5.w),
           child: Text(
             'Quick Access',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.primaryLight,
-                ),
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w700,
+              color: primaryColor,
+              letterSpacing: -0.5,
+            ),
           ),
         ),
         SizedBox(height: 2.h),
@@ -103,20 +89,12 @@ class _QuickAccessTilesWidgetState extends State<QuickAccessTilesWidget>
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               crossAxisSpacing: 4.w,
-              mainAxisSpacing: 3.h,
-              childAspectRatio: 1.8,
+              mainAxisSpacing: 2.h,
+              childAspectRatio: 2.8,
             ),
             itemCount: _quickAccessTiles.length,
             itemBuilder: (context, index) {
-              return AnimatedBuilder(
-                animation: _bounceAnimations[index],
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: _bounceAnimations[index].value,
-                    child: _buildAccessTile(_quickAccessTiles[index], index),
-                  );
-                },
-              );
+              return _buildAccessTile(_quickAccessTiles[index], index);
             },
           ),
         ),
@@ -128,13 +106,13 @@ class _QuickAccessTilesWidgetState extends State<QuickAccessTilesWidget>
     return GestureDetector(
       onTap: () => _handleTileAction(tile, index),
       child: Container(
-        padding: EdgeInsets.all(4.w),
+        padding: EdgeInsets.all(3.5.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: surfaceColor,
           borderRadius: BorderRadius.circular(4.w),
           boxShadow: [
             BoxShadow(
-              color: tile['color'].withValues(alpha: 0.2),
+              color: tile['color'].withOpacity(0.2),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -143,30 +121,33 @@ class _QuickAccessTilesWidgetState extends State<QuickAccessTilesWidget>
         child: Row(
           children: [
             Container(
-              padding: EdgeInsets.all(3.w),
+              padding: EdgeInsets.all(2.w),
               decoration: BoxDecoration(
-                color: tile['color'].withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(3.w),
+                color: tile['color'].withOpacity(0.1),
+                borderRadius: BorderRadius.circular(2.5.w),
               ),
               child: Icon(
                 tile['icon'],
                 color: tile['color'],
-                size: 6.w,
+                size: 5.w,
               ),
             ),
-            SizedBox(width: 3.w),
+            SizedBox(width: 2.5.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     tile['title'],
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.primaryLight,
-                        ),
-                    maxLines: 2,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                      color: textColor,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 0.5.h),
                   _buildTileSubtitle(tile, index),
@@ -181,7 +162,7 @@ class _QuickAccessTilesWidgetState extends State<QuickAccessTilesWidget>
 
   Widget _buildTileSubtitle(Map<String, dynamic> tile, int index) {
     String subtitle;
-    Color subtitleColor = AppTheme.neutralLight;
+    Color subtitleColor = onSurfaceColor;
 
     switch (index) {
       case 0: // My Bookings
@@ -189,11 +170,11 @@ class _QuickAccessTilesWidgetState extends State<QuickAccessTilesWidget>
         break;
       case 1: // Live Tracking
         subtitle = 'Track in real-time';
-        subtitleColor = AppTheme.successLight;
+        subtitleColor = Colors.green;
         break;
       case 2: // Wallet Balance
         subtitle = 'Balance not required';
-        subtitleColor = AppTheme.secondaryLight;
+        subtitleColor = Colors.orange;
         break;
       case 3: // Customer Support
         subtitle = '24/7 available';
@@ -204,10 +185,13 @@ class _QuickAccessTilesWidgetState extends State<QuickAccessTilesWidget>
 
     return Text(
       subtitle,
-      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: subtitleColor,
-            fontWeight: FontWeight.w500,
-          ),
+      style: TextStyle(
+        fontSize: 10.sp,
+        color: subtitleColor,
+        fontWeight: FontWeight.w500,
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
     );
   }
 
@@ -257,23 +241,25 @@ class _QuickAccessTilesWidgetState extends State<QuickAccessTilesWidget>
             Container(
               padding: EdgeInsets.all(4.w),
               decoration: BoxDecoration(
-                color: AppTheme.secondaryLight.withValues(alpha: 0.1),
+                color: primaryColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(3.w),
               ),
               child: Column(
                 children: [
                   Text(
                     'Free',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: AppTheme.secondaryLight,
-                          fontWeight: FontWeight.w700,
-                        ),
+                    style: TextStyle(
+                      fontSize: 24.sp,
+                      color: primaryColor,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   Text(
                     'Available Balance',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppTheme.neutralLight,
-                        ),
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: Colors.black54,
+                    ),
                   ),
                 ],
               ),
@@ -333,12 +319,15 @@ class _QuickAccessTilesWidgetState extends State<QuickAccessTilesWidget>
   Widget _buildSupportOption(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, color: AppTheme.primaryLight, size: 5.w),
+        Icon(icon, color: primaryColor, size: 5.w),
         SizedBox(width: 2.w),
         Expanded(
           child: Text(
             text,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: Colors.black87,
+            ),
           ),
         ),
       ],

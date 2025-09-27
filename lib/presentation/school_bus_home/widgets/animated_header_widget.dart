@@ -129,7 +129,7 @@ class _AnimatedHeaderWidgetState extends State<AnimatedHeaderWidget>
                     width: 2.w,
                     height: 2.w,
                     decoration: BoxDecoration(
-                      color: AppTheme.secondaryLight,
+                      color: const Color(0xFF008B8B),
                       borderRadius: BorderRadius.circular(1.w),
                     ),
                   ),
@@ -139,10 +139,10 @@ class _AnimatedHeaderWidgetState extends State<AnimatedHeaderWidget>
             SizedBox(width: 3.w),
             CircleAvatar(
               radius: 5.w,
-              backgroundColor: AppTheme.secondaryLight,
+              backgroundColor: const Color(0xFF008B8B),
               child: Icon(
                 Icons.person,
-                color: AppTheme.onSecondaryLight,
+                color: Colors.white,
                 size: 6.w,
               ),
             ),

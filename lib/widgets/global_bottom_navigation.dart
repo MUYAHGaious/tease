@@ -24,7 +24,8 @@ class GlobalBottomNavigation extends StatefulWidget {
   State<GlobalBottomNavigation> createState() => _GlobalBottomNavigationState();
 }
 
-class _GlobalBottomNavigationState extends State<GlobalBottomNavigation> with AutomaticKeepAliveClientMixin {
+class _GlobalBottomNavigationState extends State<GlobalBottomNavigation>
+    with AutomaticKeepAliveClientMixin {
   late int _currentIndex;
   final PageController _pageController = PageController();
 
@@ -97,7 +98,7 @@ class _GlobalBottomNavigationState extends State<GlobalBottomNavigation> with Au
     return Container(
       decoration: BoxDecoration(
         // Using exact Medium Turquoise color from my_tickets screen
-        color: const Color(0xFF20B2AA),
+        color: const Color(0xFF008B8B),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         boxShadow: [
           BoxShadow(
@@ -135,11 +136,13 @@ class _GlobalBottomNavigationState extends State<GlobalBottomNavigation> with Au
                           AnimatedSwitcher(
                             duration: const Duration(milliseconds: 200),
                             child: Icon(
-                              isSelected ? destination.selectedIcon : destination.icon,
+                              isSelected
+                                  ? destination.selectedIcon
+                                  : destination.icon,
                               key: ValueKey(isSelected),
                               color: isSelected
-                                ? Colors.white
-                                : Colors.white.withOpacity(0.7),
+                                  ? Colors.white
+                                  : Colors.white.withOpacity(0.7),
                               size: isSelected ? 24 : 22,
                             ),
                           ),
@@ -156,8 +159,8 @@ class _GlobalBottomNavigationState extends State<GlobalBottomNavigation> with Au
                                 color: Colors.white,
                                 fontSize: isSelected ? 10.sp : 9.sp,
                                 fontWeight: isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,

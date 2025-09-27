@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
+import '../../theme/theme_notifier.dart';
 import '../../widgets/global_bottom_navigation.dart';
 import './widgets/animated_toggle_widget.dart';
 import './widgets/language_selector_widget.dart';
@@ -19,6 +20,16 @@ class ProfileSettings extends StatefulWidget {
 
 class _ProfileSettingsState extends State<ProfileSettings>
     with TickerProviderStateMixin {
+  // Theme-aware colors
+  Color get primaryColor => const Color(0xFF008B8B);
+  Color get backgroundColor =>
+      ThemeNotifier().isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
+  Color get surfaceColor =>
+      ThemeNotifier().isDarkMode ? const Color(0xFF2D2D2D) : Colors.white;
+  Color get textColor =>
+      ThemeNotifier().isDarkMode ? Colors.white : Colors.black87;
+  Color get onSurfaceVariantColor =>
+      ThemeNotifier().isDarkMode ? Colors.white70 : Colors.black54;
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
 
@@ -31,6 +42,7 @@ class _ProfileSettingsState extends State<ProfileSettings>
   bool _promotionalOffers = false;
   bool _priceAlerts = true;
   bool _reducedMotion = false;
+  bool _allowPhoneLookup = true; // Allow others to lookup user by phone number
   String _selectedLanguage = "en";
 
   // Mock user data
@@ -102,6 +114,8 @@ class _ProfileSettingsState extends State<ProfileSettings>
   @override
   void initState() {
     super.initState();
+    ThemeNotifier().addListener(_onThemeChanged);
+    _darkModeEnabled = ThemeNotifier().isDarkMode;
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
@@ -118,8 +132,15 @@ class _ProfileSettingsState extends State<ProfileSettings>
 
   @override
   void dispose() {
+    ThemeNotifier().removeListener(_onThemeChanged);
     _fadeController.dispose();
     super.dispose();
+  }
+
+  void _onThemeChanged() {
+    setState(() {
+      _darkModeEnabled = ThemeNotifier().isDarkMode;
+    });
   }
 
   void _handleEditProfile() {
@@ -218,7 +239,7 @@ class _ProfileSettingsState extends State<ProfileSettings>
       builder: (context) => AlertDialog(
         title: Text(
           "Delete Account",
-          style: TextStyle(color: AppTheme.errorLight),
+          style: TextStyle(color: Colors.red),
         ),
         content: const Text(
             "This action cannot be undone. All your data will be permanently deleted."),
@@ -230,9 +251,91 @@ class _ProfileSettingsState extends State<ProfileSettings>
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.errorLight,
+              backgroundColor: Colors.red,
             ),
             child: const Text("Delete Account"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPhoneLookupInfoDialog(bool isEnabled) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          isEnabled ? "Phone Lookup Enabled" : "Phone Lookup Disabled",
+          style: TextStyle(
+            color: isEnabled ? const Color(0xFF4CAF50) : Colors.red,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              isEnabled
+                  ? "Others can now lookup your information using your phone number when booking tickets."
+                  : "Others can no longer lookup your information using your phone number.",
+              style: TextStyle(
+                fontSize: 14,
+                color: ThemeNotifier().isDarkMode
+                    ? Colors.white70
+                    : Colors.black54,
+              ),
+            ),
+            SizedBox(height: 16),
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isEnabled
+                    ? const Color(0xFF4CAF50).withOpacity(0.1)
+                    : Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isEnabled
+                      ? const Color(0xFF4CAF50).withOpacity(0.3)
+                      : Colors.red.withOpacity(0.3),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isEnabled ? "What this means:" : "Privacy Protection:",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                      color: isEnabled ? const Color(0xFF4CAF50) : Colors.red,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    isEnabled
+                        ? "• Friends and family can easily book tickets for you\n• Your name and ID will be auto-filled\n• Convenient for group bookings"
+                        : "• Your information is private and secure\n• Only you can book tickets for yourself\n• Enhanced privacy protection",
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: ThemeNotifier().isDarkMode
+                          ? Colors.white70
+                          : Colors.black54,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isEnabled ? const Color(0xFF4CAF50) : Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: Text("Got it"),
           ),
         ],
       ),
@@ -242,23 +345,32 @@ class _ProfileSettingsState extends State<ProfileSettings>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        title: const Text("Profile Settings"),
+        title: Text(
+          "Profile Settings",
+          style: TextStyle(
+            color: textColor,
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: surfaceColor,
+        elevation: 0,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: CustomIconWidget(
-            iconName: 'arrow_back',
-            color: Theme.of(context).colorScheme.onSurface,
+          icon: Icon(
+            Icons.arrow_back_ios_new,
+            color: textColor,
             size: 6.w,
           ),
         ),
         actions: [
           IconButton(
             onPressed: _handleLogout,
-            icon: CustomIconWidget(
-              iconName: 'logout',
-              color: Theme.of(context).colorScheme.onSurface,
+            icon: Icon(
+              Icons.logout,
+              color: textColor,
               size: 6.w,
             ),
           ),
@@ -343,31 +455,29 @@ class _ProfileSettingsState extends State<ProfileSettings>
                               width: 70.w,
                               margin: EdgeInsets.only(right: 4.w),
                               decoration: BoxDecoration(
-                                color: AppTheme.surfaceLight,
+                                color: surfaceColor,
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: AppTheme.primaryLight.withOpacity(0.2),
+                                  color: primaryColor.withOpacity(0.2),
                                   style: BorderStyle.solid,
                                 ),
                               ),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  CustomIconWidget(
-                                    iconName: 'add_circle_outline',
-                                    color: AppTheme.primaryLight,
+                                  Icon(
+                                    Icons.add_circle_outline,
+                                    color: primaryColor,
                                     size: 10.w,
                                   ),
                                   SizedBox(height: 1.h),
                                   Text(
                                     "Add Payment Method",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                          color: AppTheme.primaryLight,
-                                          fontWeight: FontWeight.w500,
-                                        ),
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      color: primaryColor,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -464,6 +574,7 @@ class _ProfileSettingsState extends State<ProfileSettings>
                         setState(() {
                           _darkModeEnabled = value;
                         });
+                        ThemeNotifier().toggleTheme();
                       },
                     ),
                     showDivider: true,
@@ -542,6 +653,21 @@ class _ProfileSettingsState extends State<ProfileSettings>
                     title: "Active Sessions",
                     subtitle: "Manage logged in devices",
                     onTap: () {},
+                    showDivider: true,
+                  ),
+                  SettingsItemWidget(
+                    iconName: 'phone',
+                    title: "Allow Phone Lookup",
+                    subtitle: "Let others find you by phone number",
+                    trailing: AnimatedToggleWidget(
+                      value: _allowPhoneLookup,
+                      onChanged: (value) {
+                        setState(() {
+                          _allowPhoneLookup = value;
+                        });
+                        _showPhoneLookupInfoDialog(value);
+                      },
+                    ),
                     showDivider: false,
                   ),
                 ],
@@ -584,9 +710,10 @@ class _ProfileSettingsState extends State<ProfileSettings>
               // App Version
               Text(
                 "Tease v1.2.3",
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: onSurfaceVariantColor,
+                ),
               ),
 
               SizedBox(height: 2.h),

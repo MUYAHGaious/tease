@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
+import '../../theme/theme_notifier.dart';
 import '../../widgets/global_bottom_navigation.dart';
 import './widgets/empty_state_widget.dart';
 import './widgets/filter_bottom_sheet_widget.dart';
@@ -18,6 +19,14 @@ class MyTickets extends StatefulWidget {
 }
 
 class _MyTicketsState extends State<MyTickets> with TickerProviderStateMixin {
+
+  // Theme-aware colors
+  Color get primaryColor => const Color(0xFF008B8B);
+  Color get backgroundColor => ThemeNotifier().isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
+  Color get surfaceColor => ThemeNotifier().isDarkMode ? const Color(0xFF2D2D2D) : Colors.white;
+  Color get textColor => ThemeNotifier().isDarkMode ? Colors.white : Colors.black87;
+  Color get onSurfaceVariantColor => ThemeNotifier().isDarkMode ? Colors.white70 : Colors.black54;
+  Color get shadowColor => ThemeNotifier().isDarkMode ? Colors.black : Colors.grey[300]!;
   int _selectedSegment = 0;
   int _currentBottomNavIndex = 2;
   String _searchQuery = '';
@@ -126,6 +135,7 @@ class _MyTicketsState extends State<MyTickets> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    ThemeNotifier().addListener(_onThemeChanged);
     _slideAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -153,23 +163,28 @@ class _MyTicketsState extends State<MyTickets> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    ThemeNotifier().removeListener(_onThemeChanged);
     _slideAnimationController.dispose();
     _fadeAnimationController.dispose();
     super.dispose();
   }
 
+  void _onThemeChanged() {
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
+      backgroundColor: backgroundColor,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              AppTheme.lightTheme.colorScheme.primary.withValues(alpha: 0.05),
-              AppTheme.lightTheme.scaffoldBackgroundColor,
+              primaryColor.withOpacity(0.05),
+              backgroundColor,
             ],
           ),
         ),
@@ -203,12 +218,12 @@ class _MyTicketsState extends State<MyTickets> with TickerProviderStateMixin {
             child: Container(
               padding: EdgeInsets.all(2.w),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: ThemeNotifier().isDarkMode ? Colors.white.withOpacity(0.2) : Colors.grey[100],
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 Icons.arrow_back,
-                color: Colors.black54,
+                color: textColor,
                 size: 6.w,
               ),
             ),
@@ -220,17 +235,18 @@ class _MyTicketsState extends State<MyTickets> with TickerProviderStateMixin {
               children: [
                 Text(
                   'My Tickets',
-                  style: AppTheme.lightTheme.textTheme.headlineMedium?.copyWith(
+                  style: TextStyle(
+                    fontSize: 20.sp,
                     fontWeight: FontWeight.w700,
-                    color: AppTheme.lightTheme.colorScheme.onSurface,
+                    color: textColor,
                   ),
                 ),
                 SizedBox(height: 0.5.h),
                 Text(
                   'Manage your bookings',
-                  style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.lightTheme.colorScheme.onSurface
-                        .withValues(alpha: 0.7),
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: onSurfaceVariantColor,
                   ),
                 ),
               ],
@@ -238,21 +254,18 @@ class _MyTicketsState extends State<MyTickets> with TickerProviderStateMixin {
           ),
           Container(
             decoration: BoxDecoration(
-              color: AppTheme.lightTheme.colorScheme.surface
-                  .withValues(alpha: 0.1),
+              color: surfaceColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: AppTheme.lightTheme.colorScheme.outline
-                    .withValues(alpha: 0.2),
+                color: onSurfaceVariantColor.withOpacity(0.2),
                 width: 1,
               ),
             ),
             child: IconButton(
               onPressed: () => _showNotifications(),
-              icon: CustomIconWidget(
-                iconName: 'notifications',
-                color: AppTheme.lightTheme.colorScheme.onSurface
-                    .withValues(alpha: 0.7),
+              icon: Icon(
+                Icons.notifications_outlined,
+                color: onSurfaceVariantColor,
                 size: 24,
               ),
             ),
@@ -297,8 +310,8 @@ class _MyTicketsState extends State<MyTickets> with TickerProviderStateMixin {
 
     return RefreshIndicator(
       onRefresh: _refreshTickets,
-      color: AppTheme.lightTheme.colorScheme.primary,
-      backgroundColor: AppTheme.lightTheme.colorScheme.surface,
+      color: primaryColor,
+      backgroundColor: surfaceColor,
       child: SlideTransition(
         position: _slideAnimation,
         child: FadeTransition(
@@ -432,11 +445,11 @@ class _MyTicketsState extends State<MyTickets> with TickerProviderStateMixin {
         child: Container(
           padding: EdgeInsets.all(6.w),
           decoration: BoxDecoration(
-            color: AppTheme.lightTheme.colorScheme.surface,
+            color: surfaceColor,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.lightTheme.colorScheme.shadow
+                color: shadowColor
                     .withValues(alpha: 0.2),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
@@ -460,7 +473,7 @@ class _MyTicketsState extends State<MyTickets> with TickerProviderStateMixin {
                     onPressed: () => Navigator.pop(context),
                     icon: CustomIconWidget(
                       iconName: 'close',
-                      color: AppTheme.lightTheme.colorScheme.onSurface
+                      color: textColor
                           .withValues(alpha: 0.7),
                       size: 24,
                     ),
@@ -472,17 +485,17 @@ class _MyTicketsState extends State<MyTickets> with TickerProviderStateMixin {
                 width: 60.w,
                 height: 60.w,
                 decoration: BoxDecoration(
-                  color: AppTheme.lightTheme.colorScheme.surface,
+                  color: surfaceColor,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: AppTheme.lightTheme.colorScheme.primary,
+                    color: primaryColor,
                     width: 2,
                   ),
                 ),
                 child: Center(
                   child: CustomIconWidget(
                     iconName: 'qr_code',
-                    color: AppTheme.lightTheme.colorScheme.primary,
+                    color: primaryColor,
                     size: 40.w,
                   ),
                 ),
@@ -498,7 +511,7 @@ class _MyTicketsState extends State<MyTickets> with TickerProviderStateMixin {
               Text(
                 '${ticket['fromCity']} → ${ticket['toCity']}',
                 style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(
-                  color: AppTheme.lightTheme.colorScheme.onSurface
+                  color: textColor
                       .withValues(alpha: 0.7),
                 ),
               ),
@@ -513,7 +526,7 @@ class _MyTicketsState extends State<MyTickets> with TickerProviderStateMixin {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('No new notifications'),
-        backgroundColor: AppTheme.lightTheme.colorScheme.surface,
+        backgroundColor: surfaceColor,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -582,7 +595,7 @@ class _MyTicketsState extends State<MyTickets> with TickerProviderStateMixin {
                     padding: EdgeInsets.symmetric(horizontal: 1.w),
                     child: CustomIconWidget(
                       iconName: 'star',
-                      color: AppTheme.lightTheme.colorScheme.secondary,
+                      color: Colors.orange,
                       size: 32,
                     ),
                   ),

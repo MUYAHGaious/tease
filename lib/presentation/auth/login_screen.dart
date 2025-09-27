@@ -36,20 +36,48 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: const Color(0xFF008B8B),
       body: Stack(
         children: [
-          // Background gradient
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.black,
-                  Colors.grey[900]!,
-                  Colors.black,
-                ],
+          // Background - sharp cut teal upper 50%, black lower 50%
+          Column(
+            children: [
+              Expanded(
+                flex: 1,
+                child: Container(
+                  width: double.infinity,
+                  color: const Color(0xFF008B8B),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Container(
+                  width: double.infinity,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+
+          // Enhanced image with full coverage - outside SafeArea
+          Positioned(
+            top: 0,
+            right: 0,
+            left: 0,
+            child: Container(
+              height: 80.h,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(30),
+                  bottomRight: Radius.circular(15),
+                ),
+                child: Image.asset(
+                  'assets/images/n.jpg',
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                  alignment: Alignment.centerLeft,
+                ),
               ),
             ),
           ),
@@ -88,29 +116,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                   ),
                 ),
 
-                // Enhanced image with full coverage
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  left: 0,
-                  child: Container(
-                    height: 75.h,
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(30),
-                        bottomRight: Radius.circular(15),
-                      ),
-                      child: Image.asset(
-                        'assets/images/n.jpg',
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
-                        alignment: Alignment.centerLeft,
-                      ),
-                    ),
-                  ),
-                ),
-
                 // Title outside container
                 Positioned(
                   left: 6.w,
@@ -120,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                     child: Text(
                       'Log in',
                       style: GoogleFonts.poppins(
-                        fontSize: 28.sp,
+                        fontSize: 36.sp,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
                         letterSpacing: 1.5,
@@ -307,15 +312,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                             width: double.infinity,
                             height: 6.5.h,
                             decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF20B2AA), Color(0xFF48CAE4)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
+                              color: const Color(0xFF008B8B),
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF20B2AA).withOpacity(0.4),
+                                  color: const Color(0xFF008B8B).withOpacity(0.4),
                                   blurRadius: 20,
                                   offset: const Offset(0, 8),
                                 ),
@@ -429,8 +430,8 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
 
     setState(() => isLoading = false);
 
-    // Navigate to main app
-    Navigator.pushReplacementNamed(context, '/home');
+    // Navigate to affiliation selection
+    Navigator.pushReplacementNamed(context, '/affiliation-selection');
   }
 
   void _handleForgotPassword() {

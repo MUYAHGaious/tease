@@ -7,7 +7,7 @@ import '../../../core/app_export.dart';
 import '../../../theme/app_theme.dart';
 
 const primaryGradient = LinearGradient(
-  colors: [Color(0xFF20B2AA), Color(0xFF20B2AA)],
+  colors: [Color(0xFF008B8B), Color(0xFF008B8B)],
   begin: Alignment.topLeft,
   end: Alignment.bottomRight,
 );
@@ -35,7 +35,7 @@ class BottomNavigationWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFF20B2AA),
+        color: Color(0xFF008B8B),
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: ClipRRect(
@@ -44,7 +44,7 @@ class BottomNavigationWidget extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
           child: BottomAppBar(
             height: 70, // Fixed height to prevent overflow
-            color: const Color(0xFF20B2AA).withOpacity(0.8),
+            color: const Color(0xFF008B8B).withOpacity(0.8),
             shape: const CircularNotchedRectangle(),
             notchMargin: 8,
             child: Padding(
@@ -61,10 +61,13 @@ class BottomNavigationWidget extends StatelessWidget {
                       },
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
-                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8, horizontal: 4),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(14),
-                          color: isSelected ? Colors.white.withOpacity(0.15) : Colors.transparent,
+                          color: isSelected
+                              ? Colors.white.withOpacity(0.15)
+                              : Colors.transparent,
                         ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -73,15 +76,21 @@ class BottomNavigationWidget extends StatelessWidget {
                             Icon(
                               icons[index],
                               size: isSelected ? 24 : 22,
-                              color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
+                              color: isSelected
+                                  ? Colors.white
+                                  : Colors.white.withOpacity(0.7),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               labels[index],
                               style: TextStyle(
                                 fontSize: 8,
-                                color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
-                                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                color: isSelected
+                                    ? Colors.white
+                                    : Colors.white.withOpacity(0.7),
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,

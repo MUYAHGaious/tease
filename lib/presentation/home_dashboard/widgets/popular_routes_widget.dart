@@ -6,7 +6,7 @@ import '../../../core/app_export.dart';
 import '../../../theme/app_theme.dart';
 
 // 2025 Design Constants
-const Color primaryColor = Color(0xFF20B2AA);
+const Color primaryColor = Color(0xFF008B8B);
 const double cardBorderRadius = 16.0;
 
 class PopularRoutesWidget extends StatefulWidget {
@@ -97,10 +97,10 @@ class _PopularRoutesWidgetState extends State<PopularRoutesWidget> {
       margin: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
       padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cardBorderRadius),
         border: Border.all(
-          color: AppTheme.onSurfaceLight.withOpacity(0.1),
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
           width: 1,
         ),
       ),
@@ -110,7 +110,7 @@ class _PopularRoutesWidgetState extends State<PopularRoutesWidget> {
             width: 15.w,
             height: 15.w,
             decoration: BoxDecoration(
-              color: AppTheme.onSurfaceLight.withOpacity(0.1),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
           ),
@@ -123,7 +123,7 @@ class _PopularRoutesWidgetState extends State<PopularRoutesWidget> {
                   width: 60.w,
                   height: 2.h,
                   decoration: BoxDecoration(
-                    color: AppTheme.onSurfaceLight.withOpacity(0.1),
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -132,7 +132,7 @@ class _PopularRoutesWidgetState extends State<PopularRoutesWidget> {
                   width: 40.w,
                   height: 1.5.h,
                   decoration: BoxDecoration(
-                    color: AppTheme.onSurfaceLight.withOpacity(0.1),
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -143,7 +143,7 @@ class _PopularRoutesWidgetState extends State<PopularRoutesWidget> {
             width: 15.w,
             height: 2.h,
             decoration: BoxDecoration(
-              color: AppTheme.onSurfaceLight.withOpacity(0.1),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
               borderRadius: BorderRadius.circular(4),
             ),
           ),
@@ -157,15 +157,15 @@ class _PopularRoutesWidgetState extends State<PopularRoutesWidget> {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cardBorderRadius),
         border: Border.all(
-          color: AppTheme.onSurfaceLight.withOpacity(0.1),
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.onSurfaceLight.withOpacity(0.08),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -192,7 +192,7 @@ class _PopularRoutesWidgetState extends State<PopularRoutesWidget> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: AppTheme.onSurfaceLight.withOpacity(0.1),
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
                           width: 1,
                         ),
                       ),
@@ -246,7 +246,7 @@ class _PopularRoutesWidgetState extends State<PopularRoutesWidget> {
                             child: Text(
                               '${route['from']} → ${route['to']}',
                               style: TextStyle(
-                                color: AppTheme.onSurfaceLight,
+                                color: Theme.of(context).colorScheme.onSurface,
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -286,24 +286,27 @@ class _PopularRoutesWidgetState extends State<PopularRoutesWidget> {
                       ),
                       SizedBox(height: 1.h),
 
-                      // Details row with modern icons
+                      // Details row with modern icons - fixed overflow
                       Row(
                         children: [
                           Icon(
                             Icons.access_time,
-                            color: AppTheme.onSurfaceLight.withOpacity(0.6),
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                             size: 3.5.w,
                           ),
                           SizedBox(width: 1.w),
-                          Text(
-                            route['duration'],
-                            style: TextStyle(
-                              color: AppTheme.onSurfaceLight.withOpacity(0.7),
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.w500,
+                          Flexible(
+                            child: Text(
+                              route['duration'],
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          SizedBox(width: 3.w),
+                          SizedBox(width: 2.w),
                           Icon(
                             Icons.directions_bus,
                             color: primaryColor.withOpacity(0.7),
@@ -314,8 +317,8 @@ class _PopularRoutesWidgetState extends State<PopularRoutesWidget> {
                             child: Text(
                               route['frequency'],
                               style: TextStyle(
-                                color: AppTheme.onSurfaceLight.withOpacity(0.7),
-                                fontSize: 10.sp,
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                fontSize: 9.sp,
                                 fontWeight: FontWeight.w500,
                               ),
                               overflow: TextOverflow.ellipsis,
@@ -343,7 +346,7 @@ class _PopularRoutesWidgetState extends State<PopularRoutesWidget> {
                     Text(
                       'per person',
                       style: TextStyle(
-                        color: AppTheme.onSurfaceLight.withOpacity(0.6),
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                         fontSize: 9.sp,
                         fontWeight: FontWeight.w400,
                       ),
@@ -372,7 +375,7 @@ class _PopularRoutesWidgetState extends State<PopularRoutesWidget> {
               Text(
                 'Popular Routes',
                 style: TextStyle(
-                  color: AppTheme.onSurfaceLight,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w700,
                 ),

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '../presentation/onboarding_flow/onboarding_flow.dart';
-import '../presentation/onboarding_flow/progressive_onboarding_screen.dart';
 import '../presentation/splash_screen/splash_screen.dart';
 import '../presentation/auth/login_screen.dart';
 import '../presentation/auth/signup_screen.dart';
@@ -8,13 +6,15 @@ import '../presentation/auth/welcome_screen.dart';
 import '../presentation/auth/hi_screen.dart';
 import '../presentation/auth/auth_demo_screen.dart';
 import '../presentation/auth/forgot_password_screen.dart';
-import '../presentation/seat_selection/seat_selection.dart';
+import '../presentation/auth/affiliation_selection_screen.dart';
+import '../presentation/seat_selection/redesigned_seat_selection.dart';
 import '../presentation/home_dashboard/home_dashboard.dart';
 import '../presentation/search_booking/search_booking.dart';
 import '../presentation/booking_confirmation/booking_confirmation.dart';
 import '../presentation/school_bus_home/premium_home_screen.dart';
 import '../presentation/bus_booking_formSchoolbus/bus_booking_form.dart';
 import '../presentation/qr_code_displaySchoolbus/qr_code_display.dart';
+import '../presentation/qr_code_display/qr_code_display.dart' as RegularQR;
 import '../presentation/my_tickets/my_tickets.dart';
 import '../presentation/passenger_details/passenger_details.dart';
 import '../presentation/payment_gateway/payment_gateway.dart';
@@ -22,9 +22,11 @@ import '../presentation/profile_settings/profile_settings.dart';
 import '../presentation/admin_route_managementSchoolbus/admin_route_management.dart';
 import '../presentation/booking_historySchoolbus/booking_history.dart';
 import '../presentation/driver_boarding_interfaceSchoolbus/driver_boarding_interface.dart';
+import '../presentation/parent_dashboardSchoolbus/parent_dashboard.dart';
 import '../presentation/favorites/favorites.dart';
 import '../presentation/ticket_booking/ticket_booking_screen.dart';
 import '../presentation/bus_tracking_map/safe_bus_tracking_screen.dart';
+import '../presentation/voice_ai/voice_ai_screen.dart';
 
 class AppRoutes {
   // TODO: Add your routes here
@@ -36,8 +38,8 @@ class AppRoutes {
   static const String hiScreen = '/hi';
   static const String authDemo = '/auth-demo';
   static const String forgotPassword = '/forgot-password';
+  static const String affiliationSelection = '/affiliation-selection';
   static const String home = '/home';
-  static const String onboardingFlow = '/onboarding-flow';
   static const String seatSelection = '/seat-selection';
   static const String homeDashboard = '/home-dashboard';
   static const String searchBooking = '/search-booking';
@@ -55,11 +57,18 @@ class AppRoutes {
   static const String schoolBusBooking = '/school-bus-booking';
   static const String bookingHistorySchoolbus = '/booking-history-schoolbus';
   static const String driverBoardingInterface = '/driver-boarding-interface';
+  static const String driverBoardingInterfaceSchoolbus =
+      '/driver-boarding-interfaceSchoolbus';
+  static const String parentDashboard = '/parent-dashboard';
+  static const String conductorDashboard = '/conductor-dashboard';
+  static const String bookingClerkDashboard = '/booking-clerk-dashboard';
+  static const String qrCodeDisplaySchoolbus = '/qr-code-display-schoolbus';
+  static const String voiceAi = '/voice-ai';
   static const String favorites = '/favorites';
   static const String ticketBooking = '/ticket-booking';
   static const String busTrackingMap = '/bus-tracking-map';
-  static const String progressiveOnboarding = '/progressive-onboarding';
   static const String popularRoutes = '/popular-routes';
+  static const String schoolDashboard = '/school-dashboard';
 
   static Map<String, WidgetBuilder> routes = {
     initial: (context) => const SplashScreen(),
@@ -81,8 +90,8 @@ class AppRoutes {
     hiScreen: (context) => const HiScreen(),
     authDemo: (context) => const AuthDemoScreen(),
     forgotPassword: (context) => const ForgotPasswordScreen(),
-    onboardingFlow: (context) => const OnboardingFlow(),
-    seatSelection: (context) => const SeatSelection(),
+    affiliationSelection: (context) => const AffiliationSelectionScreen(),
+    seatSelection: (context) => const RedesignedSeatSelection(),
     homeDashboard: (context) => const HomeDashboard(),
     searchBooking: (context) => const SearchBooking(),
     bookingConfirmation: (context) => const BookingConfirmation(),
@@ -101,17 +110,23 @@ class AppRoutes {
         const PremiumHomeScreen(), // Using premium home for school bus booking
     bookingHistorySchoolbus: (context) => const BookingHistory(),
     driverBoardingInterface: (context) => const DriverBoardingInterface(),
+    driverBoardingInterfaceSchoolbus: (context) =>
+        const DriverBoardingInterface(), // Same interface for school bus
+    parentDashboard: (context) => const ParentDashboard(),
+    conductorDashboard: (context) =>
+        const MyTickets(), // Placeholder - conductor can see tickets
+    bookingClerkDashboard: (context) =>
+        const AdminRouteManagement(), // Placeholder - clerk can manage bookings
+    qrCodeDisplaySchoolbus: (context) =>
+        const QrCodeDisplay(), // School bus QR display
+    voiceAi: (context) => const VoiceAIScreen(),
     favorites: (context) => const Favorites(),
     ticketBooking: (context) => const TicketBookingScreen(),
     busTrackingMap: (context) => const SafeBusTrackingScreen(),
-    progressiveOnboarding: (context) {
-      final arguments =
-          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
-              {};
-      return ProgressiveOnboardingScreen(arguments: arguments);
-    },
     popularRoutes: (context) =>
         const SearchBooking(), // Use SearchBooking for popular routes
+    schoolDashboard: (context) =>
+        const PremiumHomeScreen(), // University home screen
     // TODO: Add your other routes here
   };
 }

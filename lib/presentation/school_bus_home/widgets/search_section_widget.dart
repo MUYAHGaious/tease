@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../../theme/theme_notifier.dart';
 import '../../../core/app_export.dart';
+
+// 2025 Design Constants - Using Theme System
+// Colors are now theme-aware and will automatically switch between light/dark modes
 
 class SearchSectionWidget extends StatefulWidget {
   const SearchSectionWidget({super.key});
@@ -10,14 +14,18 @@ class SearchSectionWidget extends StatefulWidget {
   State<SearchSectionWidget> createState() => _SearchSectionWidgetState();
 }
 
-class _SearchSectionWidgetState extends State<SearchSectionWidget>
-    with TickerProviderStateMixin {
-  late AnimationController _slideController;
-  late Animation<Offset> _slideAnimation;
+class _SearchSectionWidgetState extends State<SearchSectionWidget> {
   final TextEditingController _fromController = TextEditingController();
   final TextEditingController _toController = TextEditingController();
   final FocusNode _fromFocus = FocusNode();
   final FocusNode _toFocus = FocusNode();
+
+  // Theme-aware colors that prevent glitching
+  Color get primaryColor => const Color(0xFF008B8B);
+  Color get backgroundColor => ThemeNotifier().isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
+  Color get textColor => ThemeNotifier().isDarkMode ? Colors.white : Colors.black87;
+  Color get surfaceColor => ThemeNotifier().isDarkMode ? const Color(0xFF2D2D2D) : Colors.white;
+  Color get onSurfaceColor => ThemeNotifier().isDarkMode ? Colors.white70 : Colors.black54;
 
   final List<String> _recentLocations = [
     'Downtown Terminal',
@@ -30,29 +38,12 @@ class _SearchSectionWidgetState extends State<SearchSectionWidget>
   @override
   void initState() {
     super.initState();
-    _initializeAnimations();
-  }
-
-  void _initializeAnimations() {
-    _slideController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.5),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutCubic,
-    ));
-
-    _slideController.forward();
+    ThemeNotifier().addListener(_onThemeChanged);
   }
 
   @override
   void dispose() {
-    _slideController.dispose();
+    ThemeNotifier().removeListener(_onThemeChanged);
     _fromController.dispose();
     _toController.dispose();
     _fromFocus.dispose();
@@ -60,41 +51,45 @@ class _SearchSectionWidgetState extends State<SearchSectionWidget>
     super.dispose();
   }
 
+  void _onThemeChanged() {
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SlideTransition(
-      position: _slideAnimation,
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 5.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Where are you going?',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.primaryLight,
-                  ),
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 5.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Where are you going?',
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w700,
+              color: textColor,
+              letterSpacing: -0.5,
             ),
-            SizedBox(height: 2.h),
-            _buildSearchCards(),
-          ],
-        ),
+          ),
+          SizedBox(height: 2.h),
+          _buildSearchCards(),
+        ],
       ),
     );
   }
 
   Widget _buildSearchCards() {
     return Container(
-      padding: EdgeInsets.all(4.w),
+      padding: EdgeInsets.all(5.w),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(4.w),
+        color: surfaceColor,
+        borderRadius: BorderRadius.circular(5.w),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryLight.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+            spreadRadius: 0,
           ),
         ],
       ),
@@ -131,13 +126,12 @@ class _SearchSectionWidgetState extends State<SearchSectionWidget>
     required IconData icon,
     required bool isTop,
   }) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
+    return Container(
       decoration: BoxDecoration(
         border: Border.all(
           color: focusNode.hasFocus
-              ? AppTheme.secondaryLight
-              : AppTheme.neutralLight.withValues(alpha: 0.3),
+              ? primaryColor
+              : Colors.grey.withOpacity(0.3),
           width: focusNode.hasFocus ? 2 : 1,
         ),
         borderRadius: BorderRadius.circular(3.w),
@@ -149,14 +143,14 @@ class _SearchSectionWidgetState extends State<SearchSectionWidget>
           hintText: hint,
           prefixIcon: Icon(
             icon,
-            color: AppTheme.primaryLight,
+            color: primaryColor,
             size: 6.w,
           ),
           suffixIcon: IconButton(
             onPressed: () => _showLocationSuggestions(controller),
             icon: Icon(
               Icons.search,
-              color: AppTheme.primaryLight,
+              color: primaryColor,
               size: 5.w,
             ),
           ),
@@ -178,21 +172,21 @@ class _SearchSectionWidgetState extends State<SearchSectionWidget>
       child: GestureDetector(
         onTap: _swapLocations,
         child: Container(
-          padding: EdgeInsets.all(2.w),
+          padding: EdgeInsets.all(3.w),
           decoration: BoxDecoration(
-            color: AppTheme.secondaryLight,
-            borderRadius: BorderRadius.circular(2.w),
+            color: primaryColor,
+            borderRadius: BorderRadius.circular(3.w),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.secondaryLight.withValues(alpha: 0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.4),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
           child: Icon(
             Icons.swap_vert,
-            color: AppTheme.onSecondaryLight,
+            color: surfaceColor,
             size: 6.w,
           ),
         ),
@@ -207,12 +201,17 @@ class _SearchSectionWidgetState extends State<SearchSectionWidget>
       child: ElevatedButton(
         onPressed: _performSearch,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppTheme.primaryLight,
-          foregroundColor: AppTheme.onPrimaryLight,
+          backgroundColor: primaryColor,
+          foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(3.w),
+            borderRadius: BorderRadius.circular(4.w),
           ),
-          elevation: 4,
+          elevation: 0,
+          shadowColor: Colors.transparent,
+        ).copyWith(
+          overlayColor: WidgetStateProperty.all(
+            Colors.white.withOpacity(0.1),
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -221,10 +220,12 @@ class _SearchSectionWidgetState extends State<SearchSectionWidget>
             SizedBox(width: 2.w),
             Text(
               'Search Buses',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppTheme.onPrimaryLight,
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.3,
+              ),
             ),
           ],
         ),
@@ -251,7 +252,7 @@ class _SearchSectionWidgetState extends State<SearchSectionWidget>
     return Container(
       height: 40.h,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: surfaceColor,
         borderRadius: BorderRadius.vertical(top: Radius.circular(6.w)),
       ),
       child: Column(
@@ -261,7 +262,7 @@ class _SearchSectionWidgetState extends State<SearchSectionWidget>
             width: 15.w,
             height: 0.5.h,
             decoration: BoxDecoration(
-              color: AppTheme.neutralLight,
+              color: Colors.grey,
               borderRadius: BorderRadius.circular(0.5.h),
             ),
           ),
@@ -269,9 +270,10 @@ class _SearchSectionWidgetState extends State<SearchSectionWidget>
             padding: EdgeInsets.symmetric(horizontal: 5.w),
             child: Text(
               'Recent Locations',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           Expanded(
@@ -282,7 +284,7 @@ class _SearchSectionWidgetState extends State<SearchSectionWidget>
                 return ListTile(
                   leading: Icon(
                     Icons.history,
-                    color: AppTheme.primaryLight,
+                    color: primaryColor,
                   ),
                   title: Text(_recentLocations[index]),
                   onTap: () {
@@ -306,9 +308,9 @@ class _SearchSectionWidgetState extends State<SearchSectionWidget>
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter both from and to locations'),
-          backgroundColor: AppTheme.errorLight,
+        SnackBar(
+          content: const Text('Please enter both from and to locations'),
+          backgroundColor: Colors.red,
         ),
       );
     }

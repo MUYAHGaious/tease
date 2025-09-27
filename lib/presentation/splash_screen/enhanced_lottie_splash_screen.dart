@@ -103,15 +103,15 @@ class _EnhancedLottieSplashScreenState extends State<EnhancedLottieSplashScreen>
       final isFirstTime = await _checkFirstTimeUser();
 
       if (isFirstTime) {
-        // First time user, show onboarding
-        Navigator.pushReplacementNamed(context, '/onboarding-flow');
+        // First time user, show login
+        Navigator.pushReplacementNamed(context, '/login');
       } else {
         // Returning user but not logged in, go to login
         Navigator.pushReplacementNamed(context, '/login');
       }
     } catch (e) {
-      // If there's any error, default to onboarding for safety
-      Navigator.pushReplacementNamed(context, '/onboarding-flow');
+      // If there's any error, default to login for safety
+      Navigator.pushReplacementNamed(context, '/login');
     }
   }
 
@@ -130,8 +130,8 @@ class _EnhancedLottieSplashScreenState extends State<EnhancedLottieSplashScreen>
   Future<bool> _checkFirstTimeUser() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
-      return !hasSeenOnboarding;
+      final hasSeenWelcome = prefs.getBool('has_seen_welcome') ?? false;
+      return !hasSeenWelcome;
     } catch (e) {
       return true;
     }

@@ -6,7 +6,7 @@ import '../../../core/app_export.dart';
 import '../../../theme/app_theme.dart';
 
 // 2025 Design Constants
-const Color primaryColor = Color(0xFF20B2AA);
+const Color primaryColor = Color(0xFF008B8B);
 const double cardBorderRadius = 16.0;
 
 class QuickActionsWidget extends StatefulWidget {
@@ -102,15 +102,15 @@ class _QuickActionsWidgetState extends State<QuickActionsWidget>
           scale: _scaleAnimations[index],
           child: Container(
             decoration: BoxDecoration(
-              color: AppTheme.surfaceLight,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(cardBorderRadius),
               border: Border.all(
-                color: AppTheme.onSurfaceLight.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
                 width: 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AppTheme.onSurfaceLight.withOpacity(0.08),
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -150,7 +150,7 @@ class _QuickActionsWidgetState extends State<QuickActionsWidget>
                       Text(
                         action['title'],
                         style: TextStyle(
-                          color: AppTheme.onSurfaceLight,
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontWeight: FontWeight.w600,
                           fontSize: 12.sp,
                         ),
@@ -163,7 +163,7 @@ class _QuickActionsWidgetState extends State<QuickActionsWidget>
                       Text(
                         action['subtitle'],
                         style: TextStyle(
-                          color: AppTheme.onSurfaceLight.withOpacity(0.6),
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                           fontWeight: FontWeight.w400,
                           fontSize: 9.sp,
                         ),
@@ -193,7 +193,7 @@ class _QuickActionsWidgetState extends State<QuickActionsWidget>
           child: Text(
             'Quick Actions',
             style: TextStyle(
-              color: AppTheme.onSurfaceLight,
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 18.sp,
               fontWeight: FontWeight.w700,
             ),

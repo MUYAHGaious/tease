@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
+import '../services/mock_auth_service.dart';
 
 class AppState extends ChangeNotifier {
   static final AppState _instance = AppState._internal();
@@ -28,25 +29,22 @@ class AppState extends ChangeNotifier {
   // Initialize authentication state
   Future<void> initialize() async {
     _setLoading(true);
-    
+
     try {
-      final isLoggedIn = await AuthService.isAuthenticated();
-      
+      // Initialize mock auth service
+      await MockAuthService.initialize();
+
+      // Check if user is logged in (mock)
+      final isLoggedIn = await MockAuthService.isLoggedIn();
+
       if (isLoggedIn) {
-        // Try to get current user data
-        final cachedUser = await AuthService.getCachedUser();
-        if (cachedUser != null) {
-          _setUser(cachedUser);
+        // Get current user from mock service
+        final currentUser = await MockAuthService.getCurrentUser();
+        if (currentUser != null) {
+          _setUser(currentUser);
           _setAuthenticated(true);
         } else {
-          // Try to fetch from API
-          final result = await AuthService.getCurrentUser();
-          if (result.success && result.data != null) {
-            _setUser(result.data!);
-            _setAuthenticated(true);
-          } else {
-            await _clearAuthState();
-          }
+          await _clearAuthState();
         }
       } else {
         await _clearAuthState();
@@ -59,13 +57,13 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  // Login user
+  // Login user (mock)
   Future<bool> login(String identifier, String password, {bool rememberMe = false}) async {
     _setLoading(true);
     _setError(null);
 
     try {
-      final result = await AuthService.login(
+      final result = await MockAuthService.login(
         identifier: identifier,
         password: password,
         rememberMe: rememberMe,
@@ -88,7 +86,7 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  // Register user
+  // Register user (mock)
   Future<bool> register({
     required String email,
     required String phone,
@@ -101,7 +99,7 @@ class AppState extends ChangeNotifier {
     _setError(null);
 
     try {
-      final result = await AuthService.register(
+      final result = await MockAuthService.register(
         email: email,
         phone: phone,
         password: password,
@@ -127,12 +125,12 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  // Logout user
+  // Logout user (mock)
   Future<void> logout() async {
     _setLoading(true);
-    
+
     try {
-      await AuthService.logout();
+      await MockAuthService.logout();
     } catch (e) {
       debugPrint('Error during logout: $e');
     } finally {
@@ -152,14 +150,14 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  // Refresh user data
+  // Refresh user data (mock)
   Future<bool> refreshUserData() async {
     if (!_isAuthenticated) return false;
 
     try {
-      final result = await AuthService.getCurrentUser();
-      if (result.success && result.data != null) {
-        _setUser(result.data!);
+      final currentUser = await MockAuthService.getCurrentUser();
+      if (currentUser != null) {
+        _setUser(currentUser);
         return true;
       }
       return false;
@@ -167,6 +165,68 @@ class AppState extends ChangeNotifier {
       debugPrint('Error refreshing user data: $e');
       return false;
     }
+  }
+
+  // Quick login for development (switch between users)
+  Future<bool> quickLogin(UserModel user) async {
+    _setLoading(true);
+    _setError(null);
+
+    try {
+      final result = await MockAuthService.quickLogin(user);
+
+      if (result.success && result.data != null) {
+        _setUser(result.data!);
+        _setAuthenticated(true);
+        _setLoading(false);
+        return true;
+      } else {
+        _setError(result.message);
+        _setLoading(false);
+        return false;
+      }
+    } catch (e) {
+      _setError('Quick login failed.');
+      _setLoading(false);
+      return false;
+    }
+  }
+
+  // Verify PIN and update role
+  Future<bool> verifyPinAndUpdateRole({
+    required String affiliation,
+    required String position,
+    required String pin,
+  }) async {
+    _setLoading(true);
+    _setError(null);
+
+    try {
+      final result = await MockAuthService.verifyPinAndUpdateRole(
+        affiliation: affiliation,
+        position: position,
+        pin: pin,
+      );
+
+      if (result.success && result.data != null) {
+        _setUser(result.data!);
+        _setLoading(false);
+        return true;
+      } else {
+        _setError(result.message);
+        _setLoading(false);
+        return false;
+      }
+    } catch (e) {
+      _setError('PIN verification failed.');
+      _setLoading(false);
+      return false;
+    }
+  }
+
+  // Get mock users for development
+  List<UserModel> getMockUsers() {
+    return MockAuthService.getMockUsers();
   }
 
   // Private helper methods

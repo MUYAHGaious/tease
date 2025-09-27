@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/app_export.dart';
 import 'widgets/custom_error_widget.dart';
+import 'theme/theme_notifier.dart';
 // import 'core/api_client.dart'; // Disabled for frontend-only
 // import 'services/auth_service.dart'; // Disabled for frontend-only
 // import 'core/app_state.dart'; // Disabled for frontend-only
@@ -11,6 +13,9 @@ import 'widgets/custom_error_widget.dart';
 void main() async {
   // Ensure proper binding initialization for mobile APK
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize theme notifier
+  await ThemeNotifier().initialize();
 
   // Services disabled for frontend-only development
   debugPrint('Frontend-only mode: Backend services disabled');
@@ -37,8 +42,8 @@ void main() async {
     // Additional system UI configuration for mobile stability
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
+        statusBarColor: Color(0xFF008B8B),
+        statusBarIconBrightness: Brightness.light,
       ),
     );
 
@@ -50,7 +55,28 @@ void main() async {
   }
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    ThemeNotifier().addListener(_onThemeChanged);
+  }
+
+  @override
+  void dispose() {
+    ThemeNotifier().removeListener(_onThemeChanged);
+    super.dispose();
+  }
+
+  void _onThemeChanged() {
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Sizer(builder: (context, orientation, screenType) {
@@ -58,7 +84,7 @@ class MyApp extends StatelessWidget {
         title: 'Tease Pro - Combined',
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.light,
+        themeMode: ThemeNotifier().isDarkMode ? ThemeMode.dark : ThemeMode.light,
         // 🚨 CRITICAL: NEVER REMOVE OR MODIFY
         builder: (context, child) {
           return MediaQuery(

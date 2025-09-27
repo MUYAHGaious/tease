@@ -1,26 +1,28 @@
 import 'dart:ui';
-import 'dart:math';
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
+import '../../core/app_state.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/global_bottom_navigation.dart';
 import './widgets/custom_menu_drawer.dart';
 import './widgets/greeting_header_widget.dart';
 import './widgets/popular_routes_widget.dart';
-import './widgets/quick_actions_widget.dart';
 import './widgets/recent_bookings_widget.dart';
 import './widgets/search_bar_widget.dart';
+import './widgets/role_based_quick_actions_widget.dart';
+import '../../theme/theme_notifier.dart';
 
 // 2025 Design Constants
 const double cardElevation = 2.0;
 const double cardBorderRadius = 16.0;
 const double sectionSpacing = 24.0;
 const double gridSpacing = 16.0;
-const Color primaryColor = Color(0xFF20B2AA);
 
 class HomeDashboard extends StatefulWidget {
   const HomeDashboard({super.key});
@@ -30,15 +32,24 @@ class HomeDashboard extends StatefulWidget {
 }
 
 class _HomeDashboardState extends State<HomeDashboard>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   late AnimationController _backgroundAnimationController;
   late AnimationController _scrollAnimationController;
-  late Animation<double> _backgroundAnimation;
-  late Animation<double> _headerOpacityAnimation;
 
   final ScrollController _scrollController = ScrollController();
-  int _currentBottomNavIndex = 0;
   bool _isRefreshing = false;
+  Timer? _themeCheckTimer;
+
+  // Theme-aware colors that prevent glitching
+  Color get primaryColor => const Color(0xFF008B8B);
+  Color get backgroundColor =>
+      ThemeNotifier().isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
+  Color get textColor =>
+      ThemeNotifier().isDarkMode ? Colors.white : Colors.black87;
+  Color get surfaceColor =>
+      ThemeNotifier().isDarkMode ? const Color(0xFF2D2D2D) : Colors.white;
+  Color get onSurfaceColor =>
+      ThemeNotifier().isDarkMode ? Colors.white70 : Colors.black54;
 
   // 2025 Contextual Data - Smart content based on time and user behavior
   List<Map<String, dynamic>> _contextualCards = [];
@@ -187,25 +198,11 @@ class _HomeDashboardState extends State<HomeDashboard>
       vsync: this,
     );
 
-    _backgroundAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _backgroundAnimationController,
-      curve: Curves.linear,
-    ));
-
-    _headerOpacityAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.8,
-    ).animate(CurvedAnimation(
-      parent: _scrollAnimationController,
-      curve: Curves.easeOut,
-    ));
-
     _backgroundAnimationController.repeat();
 
     _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addObserver(this);
+    ThemeNotifier().addListener(_onThemeChanged);
   }
 
   void _onScroll() {
@@ -216,42 +213,28 @@ class _HomeDashboardState extends State<HomeDashboard>
     _scrollAnimationController.value = scrollPercentage;
   }
 
-  @override
-  void dispose() {
-    _backgroundAnimationController.dispose();
-    _scrollAnimationController.dispose();
-    _scrollController.dispose();
-    super.dispose();
+  void _onThemeChanged() {
+    setState(() {});
   }
 
-  void _handleBottomNavTap(int index) {
-    setState(() {
-      _currentBottomNavIndex = index;
-    });
-
-    switch (index) {
-      case 0: // Home
-        // Already on home, maybe scroll to top
-        _scrollController.animateTo(
-          0,
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeInOut,
-        );
-        break;
-      case 1: // Favorites
-        Navigator.pushNamed(context, '/favorites');
-        break;
-      case 2: // Tickets
-        Navigator.pushNamed(context, '/my-tickets');
-        break;
-      case 3: // Profile
-        Navigator.pushNamed(context, '/profile-settings');
-        break;
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      // Refresh content when app is resumed
+      _loadContextualContent();
     }
   }
 
-  void _showCustomMenu() {
-    Scaffold.of(context).openDrawer();
+  @override
+  void dispose() {
+    ThemeNotifier().removeListener(_onThemeChanged);
+    _backgroundAnimationController.dispose();
+    _scrollAnimationController.dispose();
+    _scrollController.dispose();
+    _themeCheckTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   Future<void> _handleRefresh() async {
@@ -273,114 +256,6 @@ class _HomeDashboardState extends State<HomeDashboard>
       });
       HapticFeedback.lightImpact();
     }
-  }
-
-  // 2025 Modern Dashboard Layout
-  Widget _buildModernDashboard() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 4.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(height: 3.h),
-
-          // Modern Search Bar
-          _buildModernSearchBar(),
-
-          SizedBox(height: sectionSpacing),
-
-          // Contextual Greeting
-          _buildContextualGreeting(),
-
-          SizedBox(height: sectionSpacing),
-
-          // Smart Quick Actions Grid
-          _buildSmartQuickActions(),
-
-          SizedBox(height: sectionSpacing),
-
-          // Contextual Cards Section
-          _buildContextualCardsSection(),
-
-          SizedBox(height: 10.h), // Bottom padding for FAB
-        ],
-      ),
-    );
-  }
-
-  Widget _buildModernSearchBar() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceLight,
-        borderRadius: BorderRadius.circular(cardBorderRadius),
-        border: Border.all(
-          color: AppTheme.onSurfaceLight.withOpacity(0.1),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.onSurfaceLight.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => _handleNavigation('/search-booking'),
-          borderRadius: BorderRadius.circular(cardBorderRadius),
-          child: Padding(
-            padding: EdgeInsets.all(4.w),
-            child: Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(2.w),
-                  decoration: BoxDecoration(
-                    color: primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    Icons.search,
-                    color: primaryColor,
-                    size: 5.w,
-                  ),
-                ),
-                SizedBox(width: 3.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Where are you going?',
-                        style: TextStyle(
-                          color: AppTheme.onSurfaceLight,
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      SizedBox(height: 0.5.h),
-                      Text(
-                        'Search destinations, routes, and more',
-                        style: TextStyle(
-                          color: AppTheme.onSurfaceLight.withOpacity(0.6),
-                          fontSize: 11.sp,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.arrow_forward,
-                  color: AppTheme.onSurfaceLight.withOpacity(0.4),
-                  size: 5.w,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   Widget _buildContextualGreeting() {
@@ -453,7 +328,7 @@ class _HomeDashboardState extends State<HomeDashboard>
           child: Text(
             'Quick Actions',
             style: TextStyle(
-              color: AppTheme.onSurfaceLight,
+              color: onSurfaceColor,
               fontSize: 18.sp,
               fontWeight: FontWeight.w700,
             ),
@@ -481,15 +356,15 @@ class _HomeDashboardState extends State<HomeDashboard>
   Widget _buildQuickActionCard(Map<String, dynamic> action) {
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.surfaceLight,
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(cardBorderRadius),
         border: Border.all(
-          color: AppTheme.onSurfaceLight.withOpacity(0.1),
+          color: onSurfaceColor.withOpacity(0.1),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.onSurfaceLight.withOpacity(0.05),
+            color: onSurfaceColor.withOpacity(0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -522,7 +397,7 @@ class _HomeDashboardState extends State<HomeDashboard>
                 Text(
                   action['title'],
                   style: TextStyle(
-                    color: AppTheme.onSurfaceLight,
+                    color: onSurfaceColor,
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
                   ),
@@ -531,7 +406,7 @@ class _HomeDashboardState extends State<HomeDashboard>
                 Text(
                   action['subtitle'],
                   style: TextStyle(
-                    color: AppTheme.onSurfaceLight.withOpacity(0.6),
+                    color: onSurfaceColor.withOpacity(0.6),
                     fontSize: 10.sp,
                   ),
                 ),
@@ -672,20 +547,20 @@ class _HomeDashboardState extends State<HomeDashboard>
   Widget _buildModernLoadingOverlay() {
     return Positioned.fill(
       child: Container(
-        color: AppTheme.onSurfaceLight.withOpacity(0.1),
+        color: onSurfaceColor.withOpacity(0.1),
         child: Center(
           child: Container(
             padding: EdgeInsets.all(6.w),
             decoration: BoxDecoration(
-              color: AppTheme.surfaceLight,
+              color: surfaceColor,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: AppTheme.onSurfaceLight.withOpacity(0.1),
+                color: onSurfaceColor.withOpacity(0.1),
                 width: 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AppTheme.onSurfaceLight.withOpacity(0.1),
+                  color: onSurfaceColor.withOpacity(0.1),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
@@ -702,7 +577,7 @@ class _HomeDashboardState extends State<HomeDashboard>
                 Text(
                   'Refreshing...',
                   style: TextStyle(
-                    color: AppTheme.onSurfaceLight,
+                    color: onSurfaceColor,
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
                   ),
@@ -734,11 +609,15 @@ class _HomeDashboardState extends State<HomeDashboard>
   void _handleBookingTap(String bookingId) {
     try {
       HapticFeedback.selectionClick();
-      // Skip search flow - go directly to seat selection with pre-filled data
-      Navigator.pushNamed(context, '/seat-selection', arguments: {
-        'bookingId': bookingId,
-        'skipSearch': true,
-      });
+
+      // If it's a route string (like '/my-tickets'), navigate directly
+      if (bookingId.startsWith('/')) {
+        Navigator.pushNamed(context, bookingId);
+        return;
+      }
+
+      // Otherwise, navigate to My Tickets screen to view booking details
+      Navigator.pushNamed(context, '/my-tickets');
     } catch (e) {
       debugPrint('Booking navigation error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -772,99 +651,130 @@ class _HomeDashboardState extends State<HomeDashboard>
   // 2025 Clean Background - No animations, just clean solid color
   Widget _buildCleanBackground() {
     return Container(
-      color: AppTheme.backgroundLight,
+      color: backgroundColor,
     );
   }
 
-  // Modern 2025 Header with clean design
+  // Modern 2025 Header with role-based greeting
   Widget _buildModernHeader() {
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.backgroundLight,
+        color: backgroundColor,
         border: Border(
           bottom: BorderSide(
-            color: AppTheme.onSurfaceLight.withOpacity(0.1),
+            color: onSurfaceColor.withOpacity(0.1),
             width: 1,
           ),
         ),
       ),
       child: SafeArea(
         bottom: false,
-        child: const GreetingHeaderWidget(),
+        child: ListenableBuilder(
+          listenable: AppState(),
+          builder: (context, child) {
+            return const GreetingHeaderWidget();
+          },
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.backgroundLight,
-      drawer: const CustomMenuDrawer(),
-      body: Stack(
-        children: [
-          _buildCleanBackground(),
-          Column(
+    return AnimatedTheme(
+      duration:
+          const Duration(milliseconds: 600), // Smoother, longer transition
+      curve: Curves.easeInOutCubic, // More natural cubic curve
+      data:
+          ThemeNotifier().isDarkMode ? AppTheme.darkTheme : AppTheme.lightTheme,
+      onEnd: () {
+        // Optional: Trigger haptic feedback when transition completes
+        HapticFeedback.lightImpact();
+      },
+      child: Builder(
+        builder: (context) => Scaffold(
+          backgroundColor: backgroundColor,
+          drawer: const CustomMenuDrawer(),
+          onDrawerChanged: (isOpened) {
+            if (!isOpened) {
+              // Drawer was closed - theme changes handled by ThemeNotifier
+            }
+          },
+          body: Stack(
             children: [
-              _buildModernHeader(),
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: _handleRefresh,
-                  color: primaryColor,
-                  backgroundColor: AppTheme.surfaceLight,
-                  child: CustomScrollView(
-                    controller: _scrollController,
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    slivers: [
-                      SliverToBoxAdapter(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(height: 1.h), // Reduced from 3.h to 1.h
+              _buildCleanBackground(),
+              Column(
+                children: [
+                  _buildModernHeader(),
+                  Expanded(
+                    child: RefreshIndicator(
+                      onRefresh: _handleRefresh,
+                      color: primaryColor,
+                      backgroundColor: surfaceColor,
+                      child: CustomScrollView(
+                        controller: _scrollController,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        slivers: [
+                          SliverToBoxAdapter(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                    height: 1.h), // Reduced from 3.h to 1.h
 
-                            // Original Search Bar Widget with modern styling
-                            SearchBarWidget(
-                              onSearchTap: _handleNavigation,
+                                // Original Search Bar Widget with modern styling
+                                SearchBarWidget(
+                                  onSearchTap: _handleNavigation,
+                                ),
+
+                                SizedBox(
+                                    height: 1.h), // Reduced from 2.h to 1.h
+
+                                // Role-based Quick Actions Widget
+                                RoleBasedQuickActionsWidget(
+                                  onActionTap: _handleNavigation,
+                                ),
+
+                                SizedBox(
+                                    height: 1.h), // Reduced from 2.h to 1.h
+
+                                // Original Recent Bookings Widget with modern styling
+                                RecentBookingsWidget(
+                                  onBookingTap: _handleBookingTap,
+                                ),
+
+                                SizedBox(
+                                    height: 1.h), // Reduced from 2.h to 1.h
+
+                                // Original Popular Routes Widget with modern styling
+                                PopularRoutesWidget(
+                                  onRouteTap: _handleRouteTap,
+                                ),
+
+                                SizedBox(
+                                    height: 3.h), // Reduced from 8.h to 3.h
+                              ],
                             ),
-
-                            SizedBox(height: 1.h), // Reduced from 2.h to 1.h
-
-                            // Original Quick Actions Widget with modern styling
-                            QuickActionsWidget(
-                              onActionTap: _handleNavigation,
-                            ),
-
-                            SizedBox(height: 1.h), // Reduced from 2.h to 1.h
-
-                            // Original Recent Bookings Widget with modern styling
-                            RecentBookingsWidget(
-                              onBookingTap: _handleBookingTap,
-                            ),
-
-                            SizedBox(height: 1.h), // Reduced from 2.h to 1.h
-
-                            // Original Popular Routes Widget with modern styling
-                            PopularRoutesWidget(
-                              onRouteTap: _handleRouteTap,
-                            ),
-
-                            SizedBox(height: 3.h), // Reduced from 8.h to 3.h
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
+              if (_isRefreshing) _buildModernLoadingOverlay(),
+
+              // Development role switcher removed for clean UI
             ],
           ),
-          if (_isRefreshing) _buildModernLoadingOverlay(),
-        ],
+          bottomNavigationBar: GlobalBottomNavigation(
+            initialIndex: 0, // Home tab
+          ),
+          floatingActionButton: _buildModernFAB(),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerDocked,
+        ),
       ),
-      bottomNavigationBar: GlobalBottomNavigation(
-        initialIndex: 0, // Home tab
-      ),
-      floatingActionButton: _buildModernFAB(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 
@@ -906,7 +816,7 @@ class _HomeDashboardState extends State<HomeDashboard>
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.4,
         decoration: BoxDecoration(
-          color: AppTheme.surfaceLight,
+          color: surfaceColor,
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
@@ -936,7 +846,7 @@ class _HomeDashboardState extends State<HomeDashboard>
             Text(
               'Voice Assistant',
               style: TextStyle(
-                color: AppTheme.onSurfaceLight,
+                color: onSurfaceColor,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
@@ -945,7 +855,7 @@ class _HomeDashboardState extends State<HomeDashboard>
             Text(
               'Say "Book a ticket" to get started',
               style: TextStyle(
-                color: AppTheme.onSurfaceLight.withOpacity(0.7),
+                color: onSurfaceColor.withOpacity(0.7),
                 fontSize: 16,
               ),
             ),

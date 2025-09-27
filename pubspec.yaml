@@ -25,8 +25,9 @@ dependencies:
   qr_flutter: ^4.1.0
   # camera: ^0.10.5+5          # Heavy package - disabled for frontend-only
   # permission_handler: ^11.1.0 # Heavy package - disabled for frontend-only
-  # lottie: ^3.1.2             # Removed - replaced with optimized image splash
+  lottie: ^3.1.2              # Professional success animations
   intl: ^0.19.0
+  flutter_native_splash: ^2.4.1  # Native splash screen to eliminate white flash
 
 dev_dependencies:
   flutter_test:    # 🚨 CRITICAL: Required for Flutter project testing - DO NOT REMOVE
@@ -42,6 +43,24 @@ flutter:
   # - DO NOT ADD NEW ASSET DIRECTORIES (assets/svg/, assets/icons/, etc.)
   # - ONLY USE EXISTING AND ITEMS AVAILABLE IN THE DIRECTORIES LISTED ABOVE (assets/, assets/images/)
   
-  # 🚨 CRITICAL FONTS RULE: 
+  # 🚨 CRITICAL FONTS RULE:
   # - THIS PROJECT USES GOOGLE FONTS INSTEAD OF LOCAL FONTS
   # - DO NOT ADD ANY LOCAL FONTS SECTION OR FONT FILES
+
+# Native splash screen configuration to eliminate white flash
+flutter_native_splash:
+  # Teal background color matching the app theme
+  color: "008B8B"
+  # Logo/splash image
+  image: assets/White.png
+  # Android specific settings
+  android: true
+  # iOS specific settings
+  ios: true
+  # Web specific settings
+  web: true
+  # Remove splash screen after initialization
+  android_gravity: center
+  ios_content_mode: center
+  # Fullscreen splash
+  fullscreen: true

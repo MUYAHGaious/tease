@@ -6,7 +6,7 @@ import '../../../core/app_export.dart';
 import '../../../theme/app_theme.dart';
 
 // 2025 Design Constants
-const Color primaryColor = Color(0xFF20B2AA);
+const Color primaryColor = Color(0xFF008B8B);
 const double cardBorderRadius = 16.0;
 
 class SearchBarWidget extends StatefulWidget {
@@ -87,7 +87,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                 child: Text(
                   text,
                   style: TextStyle(
-                    color: AppTheme.onSurfaceLight,
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
                   ),
@@ -96,7 +96,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
               ),
               Icon(
                 Icons.arrow_outward,
-                color: AppTheme.onSurfaceLight.withOpacity(0.4),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
                 size: 4.w,
               ),
             ],
@@ -114,15 +114,15 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
         Container(
           margin: EdgeInsets.symmetric(horizontal: 5.w),
           decoration: BoxDecoration(
-            color: AppTheme.surfaceLight,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(cardBorderRadius),
             border: Border.all(
-              color: AppTheme.onSurfaceLight.withOpacity(0.1),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
               width: 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.onSurfaceLight.withOpacity(0.05),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.05),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -159,7 +159,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                           Text(
                             'Where are you going?',
                             style: TextStyle(
-                              color: AppTheme.onSurfaceLight,
+                              color: Theme.of(context).colorScheme.onSurface,
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
                             ),
@@ -168,7 +168,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                           Text(
                             'Search destinations, routes, and more',
                             style: TextStyle(
-                              color: AppTheme.onSurfaceLight.withOpacity(0.6),
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                               fontSize: 11.sp,
                               fontWeight: FontWeight.w400,
                             ),
@@ -179,7 +179,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                     // Modern arrow icon
                     Icon(
                       Icons.arrow_forward,
-                      color: AppTheme.onSurfaceLight.withOpacity(0.4),
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
                       size: 5.w,
                     ),
                   ],
@@ -195,15 +195,15 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
           Container(
             margin: EdgeInsets.symmetric(horizontal: 5.w),
             decoration: BoxDecoration(
-              color: AppTheme.surfaceLight,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(cardBorderRadius),
               border: Border.all(
-                color: AppTheme.onSurfaceLight.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
                 width: 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AppTheme.onSurfaceLight.withOpacity(0.08),
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -218,7 +218,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                   child: Text(
                     'Recent Searches',
                     style: TextStyle(
-                      color: AppTheme.onSurfaceLight,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
                     ),
@@ -231,7 +231,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                 Container(
                   margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
                   height: 1,
-                  color: AppTheme.onSurfaceLight.withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
                 ),
 
                 // Popular routes section
@@ -240,7 +240,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                   child: Text(
                     'Popular Routes',
                     style: TextStyle(
-                      color: AppTheme.onSurfaceLight,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
                     ),

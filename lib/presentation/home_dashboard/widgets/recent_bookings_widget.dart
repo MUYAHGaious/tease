@@ -3,10 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
-import '../../../theme/app_theme.dart';
 
 // 2025 Design Constants
-const Color primaryColor = Color(0xFF20B2AA);
+const Color primaryColor = Color(0xFF008B8B);
 const double cardBorderRadius = 16.0;
 
 class RecentBookingsWidget extends StatefulWidget {
@@ -22,7 +21,6 @@ class RecentBookingsWidget extends StatefulWidget {
 }
 
 class _RecentBookingsWidgetState extends State<RecentBookingsWidget> {
-
   final List<Map<String, dynamic>> _recentBookings = [
     {
       'id': 'BF001',
@@ -77,7 +75,7 @@ class _RecentBookingsWidgetState extends State<RecentBookingsWidget> {
       case 'cancelled':
         return Colors.red;
       default:
-        return AppTheme.onSurfaceLight.withOpacity(0.6);
+        return Theme.of(context).colorScheme.onSurface.withOpacity(0.6);
     }
   }
 
@@ -87,15 +85,15 @@ class _RecentBookingsWidgetState extends State<RecentBookingsWidget> {
       width: 80.w,
       margin: EdgeInsets.only(right: 4.w),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceLight,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(cardBorderRadius),
         border: Border.all(
-          color: AppTheme.onSurfaceLight.withOpacity(0.1),
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.onSurfaceLight.withOpacity(0.08),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -121,7 +119,10 @@ class _RecentBookingsWidgetState extends State<RecentBookingsWidget> {
                       width: double.infinity,
                       height: 10.h, // Reduced image height
                       decoration: BoxDecoration(
-                        color: AppTheme.onSurfaceLight.withOpacity(0.1),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.1),
                       ),
                       child: CustomImageWidget(
                         imageUrl: booking['image'],
@@ -144,7 +145,8 @@ class _RecentBookingsWidgetState extends State<RecentBookingsWidget> {
                           borderRadius: BorderRadius.circular(8),
                           boxShadow: [
                             BoxShadow(
-                              color: _getStatusColor(booking['status']).withOpacity(0.3),
+                              color: _getStatusColor(booking['status'])
+                                  .withOpacity(0.3),
                               blurRadius: 4,
                               offset: const Offset(0, 2),
                             ),
@@ -178,7 +180,7 @@ class _RecentBookingsWidgetState extends State<RecentBookingsWidget> {
                             child: Text(
                               booking['route'],
                               style: TextStyle(
-                                color: AppTheme.onSurfaceLight,
+                                color: Theme.of(context).colorScheme.onSurface,
                                 fontSize: 13.sp, // Slightly smaller
                                 fontWeight: FontWeight.w600,
                               ),
@@ -202,7 +204,10 @@ class _RecentBookingsWidgetState extends State<RecentBookingsWidget> {
                         children: [
                           Icon(
                             Icons.calendar_today,
-                            color: AppTheme.onSurfaceLight.withOpacity(0.6),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(0.6),
                             size: 3.w, // Smaller icons
                           ),
                           SizedBox(width: 0.5.w),
@@ -210,7 +215,10 @@ class _RecentBookingsWidgetState extends State<RecentBookingsWidget> {
                             child: Text(
                               '${booking['date']} • ${booking['time']}',
                               style: TextStyle(
-                                color: AppTheme.onSurfaceLight.withOpacity(0.7),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withOpacity(0.7),
                                 fontSize: 9.sp, // Smaller text
                                 fontWeight: FontWeight.w500,
                               ),
@@ -258,7 +266,10 @@ class _RecentBookingsWidgetState extends State<RecentBookingsWidget> {
                             child: Text(
                               booking['busOperator'],
                               style: TextStyle(
-                                color: AppTheme.onSurfaceLight.withOpacity(0.7),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withOpacity(0.7),
                                 fontSize: 8.sp, // Smaller text
                                 fontWeight: FontWeight.w500,
                               ),
@@ -293,7 +304,7 @@ class _RecentBookingsWidgetState extends State<RecentBookingsWidget> {
               Text(
                 'Recent Bookings',
                 style: TextStyle(
-                  color: AppTheme.onSurfaceLight,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w700,
                 ),
@@ -303,7 +314,7 @@ class _RecentBookingsWidgetState extends State<RecentBookingsWidget> {
                 child: InkWell(
                   onTap: () {
                     HapticFeedback.selectionClick();
-                    widget.onBookingTap('/trip-history');
+                    widget.onBookingTap('/my-tickets');
                   },
                   borderRadius: BorderRadius.circular(8),
                   child: Padding(
