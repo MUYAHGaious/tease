@@ -57,7 +57,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
 
           // Enhanced image with full coverage - outside SafeArea
           Positioned(
-            top: 0,
+            top: 3.h,
             right: 0,
             left: 0,
             child: Container(

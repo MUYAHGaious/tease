@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../presentation/splash_screen/splash_screen.dart';
 import '../presentation/auth/login_screen.dart';
 import '../presentation/auth/signup_screen.dart';
+import '../presentation/auth/multi_step_signup_screen.dart';
 import '../presentation/auth/welcome_screen.dart';
 import '../presentation/auth/hi_screen.dart';
 import '../presentation/auth/auth_demo_screen.dart';
@@ -83,7 +84,7 @@ class AppRoutes {
     },
     signup: (context) {
       final arguments = ModalRoute.of(context)?.settings.arguments as String?;
-      return SignupScreen(email: arguments);
+      return MultiStepSignupScreen(email: arguments);
     },
     welcome: (context) => const WelcomeScreen(),
     home: (context) => const HomeDashboard(),
