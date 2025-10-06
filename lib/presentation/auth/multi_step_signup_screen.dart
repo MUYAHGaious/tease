@@ -266,7 +266,8 @@ class _MultiStepSignupScreenState extends State<MultiStepSignupScreen>
                         child: BackdropFilter(
                           filter: ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
                           child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 6.w, vertical: 4.h),
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 begin: Alignment.topLeft,
@@ -588,7 +589,9 @@ class _MultiStepSignupScreenState extends State<MultiStepSignupScreen>
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(4),
             border: Border.all(
-              color: value ? const Color(0xFF008B8B) : Colors.white.withOpacity(0.5),
+              color: value
+                  ? const Color(0xFF008B8B)
+                  : Colors.white.withOpacity(0.5),
               width: 2,
             ),
             color: value ? const Color(0xFF008B8B) : Colors.transparent,
@@ -772,7 +775,8 @@ class _MultiStepSignupScreenState extends State<MultiStepSignupScreen>
     if (mounted) {
       Navigator.pushReplacementNamed(context, '/login', arguments: {
         'email': emailController.text.trim(),
-        'name': '${firstNameController.text.trim()} ${lastNameController.text.trim()}',
+        'name':
+            '${firstNameController.text.trim()} ${lastNameController.text.trim()}',
         'userData': {
           'firstName': firstNameController.text.trim(),
           'lastName': lastNameController.text.trim(),
@@ -793,7 +797,8 @@ class _MultiStepSignupScreenState extends State<MultiStepSignupScreen>
       SnackBar(
         content: Text(
           message,
-          style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w500),
+          style: GoogleFonts.inter(
+              color: Colors.white, fontWeight: FontWeight.w500),
         ),
         backgroundColor: Colors.black87,
         behavior: SnackBarBehavior.floating,

@@ -10,7 +10,8 @@ class WelcomeScreen extends StatefulWidget {
   State<WelcomeScreen> createState() => _WelcomeScreenState();
 }
 
-class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateMixin {
+class _WelcomeScreenState extends State<WelcomeScreen>
+    with TickerProviderStateMixin {
   final TextEditingController emailController = TextEditingController();
   bool isLoading = false;
   late AnimationController _animationController;
@@ -151,7 +152,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
                         filter: ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
                         child: Container(
                           margin: EdgeInsets.symmetric(horizontal: 4.w),
-                          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 6.w, vertical: 4.h),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               begin: Alignment.topLeft,
@@ -175,213 +177,234 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
                               ),
                             ],
                           ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(height: 1.h),
-
-                            // Enhanced email input with better styling
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surface.withOpacity(0.95),
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 5),
-                                ),
-                              ],
-                            ),
-                            child: TextField(
-                              controller: emailController,
-                              style: GoogleFonts.inter(
-                                fontSize: 10.sp,
-                                color: Theme.of(context).colorScheme.onSurface,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: 'Email',
-                                hintStyle: GoogleFonts.inter(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  fontSize: 10.sp,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 5.w,
-                                  vertical: 2.h,
-                                ),
-                                prefixIcon: Icon(
-                                  Icons.email_outlined,
-                                  color: Theme.of(context).colorScheme.primary,
-                                  size: 22,
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 2.5.h),
-
-                          // Enhanced continue button with teal background
-                          Container(
-                            width: double.infinity,
-                            height: 6.5.h,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF008B8B),
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF008B8B).withOpacity(0.4),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 8),
-                                ),
-                              ],
-                            ),
-                            child: ElevatedButton(
-                              onPressed: isLoading ? null : _handleContinue,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                shadowColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                              ),
-                              child: isLoading
-                                  ? const SizedBox(
-                                      height: 24,
-                                      width: 24,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.5,
-                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                      ),
-                                    )
-                                  : Text(
-                                      'Continue',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 11.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                            ),
-                          ),
-                          SizedBox(height: 2.5.h),
-
-                          // Enhanced OR divider
-                          Row(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Expanded(
-                                child: Container(
-                                  height: 1,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Colors.transparent,
-                                        Colors.grey[400]!,
-                                        Colors.transparent,
-                                      ],
+                              SizedBox(height: 1.h),
+
+                              // Enhanced email input with better styling
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .surface
+                                      .withOpacity(0.95),
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary
+                                          .withOpacity(0.2),
+                                      blurRadius: 15,
+                                      offset: const Offset(0, 5),
                                     ),
-                                  ),
+                                  ],
                                 ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 4.w),
-                                child: Text(
-                                  'or',
+                                child: TextField(
+                                  controller: emailController,
                                   style: GoogleFonts.inter(
-                                    color: Colors.grey[400],
-                                    fontSize: 11.sp,
+                                    fontSize: 10.sp,
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
                                     fontWeight: FontWeight.w500,
                                   ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Container(
-                                  height: 1,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Colors.transparent,
-                                        Colors.grey[400]!,
-                                        Colors.transparent,
-                                      ],
+                                  decoration: InputDecoration(
+                                    hintText: 'Email',
+                                    hintStyle: GoogleFonts.inter(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                      fontSize: 10.sp,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    border: InputBorder.none,
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 5.w,
+                                      vertical: 2.h,
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.email_outlined,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                      size: 22,
                                     ),
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
-                          SizedBox(height: 2.5.h),
+                              SizedBox(height: 2.5.h),
 
-                          // Enhanced social buttons
-                          _buildSocialButton(
-                            'Continue with Facebook',
-                            const Color(0xFF1877F2),
-                            _facebookIcon(),
-                          ),
-                          SizedBox(height: 2.5.h),
-                          _buildSocialButton(
-                            'Continue with Google',
-                            Colors.white,
-                            _googleIcon(),
-                            textColor: Colors.black87,
-                          ),
-                          SizedBox(height: 2.5.h),
-                          _buildSocialButton(
-                            'Continue with Apple',
-                            Colors.black,
-                            _appleIcon(),
-                          ),
-
-                          const Spacer(),
-
-                          // Enhanced bottom links
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              GestureDetector(
-                                onTap: () => Navigator.pushNamed(context, '/signup'),
-                                child: RichText(
-                                  text: TextSpan(
-                                    style: GoogleFonts.inter(
-                                      fontSize: 11.sp,
-                                      color: Colors.grey[400],
+                              // Enhanced continue button with teal background
+                              Container(
+                                width: double.infinity,
+                                height: 6.5.h,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF008B8B),
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFF008B8B)
+                                          .withOpacity(0.4),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 8),
                                     ),
-                                    children: [
-                                      const TextSpan(text: "Don't have an account? "),
-                                      TextSpan(
-                                        text: "Sign up",
-                                        style: GoogleFonts.inter(
-                                          color: Theme.of(context).colorScheme.primary,
-                                          fontWeight: FontWeight.w600,
-                                          decoration: TextDecoration.underline,
+                                  ],
+                                ),
+                                child: ElevatedButton(
+                                  onPressed: isLoading ? null : _handleContinue,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    shadowColor: Colors.transparent,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                  ),
+                                  child: isLoading
+                                      ? const SizedBox(
+                                          height: 24,
+                                          width: 24,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.5,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    Colors.white),
+                                          ),
+                                        )
+                                      : Text(
+                                          'Continue',
+                                          style: GoogleFonts.inter(
+                                            fontSize: 11.sp,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                              SizedBox(height: 2.5.h),
+
+                              // Enhanced OR divider
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      height: 1,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            Colors.transparent,
+                                            Colors.grey[400]!,
+                                            Colors.transparent,
+                                          ],
                                         ),
                                       ),
-                                    ],
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 4.w),
+                                    child: Text(
+                                      'or',
+                                      style: GoogleFonts.inter(
+                                        color: Colors.grey[400],
+                                        fontSize: 11.sp,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Container(
+                                      height: 1,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            Colors.transparent,
+                                            Colors.grey[400]!,
+                                            Colors.transparent,
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 2.5.h),
+
+                              // Enhanced social buttons
+                              _buildSocialButton(
+                                'Continue with Facebook',
+                                const Color(0xFF1877F2),
+                                _facebookIcon(),
+                              ),
+                              SizedBox(height: 2.5.h),
+                              _buildSocialButton(
+                                'Continue with Google',
+                                Colors.white,
+                                _googleIcon(),
+                                textColor: Colors.black87,
+                              ),
+                              SizedBox(height: 2.5.h),
+                              _buildSocialButton(
+                                'Continue with Apple',
+                                Colors.black,
+                                _appleIcon(),
+                              ),
+
+                              const Spacer(),
+
+                              // Enhanced bottom links
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () =>
+                                        Navigator.pushNamed(context, '/signup'),
+                                    child: RichText(
+                                      text: TextSpan(
+                                        style: GoogleFonts.inter(
+                                          fontSize: 11.sp,
+                                          color: Colors.grey[400],
+                                        ),
+                                        children: [
+                                          const TextSpan(
+                                              text: "Don't have an account? "),
+                                          TextSpan(
+                                            text: "Sign up",
+                                            style: GoogleFonts.inter(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                              fontWeight: FontWeight.w600,
+                                              decoration:
+                                                  TextDecoration.underline,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 2.h),
+
+                              Center(
+                                child: GestureDetector(
+                                  onTap: () => _handleForgotPassword(),
+                                  child: Text(
+                                    'Forgot your password?',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 11.sp,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                      fontWeight: FontWeight.w600,
+                                      decoration: TextDecoration.underline,
+                                    ),
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                          SizedBox(height: 2.h),
-
-                          Center(
-                            child: GestureDetector(
-                              onTap: () => _handleForgotPassword(),
-                              child: Text(
-                                'Forgot your password?',
-                                style: GoogleFonts.inter(
-                                  fontSize: 11.sp,
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontWeight: FontWeight.w600,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                        ),
                         ),
                       ),
                     ),
@@ -395,7 +418,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
     );
   }
 
-  Widget _buildSocialButton(String text, Color backgroundColor, Widget icon, {Color textColor = Colors.white}) {
+  Widget _buildSocialButton(String text, Color backgroundColor, Widget icon,
+      {Color textColor = Colors.white}) {
     return Container(
       width: double.infinity,
       height: 6.5.h,
@@ -543,7 +567,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
     await Future.delayed(const Duration(milliseconds: 1500));
     setState(() => isLoading = false);
 
-    Navigator.pushNamed(context, '/signup', arguments: emailController.text.trim());
+    Navigator.pushNamed(context, '/signup',
+        arguments: emailController.text.trim());
   }
 
   void _handleSocialLogin(String provider) {
@@ -563,7 +588,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
       SnackBar(
         content: Text(
           message,
-          style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w500),
+          style: GoogleFonts.inter(
+              color: Colors.white, fontWeight: FontWeight.w500),
         ),
         backgroundColor: Colors.black87,
         behavior: SnackBarBehavior.floating,
