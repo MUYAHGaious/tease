@@ -13,7 +13,10 @@ const Color primaryColor = Color(0xFF008B8B);
 const double cardBorderRadius = 16.0;
 
 class AffiliationSelectionScreen extends StatefulWidget {
-  const AffiliationSelectionScreen({super.key});
+  final String? startAffiliation; // 'ict_university' or 'agency'
+  final int? startStep; // 0: affiliation, 1: role, 2: pin
+
+  const AffiliationSelectionScreen({super.key, this.startAffiliation, this.startStep});
 
   @override
   State<AffiliationSelectionScreen> createState() =>
@@ -40,6 +43,7 @@ class _AffiliationSelectionScreenState extends State<AffiliationSelectionScreen>
   String _currentText = 'Hello User, how can we help you today?';
   String? _selectedRole;
   String _enteredPin = '';
+  String? _selectedAgency;
 
   // Step-specific data
   List<Map<String, dynamic>> _currentStepOptions = [];
@@ -95,12 +99,47 @@ class _AffiliationSelectionScreenState extends State<AffiliationSelectionScreen>
     ],
   };
 
+  // Agency selection options
+  final List<Map<String, dynamic>> _agencyOptions = const [
+    {'id': 'moghamo', 'title': 'Moghamo', 'icon': Icons.directions_bus},
+    {'id': 'vatican', 'title': 'Vatican', 'icon': Icons.directions_bus},
+    {'id': 'amour_mezam', 'title': 'Amour Mezam', 'icon': Icons.directions_bus},
+    {'id': 'nso_boyz', 'title': 'NSO Boyz', 'icon': Icons.directions_bus},
+    {'id': 'oasis', 'title': 'Oasis', 'icon': Icons.directions_bus},
+  ];
+
   @override
   void initState() {
     super.initState();
     _themeManager = AdaptiveThemeManager();
     _loadThemePreference();
     _initializeAnimations();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _applyStartParamsIfAny();
+  }
+
+  bool _didApplyStartParams = false;
+
+  void _applyStartParamsIfAny() {
+    if (_didApplyStartParams) return;
+    if (widget.startAffiliation != null) {
+      _selectedAffiliation = widget.startAffiliation;
+      // Prepare role options for the selected affiliation
+      _currentStepOptions = _roleOptions[_selectedAffiliation] ?? [];
+      _currentStep = (widget.startStep != null) ? widget.startStep!.clamp(0, 2) : 1;
+      // Reset animations for the role grid
+      _slideController.reset();
+      _fadeController.reset();
+      _buttonController.reset();
+      _slideController.forward();
+      _fadeController.forward();
+      _didApplyStartParams = true;
+      setState(() {});
+    }
   }
 
   void _initializeAnimations() {
@@ -192,16 +231,122 @@ class _AffiliationSelectionScreenState extends State<AffiliationSelectionScreen>
   }
 
   Widget _buildCurrentStepContent() {
+    final isAgency = _selectedAffiliation == 'agency';
     switch (_currentStep) {
       case 0:
         return _buildAffiliationGrid();
       case 1:
-        return _buildRoleGrid();
+        return isAgency ? _buildAgencyGrid() : _buildRoleGrid();
       case 2:
+        return isAgency ? _buildRoleGrid() : _buildPinEntry();
+      case 3:
         return _buildPinEntry();
       default:
         return _buildAffiliationGrid();
     }
+  }
+
+  Widget _buildAgencyGrid() {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 2.w,
+        mainAxisSpacing: 1.h,
+        childAspectRatio: 1.3,
+      ),
+      itemCount: _agencyOptions.length,
+      itemBuilder: (context, index) {
+        final option = _agencyOptions[index];
+        final isSelected = _selectedAgency == option['id'];
+
+        return AnimatedBuilder(
+          animation: _slideController,
+          builder: (context, child) {
+            final staggerDelay = index * 0.1;
+            final animationValue =
+                (_slideController.value - staggerDelay).clamp(0.0, 1.0);
+
+            if (animationValue <= 0) {
+              return const SizedBox.shrink();
+            }
+
+            return Transform.translate(
+              offset: Offset(0, (1 - animationValue) * 20),
+              child: Opacity(
+                opacity: animationValue,
+                child: _buildAgencyCard(option, isSelected),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildAgencyCard(Map<String, dynamic> option, bool isSelected) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        color: primaryColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isSelected ? Colors.white : Colors.white.withOpacity(0.3),
+          width: isSelected ? 2 : 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isSelected
+                ? Colors.white.withOpacity(0.2)
+                : Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _handleAgencySelection(option['id']),
+          borderRadius: BorderRadius.circular(16),
+          splashColor: primaryColor.withOpacity(0.2),
+          highlightColor: primaryColor.withOpacity(0.1),
+          child: Padding(
+            padding: EdgeInsets.all(3.w),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Material(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: const CircleBorder(),
+                  child: Container(
+                    width: 10.w,
+                    height: 10.w,
+                    alignment: Alignment.center,
+                    child: Icon(
+                      option['icon'],
+                      color: Colors.white,
+                      size: 6.w,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 1.h),
+                Text(
+                  option['title'],
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 11.sp,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildAffiliationGrid() {
@@ -636,44 +781,61 @@ class _AffiliationSelectionScreenState extends State<AffiliationSelectionScreen>
     }
   }
 
-  void _proceedToNextStep() {
+void _proceedToNextStep() {
     if (_isLoading) return;
 
     HapticFeedback.mediumImpact();
 
+    final isAgency = _selectedAffiliation == 'agency';
+
     if (_currentStep == 0) {
-      // Step 1: Affiliation selected, proceed to role selection or complete
       if (_selectedAffiliation == 'regular') {
-        // Regular users go straight to completion
         _completeFlow();
       } else {
-        // Show role selection
         _transitionToNextStep();
       }
     } else if (_currentStep == 1) {
-      // Step 2: Role selected, proceed to PIN entry
-      if (_selectedRole != null) {
-        _transitionToNextStep();
+      if (isAgency) {
+        if (_selectedAgency != null) _transitionToNextStep();
+      } else {
+        if (_selectedRole != null) _transitionToNextStep();
       }
     } else if (_currentStep == 2) {
-      // Step 3: PIN entered, validate and complete
-      if (_enteredPin.length >= 4) {
-        _completeFlow();
+      if (isAgency) {
+        if (_selectedRole != null) _transitionToNextStep();
+      } else {
+        if (_enteredPin.length >= 4) _completeFlow();
       }
+    } else if (_currentStep == 3) {
+      if (_enteredPin.length >= 4) _completeFlow();
     }
   }
 
   void _updateTextForStep() {
+    final isAgency = _selectedAffiliation == 'agency';
     switch (_currentStep) {
       case 0:
         _currentText = 'Hello User, how can we help you today?';
         break;
       case 1:
-        String affiliationName = _affiliationOptions.firstWhere(
-            (option) => option['id'] == _selectedAffiliation)['title'];
-        _currentText = 'What is your role at $affiliationName?';
+        if (isAgency) {
+          _currentText = 'Which agency are you with?';
+        } else {
+          String affiliationName = _affiliationOptions.firstWhere(
+              (option) => option['id'] == _selectedAffiliation)['title'];
+          _currentText = 'What is your role at $affiliationName?';
+        }
         break;
       case 2:
+        if (isAgency) {
+          final agencyName = _agencyOptions
+              .firstWhere((a) => a['id'] == _selectedAgency)['title'];
+          _currentText = 'What is your role at $agencyName?';
+        } else {
+          _currentText = 'Please enter your access PIN';
+        }
+        break;
+      case 3:
         _currentText = 'Please enter your access PIN';
         break;
       default:
@@ -682,12 +844,15 @@ class _AffiliationSelectionScreenState extends State<AffiliationSelectionScreen>
   }
 
   String _getSubtitleForStep() {
+    final isAgency = _selectedAffiliation == 'agency';
     switch (_currentStep) {
       case 0:
         return 'Select your affiliation';
       case 1:
-        return 'Choose your role';
+        return isAgency ? 'Pick your agency' : 'Choose your role';
       case 2:
+        return isAgency ? 'Choose your role' : 'Secure access verification';
+      case 3:
         return 'Secure access verification';
       default:
         return 'Welcome to TEASE!';
@@ -705,9 +870,12 @@ class _AffiliationSelectionScreenState extends State<AffiliationSelectionScreen>
         _currentStep++;
         _isLoading = false;
 
-        // Reset selections for new step
-        if (_currentStep == 1) {
+        // Prepare options when entering role selection step
+        final isAgency = _selectedAffiliation == 'agency';
+        if (!isAgency && _currentStep == 1) {
           _currentStepOptions = _roleOptions[_selectedAffiliation] ?? [];
+        } else if (isAgency && _currentStep == 2) {
+          _currentStepOptions = _roleOptions['agency'] ?? [];
         }
 
         // Update text for new step
@@ -731,6 +899,16 @@ class _AffiliationSelectionScreenState extends State<AffiliationSelectionScreen>
     });
   }
 
+  void _handleAgencySelection(String agencyId) {
+    setState(() {
+      _selectedAgency = agencyId;
+    });
+    HapticFeedback.selectionClick();
+    if (_buttonController.status != AnimationStatus.completed) {
+      _buttonController.forward();
+    }
+  }
+
   void _completeFlow() async {
     setState(() {
       _isLoading = true;
@@ -741,6 +919,9 @@ class _AffiliationSelectionScreenState extends State<AffiliationSelectionScreen>
     await prefs.setString(
         'user_affiliation', _selectedAffiliation ?? 'regular');
     await prefs.setString('user_role', _selectedRole ?? 'passenger');
+    if (_selectedAffiliation == 'agency' && _selectedAgency != null) {
+      await prefs.setString('user_agency', _selectedAgency!);
+    }
 
     // Also save the affiliation title for display
     String affiliationTitle = _affiliationOptions.firstWhere(

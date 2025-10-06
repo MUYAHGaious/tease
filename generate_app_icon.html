@@ -88,92 +88,16 @@
             canvas.width = size;
             canvas.height = size;
             
-            // Clear canvas
-            ctx.clearRect(0, 0, size, size);
+            // Background
+            ctx.fillStyle = '#008B8B';
+            ctx.fillRect(0, 0, size, size);
             
-            // Background gradient
-            const gradient = ctx.createLinearGradient(0, 0, size, size);
-            gradient.addColorStop(0, '#1a4d3a');
-            gradient.addColorStop(1, '#2d5a3d');
-            
-            // Background circle
-            ctx.fillStyle = gradient;
-            ctx.beginPath();
-            ctx.arc(size/2, size/2, size/2 - 4, 0, 2 * Math.PI);
-            ctx.fill();
-            
-            // White border
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = size * 0.015;
-            ctx.stroke();
-            
-            // Scale factor for drawing elements
-            const scale = size / 512;
-            
-            // Bus body
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(120 * scale, 200 * scale, 272 * scale, 120 * scale);
-            ctx.strokeStyle = '#1a4d3a';
-            ctx.lineWidth = 4 * scale;
-            ctx.strokeRect(120 * scale, 200 * scale, 272 * scale, 120 * scale);
-            
-            // Bus windows
-            ctx.fillStyle = '#87CEEB';
-            ctx.fillRect(140 * scale, 220 * scale, 60 * scale, 40 * scale);
-            ctx.fillRect(220 * scale, 220 * scale, 60 * scale, 40 * scale);
-            ctx.fillRect(300 * scale, 220 * scale, 60 * scale, 40 * scale);
-            
-            ctx.strokeStyle = '#1a4d3a';
-            ctx.lineWidth = 2 * scale;
-            ctx.strokeRect(140 * scale, 220 * scale, 60 * scale, 40 * scale);
-            ctx.strokeRect(220 * scale, 220 * scale, 60 * scale, 40 * scale);
-            ctx.strokeRect(300 * scale, 220 * scale, 60 * scale, 40 * scale);
-            
-            // Bus front
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(392 * scale, 210 * scale, 20 * scale, 100 * scale);
-            ctx.strokeStyle = '#1a4d3a';
-            ctx.lineWidth = 4 * scale;
-            ctx.strokeRect(392 * scale, 210 * scale, 20 * scale, 100 * scale);
-            
-            // Bus wheels
-            ctx.fillStyle = '#2a2a2a';
-            ctx.beginPath();
-            ctx.arc(160 * scale, 340 * scale, 25 * scale, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(352 * scale, 340 * scale, 25 * scale, 0, 2 * Math.PI);
-            ctx.fill();
-            
-            ctx.fillStyle = '#666666';
-            ctx.beginPath();
-            ctx.arc(160 * scale, 340 * scale, 15 * scale, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(352 * scale, 340 * scale, 15 * scale, 0, 2 * Math.PI);
-            ctx.fill();
-            
-            // Bus door
-            ctx.fillStyle = '#e0e0e0';
-            ctx.fillRect(120 * scale, 240 * scale, 20 * scale, 60 * scale);
-            ctx.strokeStyle = '#1a4d3a';
-            ctx.lineWidth = 2 * scale;
-            ctx.strokeRect(120 * scale, 240 * scale, 20 * scale, 60 * scale);
-            
-            // Headlights
-            ctx.fillStyle = '#ffff99';
-            ctx.beginPath();
-            ctx.arc(405 * scale, 230 * scale, 8 * scale, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(405 * scale, 280 * scale, 8 * scale, 0, 2 * Math.PI);
-            ctx.fill();
-            
-            // Letter T
-            ctx.fillStyle = '#ffffff';
-            ctx.font = `bold ${48 * scale}px Arial`;
+            // Text
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = `bold ${size * 0.4}px Arial`;
             ctx.textAlign = 'center';
-            ctx.fillText('T', size/2, 420 * scale);
+            ctx.textBaseline = 'middle';
+            ctx.fillText('TEASE', size / 2, size / 2);
         }
 
         function generateAllIcons() {

@@ -144,6 +144,39 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
         'requiresAuth': true,
         'category': 'account',
       },
+      // Role change shortcuts
+      {
+        'icon': Icons.school,
+        'title': 'Change Role: Student',
+        'category': 'account',
+        'onTap': () {
+          Navigator.pop(context);
+          Navigator.pushNamed(
+            context,
+            '/affiliation-selection',
+            arguments: {
+              'affiliation': 'ict_university',
+              'step': 1, // Jump to role selection for university
+            },
+          );
+        },
+      },
+      {
+        'icon': Icons.business,
+        'title': 'Change Role: Agency',
+        'category': 'account',
+        'onTap': () {
+          Navigator.pop(context);
+          Navigator.pushNamed(
+            context,
+            '/affiliation-selection',
+            arguments: {
+              'affiliation': 'agency',
+              'step': 1, // Jump to role selection for agency
+            },
+          );
+        },
+      },
       {
         'icon': Icons.mic,
         'title': 'Voice AI Assistant',

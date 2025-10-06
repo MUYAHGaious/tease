@@ -39,13 +39,8 @@ void main() async {
     await SystemChrome.setPreferredOrientations(
         [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
 
-    // Additional system UI configuration for mobile stability
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Color(0xFF008B8B),
-        statusBarIconBrightness: Brightness.light,
-      ),
-    );
+    // Update status bar to contrast with the current theme
+    updateStatusBarTheme(ThemeNotifier().isDarkMode);
 
     runApp(MyApp());
   } catch (e) {
@@ -53,6 +48,19 @@ void main() async {
     // Fallback - run app anyway
     runApp(MyApp());
   }
+}
+
+void updateStatusBarTheme(bool isDarkMode) {
+  SystemChrome.setSystemUIOverlayStyle(
+    SystemUiOverlayStyle(
+      statusBarColor: isDarkMode 
+          ? const Color(0xFF121212) // Dark background for dark theme
+          : const Color(0xFFf8f9fa), // Light background for light theme
+      statusBarIconBrightness: isDarkMode 
+          ? Brightness.light // Light icons for dark status bar
+          : Brightness.dark,  // Dark icons for light status bar
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -74,6 +82,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _onThemeChanged() {
+    // Update status bar when theme changes
+    updateStatusBarTheme(ThemeNotifier().isDarkMode);
     setState(() {});
   }
 

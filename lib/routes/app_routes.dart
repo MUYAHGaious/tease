@@ -27,7 +27,9 @@ import '../presentation/parent_dashboardSchoolbus/parent_dashboard.dart';
 import '../presentation/favorites/favorites.dart';
 import '../presentation/ticket_booking/ticket_booking_screen.dart';
 import '../presentation/bus_tracking_map/safe_bus_tracking_screen.dart';
-import '../presentation/voice_ai/voice_ai_screen.dart';
+import '../presentation/booking_management/booking_management.dart';
+import '../presentation/auth/agency_selection_screen.dart';
+import '../presentation/auth/role_selection_screen.dart';
 
 class AppRoutes {
   // TODO: Add your routes here
@@ -40,6 +42,8 @@ class AppRoutes {
   static const String authDemo = '/auth-demo';
   static const String forgotPassword = '/forgot-password';
   static const String affiliationSelection = '/affiliation-selection';
+  static const String agencySelection = '/agency-selection';
+  static const String roleSelection = '/role-selection';
   static const String home = '/home';
   static const String seatSelection = '/seat-selection';
   static const String homeDashboard = '/home-dashboard';
@@ -63,6 +67,7 @@ class AppRoutes {
   static const String parentDashboard = '/parent-dashboard';
   static const String conductorDashboard = '/conductor-dashboard';
   static const String bookingClerkDashboard = '/booking-clerk-dashboard';
+  static const String bookingManagement = '/booking-management';
   static const String qrCodeDisplaySchoolbus = '/qr-code-display-schoolbus';
   static const String voiceAi = '/voice-ai';
   static const String favorites = '/favorites';
@@ -91,7 +96,20 @@ class AppRoutes {
     hiScreen: (context) => const HiScreen(),
     authDemo: (context) => const AuthDemoScreen(),
     forgotPassword: (context) => const ForgotPasswordScreen(),
-    affiliationSelection: (context) => const AffiliationSelectionScreen(),
+    affiliationSelection: (context) {
+      final args =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      return AffiliationSelectionScreen(
+        startAffiliation: args != null ? args['affiliation'] as String? : null,
+        startStep: args != null ? args['step'] as int? : null,
+      );
+    },
+    agencySelection: (context) => const AgencySelectionScreen(),
+    roleSelection: (context) {
+      final selectedAgency =
+          ModalRoute.of(context)?.settings.arguments as String;
+      return RoleSelectionScreen(selectedAgency: selectedAgency);
+    },
     seatSelection: (context) => const RedesignedSeatSelection(),
     homeDashboard: (context) => const HomeDashboard(),
     searchBooking: (context) => const SearchBooking(),
@@ -117,10 +135,12 @@ class AppRoutes {
     conductorDashboard: (context) =>
         const MyTickets(), // Placeholder - conductor can see tickets
     bookingClerkDashboard: (context) =>
-        const AdminRouteManagement(), // Placeholder - clerk can manage bookings
+        const BookingManagement(), // Booking management for clerks
+    bookingManagement: (context) =>
+        const BookingManagement(), // Booking management screen
     qrCodeDisplaySchoolbus: (context) =>
         const QrCodeDisplay(), // School bus QR display
-    voiceAi: (context) => const VoiceAIScreen(),
+    voiceAi: (context) => const HomeDashboard(), // Placeholder - Voice AI coming soon
     favorites: (context) => const Favorites(),
     ticketBooking: (context) => const TicketBookingScreen(),
     busTrackingMap: (context) => const SafeBusTrackingScreen(),

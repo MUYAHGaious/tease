@@ -69,13 +69,13 @@ class _SegmentedControlWidgetState extends State<SegmentedControlWidget>
         ),
       ),
       child: Row(
-        children: widget.segments.asMap().entries.map((entry) {
-          final int index = entry.key;
-          final String segment = entry.value;
-          final bool isSelected = index == widget.selectedIndex;
+            children: widget.segments.asMap().entries.map((entry) {
+              final int index = entry.key;
+              final String segment = entry.value;
+              final bool isSelected = index == widget.selectedIndex;
 
-          return Expanded(
-            child: GestureDetector(
+              return Expanded(
+                child: GestureDetector(
               onTap: () {
                 // Add haptic feedback for better UX
                 HapticFeedback.selectionClick();
@@ -104,8 +104,8 @@ class _SegmentedControlWidgetState extends State<SegmentedControlWidget>
                         ]
                       : null,
                 ),
-                child: Center(
-                  child: AnimatedDefaultTextStyle(
+                    child: Center(
+                      child: AnimatedDefaultTextStyle(
                     duration: const Duration(milliseconds: 250),
                     curve: Curves.easeInOutCubic,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -119,14 +119,14 @@ class _SegmentedControlWidgetState extends State<SegmentedControlWidget>
                                   ? FontWeight.w600
                                   : FontWeight.w500,
                             ) ??
-                        const TextStyle(),
-                    child: Text(segment),
+                            const TextStyle(),
+                        child: Text(segment),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-          );
-        }).toList(),
+              );
+            }).toList(),
       ),
     );
   }
