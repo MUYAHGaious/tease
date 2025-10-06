@@ -3,15 +3,19 @@ import 'tokens.dart';
 
 ThemeData buildAppTheme({Brightness brightness = Brightness.light}) {
   final scheme = ColorScheme.fromSeed(
-    seedColor: const Color(0xFF8763FF),
+    seedColor: const Color(0xFF008B8B), // Teal - same as bottom nav
     brightness: brightness,
   ).copyWith(
-    surface: brightness == Brightness.dark ? const Color(0xFF14161C) : const Color(0xFFF7F8FA),
-    onSurface: brightness == Brightness.dark ? Colors.white : const Color(0xFF16181D),
-    primary: const Color(0xFF8763FF),
+    surface: brightness == Brightness.dark
+        ? const Color(0xFF14161C)
+        : const Color(0xFFF7F8FA),
+    onSurface:
+        brightness == Brightness.dark ? Colors.white : const Color(0xFF16181D),
+    primary: const Color(0xFF008B8B), // Teal - same as bottom nav
   );
 
-  final text = ThemeData(brightness: brightness).textTheme.apply(fontFamily: 'Inter');
+  final text =
+      ThemeData(brightness: brightness).textTheme.apply(fontFamily: 'Inter');
 
   return ThemeData(
     useMaterial3: true,
@@ -27,17 +31,17 @@ ThemeData buildAppTheme({Brightness brightness = Brightness.light}) {
     ),
     navigationBarTheme: NavigationBarThemeData(
       height: 68,
-      indicatorColor: scheme.primary.withOpacity(.12),
-      backgroundColor: scheme.surface.withOpacity(.85),
+      indicatorColor: scheme.primary.withValues(alpha: 0.12),
+      backgroundColor: scheme.surface.withValues(alpha: 0.85),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: scheme.surface.withOpacity(.7),
+      fillColor: scheme.surface.withValues(alpha: 0.7),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(const AppTokens().rMd),
+        borderRadius: BorderRadius.circular(AppTokens.rMd),
         borderSide: BorderSide(color: scheme.outlineVariant),
       ),
-      contentPadding: EdgeInsets.all(const AppTokens().s3),
+      contentPadding: const EdgeInsets.all(AppTokens.s3),
     ),
   );
 }

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
@@ -19,14 +18,14 @@ class MyTickets extends StatefulWidget {
 }
 
 class _MyTicketsState extends State<MyTickets> with TickerProviderStateMixin {
-
-  // Theme-aware colors
-  Color get primaryColor => const Color(0xFF008B8B);
-  Color get backgroundColor => ThemeNotifier().isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
-  Color get surfaceColor => ThemeNotifier().isDarkMode ? const Color(0xFF2D2D2D) : Colors.white;
-  Color get textColor => ThemeNotifier().isDarkMode ? Colors.white : Colors.black87;
-  Color get onSurfaceVariantColor => ThemeNotifier().isDarkMode ? Colors.white70 : Colors.black54;
-  Color get shadowColor => ThemeNotifier().isDarkMode ? Colors.black : Colors.grey[300]!;
+  // Theme-aware colors using proper theme system
+  Color get primaryColor => Theme.of(context).colorScheme.primary;
+  Color get backgroundColor => Theme.of(context).scaffoldBackgroundColor;
+  Color get surfaceColor => Theme.of(context).colorScheme.surface;
+  Color get textColor => Theme.of(context).colorScheme.onSurface;
+  Color get onSurfaceVariantColor =>
+      Theme.of(context).colorScheme.onSurfaceVariant;
+  Color get shadowColor => Theme.of(context).colorScheme.shadow;
   int _selectedSegment = 0;
   int _currentBottomNavIndex = 2;
   String _searchQuery = '';
@@ -218,7 +217,7 @@ class _MyTicketsState extends State<MyTickets> with TickerProviderStateMixin {
             child: Container(
               padding: EdgeInsets.all(2.w),
               decoration: BoxDecoration(
-                color: ThemeNotifier().isDarkMode ? Colors.white.withOpacity(0.2) : Colors.grey[100],
+                color: Theme.of(context).colorScheme.surfaceVariant,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -449,8 +448,7 @@ class _MyTicketsState extends State<MyTickets> with TickerProviderStateMixin {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: shadowColor
-                    .withValues(alpha: 0.2),
+                color: shadowColor.withValues(alpha: 0.2),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -464,17 +462,16 @@ class _MyTicketsState extends State<MyTickets> with TickerProviderStateMixin {
                 children: [
                   Text(
                     'Ticket Details',
-                    style:
-                        AppTheme.lightTheme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: textColor,
+                        ),
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
                     icon: CustomIconWidget(
                       iconName: 'close',
-                      color: textColor
-                          .withValues(alpha: 0.7),
+                      color: textColor.withValues(alpha: 0.7),
                       size: 24,
                     ),
                   ),
@@ -503,17 +500,17 @@ class _MyTicketsState extends State<MyTickets> with TickerProviderStateMixin {
               SizedBox(height: 3.h),
               Text(
                 'Booking ID: ${ticket['bookingId']}',
-                style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: textColor,
+                    ),
               ),
               SizedBox(height: 1.h),
               Text(
                 '${ticket['fromCity']} → ${ticket['toCity']}',
-                style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(
-                  color: textColor
-                      .withValues(alpha: 0.7),
-                ),
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: textColor.withValues(alpha: 0.7),
+                    ),
               ),
             ],
           ),

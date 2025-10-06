@@ -20,6 +20,7 @@ class UserHeaderWidget extends StatelessWidget {
       padding: EdgeInsets.all(4.w),
       decoration: AppTheme.getGlassmorphismDecoration(
         borderRadius: 16.0,
+        isDark: Theme.of(context).brightness == Brightness.dark,
       ),
       child: Column(
         children: [
@@ -31,7 +32,7 @@ class UserHeaderWidget extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: AppTheme.primaryLight,
+                    color: Theme.of(context).colorScheme.primary,
                     width: 3,
                   ),
                 ),
@@ -53,7 +54,7 @@ class UserHeaderWidget extends StatelessWidget {
                     width: 7.w,
                     height: 7.w,
                     decoration: BoxDecoration(
-                      color: AppTheme.primaryLight,
+                      color: Theme.of(context).colorScheme.primary,
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: Theme.of(context).scaffoldBackgroundColor,
@@ -62,7 +63,7 @@ class UserHeaderWidget extends StatelessWidget {
                     ),
                     child: CustomIconWidget(
                       iconName: 'edit',
-                      color: AppTheme.onPrimaryLight,
+                      color: Theme.of(context).colorScheme.onPrimary,
                       size: 3.w,
                     ),
                   ),
@@ -160,9 +161,9 @@ class UserHeaderWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           child: LinearProgressIndicator(
             value: progress,
-            backgroundColor: AppTheme.surfaceVariantLight,
+            backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
             valueColor: AlwaysStoppedAnimation<Color>(
-              AppTheme.primaryLight,
+              Theme.of(context).colorScheme.primary,
             ),
             minHeight: 1.h,
           ),

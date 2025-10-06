@@ -40,6 +40,25 @@ class _ProfessionalSuccessWidgetState extends State<ProfessionalSuccessWidget>
 
   bool _showContent = false;
   late PageController _cardPageController;
+  late PageController _ticketPageController;
+  int _currentTicketIndex = 0;
+
+  // Get list of passengers from booking data
+  List<Map<String, dynamic>> get _passengers {
+    final passengers = widget.bookingData["passengers"];
+    if (passengers is List && passengers.isNotEmpty) {
+      return List<Map<String, dynamic>>.from(passengers);
+    }
+    // Fallback to single passenger from main booking data
+    return [
+      {
+        "name": widget.bookingData["passengerName"] ?? widget.bookingData["name"] ?? "N/A",
+        "seat": (widget.bookingData["selectedSeats"] as List?)?.first ?? "N/A",
+        "idCardNumber": widget.bookingData["idCardNumber"] ?? widget.bookingData["cniNumber"] ?? "N/A",
+        "price": widget.bookingData["ticketPrice"] ?? widget.bookingData["totalPrice"] ?? "0",
+      }
+    ];
+  }
 
   // Material Design 3 compliant colors
   Color get primaryColor => const Color(0xFF008B8B);
@@ -52,6 +71,7 @@ class _ProfessionalSuccessWidgetState extends State<ProfessionalSuccessWidget>
   void initState() {
     super.initState();
     _cardPageController = PageController();
+    _ticketPageController = PageController();
     _setupAnimations();
     _startSuccessSequence();
   }
@@ -158,6 +178,45 @@ class _ProfessionalSuccessWidgetState extends State<ProfessionalSuccessWidget>
       curve: Curves.easeInOut,
     );
     HapticFeedback.mediumImpact();
+
+    // Phase 5: Auto-cycle through all tickets if multiple passengers
+    if (_passengers.length > 1) {
+      await Future.delayed(const Duration(milliseconds: 1500)); // Wait on QR code
+
+      // Cycle through remaining tickets
+      for (int i = 1; i < _passengers.length; i++) {
+        // Swipe to next ticket with smooth animation
+        await _ticketPageController.animateToPage(
+          i,
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeInOutCubic,
+        );
+        HapticFeedback.selectionClick();
+
+        // Stay on details page for a moment
+        await Future.delayed(const Duration(milliseconds: 1500));
+
+        // Auto-slide to QR code for this ticket
+        await _cardPageController.animateToPage(
+          1,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+        HapticFeedback.lightImpact();
+
+        // Wait on QR code
+        await Future.delayed(const Duration(milliseconds: 1500));
+
+        // Go back to details for next ticket (unless it's the last one)
+        if (i < _passengers.length - 1) {
+          await _cardPageController.animateToPage(
+            0,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        }
+      }
+    }
   }
 
   @override
@@ -167,6 +226,7 @@ class _ProfessionalSuccessWidgetState extends State<ProfessionalSuccessWidget>
     _pageController.dispose();
     _tickMoveController.dispose();
     _cardPageController.dispose();
+    _ticketPageController.dispose();
     super.dispose();
   }
 
@@ -176,7 +236,7 @@ class _ProfessionalSuccessWidgetState extends State<ProfessionalSuccessWidget>
       backgroundColor: backgroundColor,
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
+          padding: EdgeInsets.symmetric(horizontal: 6.w),
           child: Stack(
             children: [
               // Animated tick (always visible, moves and scales)
@@ -184,7 +244,28 @@ class _ProfessionalSuccessWidgetState extends State<ProfessionalSuccessWidget>
                 position: _tickMoveAnimation,
                 child: ScaleTransition(
                   scale: _tickScaleAnimation,
-                  child: Center(child: _buildSuccessIndicator()),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _buildSuccessIndicator(),
+                        SizedBox(height: 3.h),
+                        // Payment Successful text appears with tick
+                        if (!_showContent)
+                          FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: Text(
+                              'Payment Successful',
+                              style: GoogleFonts.inter(
+                                fontSize: 20.sp,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
               // Main page (booking summary) - only shows after tick moves
@@ -199,23 +280,36 @@ class _ProfessionalSuccessWidgetState extends State<ProfessionalSuccessWidget>
   Widget _buildMainPage() {
     return Column(
       children: [
-        // Top spacer (less space since tick is at top)
-        SizedBox(height: 15.h),
+        // Swipeable content (entire upper section)
+        Expanded(
+          child: PageView.builder(
+            controller: _ticketPageController,
+            itemCount: _passengers.length,
+            physics: const BouncingScrollPhysics(),
+            pageSnapping: true,
+            padEnds: true,
+            onPageChanged: (index) {
+              setState(() {
+                _currentTicketIndex = index;
+              });
+              HapticFeedback.selectionClick();
+            },
+            itemBuilder: (context, index) {
+              return _buildFullTicketPage(index);
+            },
+          ),
+        ),
 
-        // Success message
-        _buildSuccessMessage(),
+        SizedBox(height: 1.5.h),
 
-        SizedBox(height: 4.h),
-
-        // Booking summary card
-        Expanded(child: _buildBookingSummaryCard()),
-
-        SizedBox(height: 2.h),
+        // Ticket indicator (only show for multiple passengers)
+        if (_passengers.length > 1) _buildTicketIndicator(),
+        if (_passengers.length > 1) SizedBox(height: 1.5.h),
 
         // Action buttons at bottom
         _buildActionButtons(),
 
-        SizedBox(height: 2.h),
+        SizedBox(height: 1.5.h),
       ],
     );
   }
@@ -254,162 +348,193 @@ class _ProfessionalSuccessWidgetState extends State<ProfessionalSuccessWidget>
     );
   }
 
-  Widget _buildSuccessMessage() {
-    return FadeTransition(
-      opacity: _fadeAnimation,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: Column(
-          children: [
-            Text(
-              'Booking ID: ${widget.bookingData["bookingId"]?.toString() ?? "N/A"}',
-              style: GoogleFonts.inter(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600,
-                color: Colors.white.withOpacity(0.9),
-              ),
+  Widget _buildFullTicketPage(int passengerIndex) {
+    final passenger = _passengers[passengerIndex];
+    final passengerCount = _passengers.length;
+
+    return Column(
+      children: [
+        SizedBox(height: 5.h),
+
+        // Success message with passenger-specific booking ID
+        FadeTransition(
+          opacity: _fadeAnimation,
+          child: ScaleTransition(
+            scale: _scaleAnimation,
+            child: Column(
+              children: [
+                Text(
+                  'Booking ID: ${widget.bookingData["bookingId"]?.toString() ?? "N/A"}',
+                  style: GoogleFonts.inter(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(height: 1.h),
+                Text(
+                  passengerCount > 1
+                    ? 'Ticket ${passengerIndex + 1} of $passengerCount - ${passenger["name"] ?? "N/A"}'
+                    : 'Ticket Confirmed',
+                  style: GoogleFonts.inter(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white.withOpacity(0.85),
+                    height: 1.3,
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 2.h),
-            Text(
-              'Payment Successful',
-              style: GoogleFonts.inter(
-                fontSize: 24.sp,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-                height: 1.2,
-              ),
-            ),
-            SizedBox(height: 1.h),
-            Text(
-              'Your booking has been confirmed',
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w400,
-                color: Colors.white.withOpacity(0.9),
-                height: 1.4,
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
+
+        SizedBox(height: 2.h),
+
+        // Ticket card for this passenger
+        Expanded(
+          child: SlideTransition(
+            position: _slideAnimation,
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: _buildTicketCard(passengerIndex),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildBookingSummaryCard() {
-    return SlideTransition(
-      position: _slideAnimation,
-      child: FadeTransition(
-        opacity: _fadeAnimation,
-        child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(4.w),
+  Widget _buildTicketIndicator() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(_passengers.length, (index) {
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          margin: EdgeInsets.symmetric(horizontal: 1.w),
+          width: index == _currentTicketIndex ? 8.w : 2.w,
+          height: 2.w,
           decoration: BoxDecoration(
-            color: surfaceColor,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: onSurfaceColor.withOpacity(0.08),
-              width: 1,
+            color: index == _currentTicketIndex
+              ? primaryColor
+              : Colors.white.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(1.w),
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget _buildTicketCard(int passengerIndex) {
+    final passenger = _passengers[passengerIndex];
+    return ClipPath(
+      clipper: TicketClipper(),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(4.w),
+        decoration: BoxDecoration(
+          color: surfaceColor,
+          border: Border.all(
+            color: onSurfaceColor.withOpacity(0.08),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+              spreadRadius: 0,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-                spreadRadius: 0,
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            children: [
+              Icon(
+                Icons.receipt_long_outlined,
+                color: primaryColor,
+                size: 5.w,
+              ),
+              SizedBox(width: 3.w),
+              Text(
+                'Booking Summary',
+                style: GoogleFonts.inter(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w600,
+                  color: onSurfaceColor,
+                ),
               ),
             ],
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Row(
-                children: [
-                  Icon(
-                    Icons.receipt_long_outlined,
-                    color: primaryColor,
-                    size: 5.w,
-                  ),
-                  SizedBox(width: 3.w),
-                  Text(
-                    'Booking Summary',
-                    style: GoogleFonts.inter(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                      color: onSurfaceColor,
-                    ),
-                  ),
-                ],
-              ),
 
-              SizedBox(height: 2.h),
+          SizedBox(height: 2.h),
 
-              // Slide-based content
-              Expanded(
-                child: PageView(
-                  controller: _cardPageController,
-                  children: [
-                    // Slide 1: Route and details
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 2.w),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+          // Slide-based content
+          Expanded(
+            child: PageView(
+              controller: _cardPageController,
+              children: [
+                // Slide 1: Route and details
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 2.w),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Column(
                         children: [
                           // Route
                           _buildRouteSection(),
 
                           SizedBox(height: 1.5.h),
 
-                          // Details grid
-                          _buildDetailsGrid(),
+                          // Details grid for specific passenger
+                          _buildDetailsGrid(passengerIndex),
+                        ],
+                      ),
 
-                          SizedBox(height: 2.h),
-
-                          // Slide indicator
-                          Center(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                    color: primaryColor,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                SizedBox(width: 1.w),
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                    color: onSurfaceColor.withOpacity(0.3),
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                              ],
+                      // Slide indicator at bottom
+                      Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: primaryColor,
+                                shape: BoxShape.circle,
+                              ),
                             ),
-                          ),
-                        ],
+                            SizedBox(width: 1.w),
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: onSurfaceColor.withOpacity(0.3),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-
-                    // Slide 2: QR Code
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 2.w),
-                      child: Column(
-                        children: [
-                          SizedBox(height: 2.h),
-                          Center(child: _buildQRSection()),
-                          SizedBox(height: 2.h),
-                        ],
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+
+                // Slide 2: QR Code for this passenger
+                Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 2.w),
+                    child: _buildQRSection(passengerIndex),
+                  ),
+                ),
+              ],
+            ),
           ),
+        ],
         ),
       ),
     );
@@ -425,17 +550,17 @@ class _ProfessionalSuccessWidgetState extends State<ProfessionalSuccessWidget>
               Text(
                 'FROM',
                 style: GoogleFonts.inter(
-                  fontSize: 10.sp,
+                  fontSize: 8.sp,
                   fontWeight: FontWeight.w500,
                   color: onSurfaceColor.withOpacity(0.6),
                   letterSpacing: 0.5,
                 ),
               ),
-              SizedBox(height: 0.5.h),
+              SizedBox(height: 0.3.h),
               Text(
                 widget.bookingData["fromCity"]?.toString() ?? "N/A",
                 style: GoogleFonts.inter(
-                  fontSize: 16.sp,
+                  fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
                   color: onSurfaceColor,
                 ),
@@ -444,12 +569,12 @@ class _ProfessionalSuccessWidgetState extends State<ProfessionalSuccessWidget>
           ),
         ),
         Container(
-          padding: EdgeInsets.all(2.w),
+          padding: EdgeInsets.all(1.5.w),
           decoration: BoxDecoration(
             color: primaryColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(Icons.arrow_forward, color: primaryColor, size: 4.w),
+          child: Icon(Icons.arrow_forward, color: primaryColor, size: 3.5.w),
         ),
         Expanded(
           child: Column(
@@ -458,17 +583,17 @@ class _ProfessionalSuccessWidgetState extends State<ProfessionalSuccessWidget>
               Text(
                 'TO',
                 style: GoogleFonts.inter(
-                  fontSize: 10.sp,
+                  fontSize: 8.sp,
                   fontWeight: FontWeight.w500,
                   color: onSurfaceColor.withOpacity(0.6),
                   letterSpacing: 0.5,
                 ),
               ),
-              SizedBox(height: 0.5.h),
+              SizedBox(height: 0.3.h),
               Text(
                 widget.bookingData["toCity"]?.toString() ?? "N/A",
                 style: GoogleFonts.inter(
-                  fontSize: 16.sp,
+                  fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
                   color: onSurfaceColor,
                 ),
@@ -481,48 +606,300 @@ class _ProfessionalSuccessWidgetState extends State<ProfessionalSuccessWidget>
     );
   }
 
-  Widget _buildDetailsGrid() {
-    return Container(
-      padding: EdgeInsets.all(4.w),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Row(
+  Widget _buildDetailsGrid(int passengerIndex) {
+    final passenger = _passengers[passengerIndex];
+    return Column(
+      children: [
+        // Passenger Name Section
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(2.5.w),
+          decoration: BoxDecoration(
+            color: onSurfaceColor.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: onSurfaceColor.withOpacity(0.08),
+              width: 1,
+            ),
+          ),
+          child: Row(
             children: [
-              Expanded(
-                child: _buildDetailItem(
-                  'Date',
-                  widget.bookingData["date"]?.toString() ?? "N/A",
+              Container(
+                padding: EdgeInsets.all(1.5.w),
+                decoration: BoxDecoration(
+                  color: primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Icon(
+                  Icons.person_outline,
+                  color: primaryColor,
+                  size: 3.5.w,
                 ),
               ),
+              SizedBox(width: 2.5.w),
               Expanded(
-                child: _buildDetailItem(
-                  'Time',
-                  widget.bookingData["departureTime"]?.toString() ?? "N/A",
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'PASSENGER NAME',
+                      style: GoogleFonts.inter(
+                        fontSize: 7.sp,
+                        fontWeight: FontWeight.w500,
+                        color: onSurfaceColor.withOpacity(0.5),
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                    SizedBox(height: 0.2.h),
+                    Text(
+                      passenger["name"]?.toString() ?? "N/A",
+                      style: GoogleFonts.inter(
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w600,
+                        color: onSurfaceColor,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          SizedBox(height: 2.h),
-          Row(
+        ),
+
+        SizedBox(height: 1.2.h),
+
+        // ID Card Number Section
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(2.5.w),
+          decoration: BoxDecoration(
+            color: onSurfaceColor.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: onSurfaceColor.withOpacity(0.08),
+              width: 1,
+            ),
+          ),
+          child: Row(
             children: [
-              Expanded(
-                child: _buildDetailItem(
-                  'Seats',
-                  (widget.bookingData["selectedSeats"] as List?)?.join(", ") ??
-                      "N/A",
+              Container(
+                padding: EdgeInsets.all(1.5.w),
+                decoration: BoxDecoration(
+                  color: primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Icon(
+                  Icons.badge_outlined,
+                  color: primaryColor,
+                  size: 3.5.w,
                 ),
               ),
+              SizedBox(width: 2.5.w),
               Expanded(
-                child: _buildDetailItem(
-                  'Total',
-                  "${widget.bookingData["totalPrice"]?.toString() ?? "0"} XAF",
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'ID CARD NUMBER',
+                      style: GoogleFonts.inter(
+                        fontSize: 7.sp,
+                        fontWeight: FontWeight.w500,
+                        color: onSurfaceColor.withOpacity(0.5),
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                    SizedBox(height: 0.2.h),
+                    Text(
+                      passenger["idCardNumber"]?.toString() ?? "N/A",
+                      style: GoogleFonts.inter(
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w600,
+                        color: onSurfaceColor,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ),
             ],
+          ),
+        ),
+
+        SizedBox(height: 1.2.h),
+
+        // Time Information
+        Container(
+          padding: EdgeInsets.all(2.5.w),
+          decoration: BoxDecoration(
+            color: primaryColor.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: _buildCompactDetail(
+                  Icons.schedule,
+                  'DEPARTURE',
+                  widget.bookingData["departureTime"]?.toString() ?? "N/A",
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 4.h,
+                color: onSurfaceColor.withOpacity(0.1),
+              ),
+              Expanded(
+                child: _buildCompactDetail(
+                  Icons.access_time,
+                  'ARRIVAL',
+                  widget.bookingData["arrivalTime"]?.toString() ?? "N/A",
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        SizedBox(height: 1.2.h),
+
+        // Date and Seats Grid
+        Row(
+          children: [
+            Expanded(
+              child: _buildInfoCard(
+                'Date',
+                widget.bookingData["date"]?.toString() ?? "N/A",
+                Icons.calendar_today_outlined,
+              ),
+            ),
+            SizedBox(width: 1.5.w),
+            Expanded(
+              child: _buildInfoCard(
+                'Seat',
+                passenger["seat"]?.toString() ?? "N/A",
+                Icons.event_seat_outlined,
+              ),
+            ),
+          ],
+        ),
+
+        SizedBox(height: 1.2.h),
+
+        // Total Amount
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(2.5.w),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                primaryColor.withOpacity(0.1),
+                primaryColor.withOpacity(0.05),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: primaryColor.withOpacity(0.3),
+              width: 1.5,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.payments_outlined,
+                    color: primaryColor,
+                    size: 4.w,
+                  ),
+                  SizedBox(width: 2.w),
+                  Text(
+                    'TICKET PRICE',
+                    style: GoogleFonts.inter(
+                      fontSize: 8.sp,
+                      fontWeight: FontWeight.w600,
+                      color: onSurfaceColor.withOpacity(0.6),
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                "XAF ${passenger["price"]?.toString() ?? widget.bookingData["ticketPrice"]?.toString() ?? "0"}",
+                style: GoogleFonts.inter(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w700,
+                  color: primaryColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCompactDetail(IconData icon, String label, String value) {
+    return Column(
+      children: [
+        Icon(icon, color: primaryColor, size: 3.5.w),
+        SizedBox(height: 0.3.h),
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 7.sp,
+            fontWeight: FontWeight.w500,
+            color: onSurfaceColor.withOpacity(0.5),
+            letterSpacing: 0.2,
+          ),
+        ),
+        SizedBox(height: 0.2.h),
+        Text(
+          value,
+          style: GoogleFonts.inter(
+            fontSize: 11.sp,
+            fontWeight: FontWeight.w600,
+            color: onSurfaceColor,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoCard(String label, String value, IconData icon) {
+    return Container(
+      padding: EdgeInsets.all(2.5.w),
+      decoration: BoxDecoration(
+        color: onSurfaceColor.withOpacity(0.03),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: onSurfaceColor.withOpacity(0.08),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: primaryColor, size: 3.5.w),
+          SizedBox(height: 0.7.h),
+          Text(
+            label.toUpperCase(),
+            style: GoogleFonts.inter(
+              fontSize: 7.sp,
+              fontWeight: FontWeight.w500,
+              color: onSurfaceColor.withOpacity(0.5),
+              letterSpacing: 0.2,
+            ),
+          ),
+          SizedBox(height: 0.2.h),
+          Text(
+            value,
+            style: GoogleFonts.inter(
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w600,
+              color: onSurfaceColor,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -538,7 +915,8 @@ class _ProfessionalSuccessWidgetState extends State<ProfessionalSuccessWidget>
           style: GoogleFonts.inter(
             fontSize: 10.sp,
             fontWeight: FontWeight.w500,
-            color: onSurfaceColor.withOpacity(0.6),
+            color: Colors.white.withOpacity(0.7),
+            letterSpacing: 0.5,
           ),
         ),
         SizedBox(height: 0.5.h),
@@ -547,34 +925,78 @@ class _ProfessionalSuccessWidgetState extends State<ProfessionalSuccessWidget>
           style: GoogleFonts.inter(
             fontSize: 13.sp,
             fontWeight: FontWeight.w600,
-            color: onSurfaceColor,
+            color: Colors.white,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildQRSection() {
+  Widget _buildQRSection(int passengerIndex) {
+    final passenger = _passengers[passengerIndex];
+    final bookingId = widget.bookingData["bookingId"] ?? "12345";
+    final ticketData = '$bookingId-P${passengerIndex + 1}-${passenger["seat"]}-${passenger["name"]}';
+
     return Column(
       mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          padding: EdgeInsets.all(2.w),
+          padding: EdgeInsets.all(4.w),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: onSurfaceColor.withOpacity(0.1),
               width: 1,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 20,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          child: QrImageView(
-            data:
-                'https://tease.com/booking/${widget.bookingData["bookingId"] ?? "12345"}',
-            version: QrVersions.auto,
-            size: 50.w, // Reduced from 60.w to prevent overflow
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.black,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              QrImageView(
+                data: 'https://tease.com/ticket/$ticketData',
+                version: QrVersions.auto,
+                size: 70.w,
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black,
+                errorCorrectionLevel: QrErrorCorrectLevel.H,
+              ),
+              // Logo overlay (black logo on white background)
+              Container(
+                width: 70.w * 0.22,
+                height: 70.w * 0.22,
+                child: Image.asset(
+                  'qr_logo.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 1.5.h),
+        Text(
+          'Ticket for ${passenger["name"]}',
+          style: GoogleFonts.inter(
+            fontSize: 11.sp,
+            fontWeight: FontWeight.w600,
+            color: onSurfaceColor,
+          ),
+        ),
+        SizedBox(height: 0.3.h),
+        Text(
+          'Seat ${passenger["seat"]} • Show to driver',
+          style: GoogleFonts.inter(
+            fontSize: 9.sp,
+            fontWeight: FontWeight.w400,
+            color: onSurfaceColor.withOpacity(0.6),
           ),
         ),
       ],
@@ -710,4 +1132,84 @@ class _ProfessionalSuccessWidgetState extends State<ProfessionalSuccessWidget>
     HapticFeedback.lightImpact();
     // Implement copy link functionality
   }
+}
+
+// Custom clipper for ticket-style corner cuts
+class TicketClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    final cornerCutRadius = 15.0;
+    final sideCutRadius = 12.0;
+    final midHeight = size.height / 2;
+
+    // Start from top-left (after corner cut)
+    path.moveTo(cornerCutRadius, 0);
+
+    // Top edge
+    path.lineTo(size.width - cornerCutRadius, 0);
+
+    // Top-right corner cut (concave)
+    path.arcToPoint(
+      Offset(size.width, cornerCutRadius),
+      radius: Radius.circular(cornerCutRadius),
+      clockwise: false,
+    );
+
+    // Right edge - top half
+    path.lineTo(size.width, midHeight - sideCutRadius);
+
+    // Right center cut (concave)
+    path.arcToPoint(
+      Offset(size.width, midHeight + sideCutRadius),
+      radius: Radius.circular(sideCutRadius),
+      clockwise: false,
+    );
+
+    // Right edge - bottom half
+    path.lineTo(size.width, size.height - cornerCutRadius);
+
+    // Bottom-right corner cut (concave)
+    path.arcToPoint(
+      Offset(size.width - cornerCutRadius, size.height),
+      radius: Radius.circular(cornerCutRadius),
+      clockwise: false,
+    );
+
+    // Bottom edge
+    path.lineTo(cornerCutRadius, size.height);
+
+    // Bottom-left corner cut (concave)
+    path.arcToPoint(
+      Offset(0, size.height - cornerCutRadius),
+      radius: Radius.circular(cornerCutRadius),
+      clockwise: false,
+    );
+
+    // Left edge - bottom half
+    path.lineTo(0, midHeight + sideCutRadius);
+
+    // Left center cut (concave)
+    path.arcToPoint(
+      Offset(0, midHeight - sideCutRadius),
+      radius: Radius.circular(sideCutRadius),
+      clockwise: false,
+    );
+
+    // Left edge - top half
+    path.lineTo(0, cornerCutRadius);
+
+    // Top-left corner cut (concave)
+    path.arcToPoint(
+      Offset(cornerCutRadius, 0),
+      radius: Radius.circular(cornerCutRadius),
+      clockwise: false,
+    );
+
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }

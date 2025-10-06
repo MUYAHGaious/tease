@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
-import '../../core/app_export.dart';
 import '../../theme/theme_notifier.dart';
 import '../../widgets/global_bottom_navigation.dart';
 import './widgets/animated_toggle_widget.dart';
@@ -20,16 +19,13 @@ class ProfileSettings extends StatefulWidget {
 
 class _ProfileSettingsState extends State<ProfileSettings>
     with TickerProviderStateMixin {
-  // Theme-aware colors
-  Color get primaryColor => const Color(0xFF008B8B);
-  Color get backgroundColor =>
-      ThemeNotifier().isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
-  Color get surfaceColor =>
-      ThemeNotifier().isDarkMode ? const Color(0xFF2D2D2D) : Colors.white;
-  Color get textColor =>
-      ThemeNotifier().isDarkMode ? Colors.white : Colors.black87;
+  // Theme-aware colors using proper theme system
+  Color get primaryColor => Theme.of(context).colorScheme.primary;
+  Color get backgroundColor => Theme.of(context).scaffoldBackgroundColor;
+  Color get surfaceColor => Theme.of(context).colorScheme.surface;
+  Color get textColor => Theme.of(context).colorScheme.onSurface;
   Color get onSurfaceVariantColor =>
-      ThemeNotifier().isDarkMode ? Colors.white70 : Colors.black54;
+      Theme.of(context).colorScheme.onSurfaceVariant;
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
 
@@ -264,6 +260,7 @@ class _ProfileSettingsState extends State<ProfileSettings>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).colorScheme.surface,
         title: Text(
           isEnabled ? "Phone Lookup Enabled" : "Phone Lookup Disabled",
           style: TextStyle(
@@ -281,9 +278,7 @@ class _ProfileSettingsState extends State<ProfileSettings>
                   : "Others can no longer lookup your information using your phone number.",
               style: TextStyle(
                 fontSize: 14,
-                color: ThemeNotifier().isDarkMode
-                    ? Colors.white70
-                    : Colors.black54,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             SizedBox(height: 16),
@@ -318,9 +313,7 @@ class _ProfileSettingsState extends State<ProfileSettings>
                         : "• Your information is private and secure\n• Only you can book tickets for yourself\n• Enhanced privacy protection",
                     style: TextStyle(
                       fontSize: 11,
-                      color: ThemeNotifier().isDarkMode
-                          ? Colors.white70
-                          : Colors.black54,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -455,12 +448,32 @@ class _ProfileSettingsState extends State<ProfileSettings>
                               width: 70.w,
                               margin: EdgeInsets.only(right: 4.w),
                               decoration: BoxDecoration(
-                                color: surfaceColor,
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? const Color(0xFF2A2A2A)
+                                        : surfaceColor,
+                                    Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? const Color(0xFF1F1F1F)
+                                        : surfaceColor.withOpacity(0.8),
+                                  ],
+                                ),
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: primaryColor.withOpacity(0.2),
+                                  color: primaryColor.withOpacity(0.3),
                                   style: BorderStyle.solid,
                                 ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: primaryColor.withOpacity(0.1),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
                               ),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,

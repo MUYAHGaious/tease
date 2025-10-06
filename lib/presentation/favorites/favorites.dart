@@ -14,19 +14,14 @@ class Favorites extends StatefulWidget {
 }
 
 class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
-  // Theme-aware colors
-  Color get primaryColor => const Color(0xFF008B8B);
-  Color get backgroundColor =>
-      ThemeNotifier().isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
-  Color get surfaceColor =>
-      ThemeNotifier().isDarkMode ? const Color(0xFF2D2D2D) : Colors.white;
-  Color get textColor =>
-      ThemeNotifier().isDarkMode ? Colors.white : Colors.black87;
+  // Theme-aware colors using proper theme system
+  Color get primaryColor => Theme.of(context).colorScheme.primary;
+  Color get backgroundColor => Theme.of(context).scaffoldBackgroundColor;
+  Color get surfaceColor => Theme.of(context).colorScheme.surface;
+  Color get textColor => Theme.of(context).colorScheme.onSurface;
   Color get onSurfaceVariantColor =>
-      ThemeNotifier().isDarkMode ? Colors.white70 : Colors.black54;
-  Color get borderColor => ThemeNotifier().isDarkMode
-      ? Colors.white.withOpacity(0.2)
-      : Colors.grey.withOpacity(0.3);
+      Theme.of(context).colorScheme.onSurfaceVariant;
+  Color get borderColor => Theme.of(context).colorScheme.outline;
   int _selectedSegment = 0;
   String _searchQuery = '';
   bool _isRefreshing = false;
@@ -48,7 +43,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
       "rating": 4.8,
       "frequency": "Every 2 hours",
       "icon": Icons.route,
-      "color": Color(0xFF1a4d3a),
+      "color": const Color(0xFF008B8B), // Medium Turquoise - same as bottom nav
     },
     {
       "id": "FAV002",
@@ -60,7 +55,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
       "rating": 4.6,
       "frequency": "20+ routes",
       "icon": Icons.directions_bus,
-      "color": Color(0xFF2d5a3d),
+      "color": const Color(0xFF008B8B), // Medium Turquoise - same as bottom nav
     },
     {
       "id": "FAV003",
@@ -72,7 +67,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
       "rating": 4.7,
       "frequency": "Daily departures",
       "icon": Icons.route,
-      "color": Color(0xFF4a7c59),
+      "color": const Color(0xFF008B8B), // Medium Turquoise - same as bottom nav
     },
     {
       "id": "FAV004",
@@ -84,7 +79,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
       "rating": 4.4,
       "frequency": "15+ daily trips",
       "icon": Icons.location_city,
-      "color": Color(0xFF0d2921),
+      "color": const Color(0xFF008B8B), // Medium Turquoise - same as bottom nav
     },
   ];
 
@@ -180,10 +175,15 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            primaryColor.withOpacity(0.05),
-            Colors.white,
-          ],
+          colors: ThemeNotifier().isDarkMode
+              ? [
+                  const Color(0xFF2A2A2A).withOpacity(0.8),
+                  const Color(0xFF1F1F1F).withOpacity(0.9),
+                ]
+              : [
+                  primaryColor.withOpacity(0.05),
+                  Colors.white,
+                ],
         ),
         border: Border(
           bottom: BorderSide(

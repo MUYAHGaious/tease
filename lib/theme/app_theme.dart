@@ -8,10 +8,12 @@ class AppTheme {
 
   // Teal/Turquoise Color Palette (matching hero image)
   static const Color primaryLight = Color(0xFF008B8B); // Medium turquoise
-  static const Color primaryVariantLight = Color(0xFF48CAE4); // Light turquoise
-  static const Color secondaryLight = Color(0xFF0077B6); // Deep blue accent
+  static const Color primaryVariantLight =
+      Color(0xFF008B8B); // Teal - same as primary
+  static const Color secondaryLight =
+      Color(0xFF008B8B); // Teal - same as primary
   static const Color secondaryVariantLight =
-      Color(0xFF023E8A); // Darker blue variant
+      Color(0xFF008B8B); // Teal - same as primary
   static const Color backgroundLight = Color(0xFFf8f9fa); // Soft off-white
   static const Color surfaceLight = Color(0xFFffffff); // Pure white
   static const Color surfaceVariantLight = Color(0xFFf1f3f4); // Subtle gray
@@ -32,13 +34,12 @@ class AppTheme {
   static const Color neutralLight = Color(0xFF95a5a6); // Gray neutral
 
   // Dark theme variants (maintaining teal/turquoise philosophy)
-  static const Color primaryDark =
-      Color(0xFF48CAE4); // Light turquoise for dark mode
+  static const Color primaryDark = Color(0xFF008B8B); // Teal - same as primary
   static const Color primaryVariantDark = Color(0xFF008B8B); // Medium turquoise
   static const Color secondaryDark =
-      Color(0xFF0077B6); // Deep blue (consistent)
+      Color(0xFF008B8B); // Teal - same as primary
   static const Color secondaryVariantDark =
-      Color(0xFF023E8A); // Darker blue variant
+      Color(0xFF008B8B); // Teal - same as primary
   static const Color backgroundDark =
       Color(0xFF121212); // Material dark background
   static const Color surfaceDark = Color(0xFF1e1e1e); // Dark surface
@@ -719,20 +720,39 @@ class AppTheme {
     Color? backgroundColor,
     double borderRadius = 16.0,
     double blurRadius = 10.0,
+    bool isDark = false,
   }) {
+    // More appealing colors for dark mode cards
+    final Color surfaceColor = isDark
+        ? const Color(0xFF2A2A2A) // Darker, more sophisticated gray
+        : surfaceLight;
+    final Color shadowColor = isDark
+        ? const Color(0x40000000) // Stronger shadow for depth
+        : shadowLight;
+    final Color borderColor = isDark
+        ? const Color(0xFF404040).withOpacity(0.3) // Subtle border
+        : Colors.white.withOpacity(0.2);
+
     return BoxDecoration(
-      color: backgroundColor ?? surfaceLight.withOpacity(0.8),
+      color: backgroundColor ?? surfaceColor.withOpacity(isDark ? 0.95 : 0.8),
       borderRadius: BorderRadius.circular(borderRadius),
       border: Border.all(
-        color: Colors.white.withOpacity(0.2),
+        color: borderColor,
         width: 1,
       ),
       boxShadow: [
         BoxShadow(
-          color: shadowLight,
+          color: shadowColor,
           blurRadius: blurRadius,
           offset: const Offset(0, 4),
         ),
+        // Additional subtle inner shadow for dark mode depth
+        if (isDark)
+          BoxShadow(
+            color: const Color(0xFF1A1A1A).withOpacity(0.5),
+            blurRadius: 2,
+            offset: const Offset(0, 1),
+          ),
       ],
     );
   }

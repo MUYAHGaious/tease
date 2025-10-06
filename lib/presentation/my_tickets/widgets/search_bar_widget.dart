@@ -64,21 +64,27 @@ class _SearchBarWidgetState extends State<SearchBarWidget>
                   scale: _scaleAnimation.value,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: AppTheme.lightTheme.colorScheme.surface
-                          .withValues(alpha: 0.1),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surface
+                          .withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: _isSearchActive
-                            ? AppTheme.lightTheme.colorScheme.primary
-                            : AppTheme.lightTheme.colorScheme.outline
-                                .withValues(alpha: 0.2),
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withOpacity(0.2),
                         width: _isSearchActive ? 2 : 1,
                       ),
                       boxShadow: _isSearchActive
                           ? [
                               BoxShadow(
-                                color: AppTheme.lightTheme.colorScheme.primary
-                                    .withValues(alpha: 0.1),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withOpacity(0.1),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
@@ -111,18 +117,22 @@ class _SearchBarWidgetState extends State<SearchBarWidget>
                       decoration: InputDecoration(
                         hintText: widget.hintText,
                         hintStyle:
-                            AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                          color: AppTheme.lightTheme.colorScheme.onSurface
-                              .withValues(alpha: 0.6),
-                        ),
+                            Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withOpacity(0.6),
+                                ),
                         prefixIcon: Padding(
                           padding: EdgeInsets.all(3.w),
                           child: CustomIconWidget(
                             iconName: 'search',
                             color: _isSearchActive
-                                ? AppTheme.lightTheme.colorScheme.primary
-                                : AppTheme.lightTheme.colorScheme.onSurface
-                                    .withValues(alpha: 0.6),
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withOpacity(0.6),
                             size: 20,
                           ),
                         ),
@@ -141,7 +151,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget>
                                     iconName: 'clear',
                                     color: AppTheme
                                         .lightTheme.colorScheme.onSurface
-                                        .withValues(alpha: 0.6),
+                                        .withOpacity(0.6),
                                     size: 20,
                                   ),
                                 ),
@@ -153,7 +163,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget>
                           vertical: 2.h,
                         ),
                       ),
-                      style: AppTheme.lightTheme.textTheme.bodyMedium,
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
                 );
@@ -167,12 +177,14 @@ class _SearchBarWidgetState extends State<SearchBarWidget>
               child: Container(
                 padding: EdgeInsets.all(3.w),
                 decoration: BoxDecoration(
-                  color: AppTheme.lightTheme.colorScheme.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.lightTheme.colorScheme.primary
-                          .withValues(alpha: 0.3),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withOpacity(0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -180,7 +192,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget>
                 ),
                 child: CustomIconWidget(
                   iconName: 'tune',
-                  color: AppTheme.lightTheme.colorScheme.onPrimary,
+                  color: Theme.of(context).colorScheme.onPrimary,
                   size: 24,
                 ),
               ),

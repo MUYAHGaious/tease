@@ -36,14 +36,16 @@ class SettingsItemWidget extends StatelessWidget {
                   width: 10.w,
                   height: 10.w,
                   decoration: BoxDecoration(
-                    color: AppTheme.lightTheme.colorScheme.primary
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primary
                         .withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Center(
                     child: CustomIconWidget(
                       iconName: iconName,
-                      color: AppTheme.lightTheme.colorScheme.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       size: 5.w,
                     ),
                   ),

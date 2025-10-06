@@ -87,8 +87,8 @@ class _GlobalBottomNavigationState extends State<GlobalBottomNavigation>
       _currentIndex = index;
     });
 
-    // Navigate to respective route
-    Navigator.pushReplacementNamed(context, _routes[index]);
+    // Navigate to respective route using pushNamed to maintain navigation stack
+    Navigator.pushNamed(context, _routes[index]);
   }
 
   @override

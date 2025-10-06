@@ -34,30 +34,15 @@ class TicketCardWidget extends StatefulWidget {
 
 class _TicketCardWidgetState extends State<TicketCardWidget>
     with TickerProviderStateMixin {
-  late AnimationController _qrAnimationController;
-  late Animation<double> _qrPulseAnimation;
   bool _isExpanded = false;
 
   @override
   void initState() {
     super.initState();
-    _qrAnimationController = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    );
-    _qrPulseAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _qrAnimationController,
-      curve: Curves.easeInOut,
-    ));
-    _qrAnimationController.repeat(reverse: true);
   }
 
   @override
   void dispose() {
-    _qrAnimationController.dispose();
     super.dispose();
   }
 
@@ -74,18 +59,15 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
             decoration: BoxDecoration(
-              color: AppTheme.lightTheme.colorScheme.surface
-                  .withValues(alpha: 0.1),
+              color: Theme.of(context).colorScheme.surface.withOpacity(0.1),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: AppTheme.lightTheme.colorScheme.outline
-                    .withValues(alpha: 0.2),
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
                 width: 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AppTheme.lightTheme.colorScheme.shadow
-                      .withValues(alpha: 0.1),
+                  color: Theme.of(context).colorScheme.shadow.withOpacity(0.1),
                   blurRadius: 20,
                   offset: const Offset(0, 4),
                 ),
@@ -133,17 +115,19 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
             children: [
               Text(
                 'Booking ID: ${widget.ticketData['bookingId']}',
-                style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
-                  color: AppTheme.lightTheme.colorScheme.onSurface
-                      .withValues(alpha: 0.7),
-                ),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.7),
+                    ),
               ),
               SizedBox(height: 0.5.h),
               Text(
                 widget.ticketData['busOperator'] ?? 'Tease Express',
-                style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
             ],
           ),
@@ -152,7 +136,7 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
           padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
           decoration: BoxDecoration(
             color: _getStatusColorValue(widget.ticketData['status'])
-                .withValues(alpha: 0.1),
+                .withOpacity(0.1),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: _getStatusColorValue(widget.ticketData['status']),
@@ -162,10 +146,10 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
           child: Text(
             widget.ticketData['status']?.toString().toUpperCase() ??
                 'CONFIRMED',
-            style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
-              color: _getStatusColorValue(widget.ticketData['status']),
-              fontWeight: FontWeight.w600,
-            ),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: _getStatusColorValue(widget.ticketData['status']),
+                  fontWeight: FontWeight.w600,
+                ),
           ),
         ),
       ],
@@ -181,16 +165,18 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
             children: [
               Text(
                 widget.ticketData['fromCity'] ?? 'Douala',
-                style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
               ),
               Text(
                 widget.ticketData['fromTerminal'] ?? 'Port Authority',
-                style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
-                  color: AppTheme.lightTheme.colorScheme.onSurface
-                      .withValues(alpha: 0.7),
-                ),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.7),
+                    ),
               ),
             ],
           ),
@@ -203,32 +189,30 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
                 width: 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: AppTheme.lightTheme.colorScheme.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   shape: BoxShape.circle,
                 ),
               ),
               Container(
                 width: 8.w,
                 height: 2,
-                color: AppTheme.lightTheme.colorScheme.primary
-                    .withValues(alpha: 0.3),
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
               ),
               CustomIconWidget(
                 iconName: 'directions_bus',
-                color: AppTheme.lightTheme.colorScheme.primary,
+                color: Theme.of(context).colorScheme.primary,
                 size: 20,
               ),
               Container(
                 width: 8.w,
                 height: 2,
-                color: AppTheme.lightTheme.colorScheme.primary
-                    .withValues(alpha: 0.3),
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
               ),
               Container(
                 width: 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: AppTheme.lightTheme.colorScheme.secondary,
+                  color: Theme.of(context).colorScheme.secondary,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -241,16 +225,18 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
             children: [
               Text(
                 widget.ticketData['toCity'] ?? 'Yaoundé',
-                style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
               ),
               Text(
                 widget.ticketData['toTerminal'] ?? 'South Station',
-                style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
-                  color: AppTheme.lightTheme.colorScheme.onSurface
-                      .withValues(alpha: 0.7),
-                ),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.7),
+                    ),
               ),
             ],
           ),
@@ -263,10 +249,10 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
     return Container(
       padding: EdgeInsets.all(3.w),
       decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surface.withValues(alpha: 0.5),
+        color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.1),
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
         ),
       ),
       child: Row(
@@ -281,8 +267,7 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
           Container(
             width: 1,
             height: 6.h,
-            color:
-                AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
           ),
           Expanded(
             child: _buildDetailItem(
@@ -294,8 +279,7 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
           Container(
             width: 1,
             height: 6.h,
-            color:
-                AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
           ),
           Expanded(
             child: _buildDetailItem(
@@ -314,23 +298,22 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
       children: [
         CustomIconWidget(
           iconName: iconName,
-          color: AppTheme.lightTheme.colorScheme.primary,
+          color: Theme.of(context).colorScheme.primary,
           size: 24,
         ),
         SizedBox(height: 1.h),
         Text(
           label,
-          style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
-            color: AppTheme.lightTheme.colorScheme.onSurface
-                .withValues(alpha: 0.7),
-          ),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              ),
         ),
         SizedBox(height: 0.5.h),
         Text(
           value,
-          style: AppTheme.lightTheme.textTheme.labelMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
           textAlign: TextAlign.center,
         ),
       ],
@@ -347,41 +330,32 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
       child: Container(
         padding: EdgeInsets.all(3.w),
         decoration: BoxDecoration(
-          color: AppTheme.lightTheme.colorScheme.surface.withValues(alpha: 0.3),
+          color: Theme.of(context).colorScheme.surface.withOpacity(0.3),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color:
-                AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.1),
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
           ),
         ),
         child: Row(
           children: [
-            AnimatedBuilder(
-              animation: _qrPulseAnimation,
-              builder: (context, child) {
-                return Transform.scale(
-                  scale: _qrPulseAnimation.value,
-                  child: Container(
-                    width: 15.w,
-                    height: 15.w,
-                    decoration: BoxDecoration(
-                      color: AppTheme.lightTheme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: AppTheme.lightTheme.colorScheme.primary,
-                        width: 2,
-                      ),
-                    ),
-                    child: Center(
-                      child: CustomIconWidget(
-                        iconName: 'qr_code',
-                        color: AppTheme.lightTheme.colorScheme.primary,
-                        size: 8.w,
-                      ),
-                    ),
-                  ),
-                );
-              },
+            Container(
+              width: 15.w,
+              height: 15.w,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.primary,
+                  width: 2,
+                ),
+              ),
+              child: Center(
+                child: CustomIconWidget(
+                  iconName: 'qr_code',
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 8.w,
+                ),
+              ),
             ),
             SizedBox(width: 4.w),
             Expanded(
@@ -390,25 +364,26 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
                 children: [
                   Text(
                     'Digital Ticket',
-                    style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                   SizedBox(height: 0.5.h),
                   Text(
                     'Tap to ${_isExpanded ? 'collapse' : 'expand'} QR code',
-                    style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
-                      color: AppTheme.lightTheme.colorScheme.onSurface
-                          .withValues(alpha: 0.7),
-                    ),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.7),
+                        ),
                   ),
                 ],
               ),
             ),
             CustomIconWidget(
               iconName: _isExpanded ? 'expand_less' : 'expand_more',
-              color: AppTheme.lightTheme.colorScheme.onSurface
-                  .withValues(alpha: 0.7),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               size: 24,
             ),
           ],
@@ -421,10 +396,10 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
     return Container(
       padding: EdgeInsets.all(3.w),
       decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surface.withValues(alpha: 0.3),
+        color: Theme.of(context).colorScheme.surface.withOpacity(0.3),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.1),
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
         ),
       ),
       child: isUpcoming ? _buildUpcomingActions() : _buildPastActions(),
@@ -438,7 +413,7 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
           child: _buildActionButton(
             'cancel',
             'Cancel',
-            AppTheme.lightTheme.colorScheme.error,
+            Theme.of(context).colorScheme.error,
             widget.onCancel,
           ),
         ),
@@ -447,7 +422,7 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
           child: _buildActionButton(
             'edit',
             'Modify',
-            AppTheme.lightTheme.colorScheme.primary,
+            Theme.of(context).colorScheme.primary,
             widget.onModify,
           ),
         ),
@@ -456,7 +431,7 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
           child: _buildActionButton(
             'share',
             'Share',
-            AppTheme.lightTheme.colorScheme.secondary,
+            Theme.of(context).colorScheme.secondary,
             widget.onShare,
           ),
         ),
@@ -471,7 +446,7 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
           child: _buildActionButton(
             'refresh',
             'Rebook',
-            AppTheme.lightTheme.colorScheme.primary,
+            Theme.of(context).colorScheme.primary,
             widget.onRebook,
           ),
         ),
@@ -480,7 +455,7 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
           child: _buildActionButton(
             'star',
             'Rate',
-            AppTheme.lightTheme.colorScheme.secondary,
+            Theme.of(context).colorScheme.secondary,
             widget.onRate,
           ),
         ),
@@ -489,7 +464,7 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
           child: _buildActionButton(
             'download',
             'Receipt',
-            AppTheme.lightTheme.colorScheme.tertiary,
+            Theme.of(context).colorScheme.tertiary,
             widget.onDownload,
           ),
         ),
@@ -513,7 +488,7 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: color.withValues(alpha: 0.3),
+              color: color.withOpacity(0.3),
               width: 1,
             ),
           ),
@@ -527,10 +502,10 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
               SizedBox(height: 0.5.h),
               Text(
                 label,
-                style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: color,
+                      fontWeight: FontWeight.w500,
+                    ),
               ),
             ],
           ),
@@ -557,15 +532,15 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
   Color _getStatusColorValue(String? status) {
     switch (status?.toLowerCase()) {
       case 'confirmed':
-        return AppTheme.lightTheme.colorScheme.tertiary;
+        return Theme.of(context).colorScheme.tertiary;
       case 'upcoming':
-        return AppTheme.lightTheme.colorScheme.primary;
+        return Theme.of(context).colorScheme.primary;
       case 'completed':
-        return AppTheme.lightTheme.colorScheme.tertiary;
+        return Theme.of(context).colorScheme.tertiary;
       case 'cancelled':
-        return AppTheme.lightTheme.colorScheme.error;
+        return Theme.of(context).colorScheme.error;
       default:
-        return AppTheme.lightTheme.colorScheme.primary;
+        return Theme.of(context).colorScheme.primary;
     }
   }
 }

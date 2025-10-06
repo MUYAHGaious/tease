@@ -533,11 +533,11 @@ class _MultiStepSignupScreenState extends State<MultiStepSignupScreen>
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.95),
+        color: Theme.of(context).colorScheme.surface.withOpacity(0.95),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF008B8B).withOpacity(0.2),
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -550,13 +550,13 @@ class _MultiStepSignupScreenState extends State<MultiStepSignupScreen>
         validator: validator,
         style: GoogleFonts.inter(
           fontSize: 10.sp,
-          color: Colors.black87,
+          color: Theme.of(context).colorScheme.onSurface,
           fontWeight: FontWeight.w500,
         ),
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: GoogleFonts.inter(
-            color: Colors.grey[500],
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
             fontSize: 10.sp,
           ),
           border: InputBorder.none,
@@ -566,7 +566,7 @@ class _MultiStepSignupScreenState extends State<MultiStepSignupScreen>
           ),
           prefixIcon: Icon(
             icon,
-            color: const Color(0xFF008B8B),
+            color: Theme.of(context).colorScheme.primary,
             size: 22,
           ),
           suffixIcon: suffixIcon,

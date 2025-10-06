@@ -247,11 +247,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                           // Password Input
                           Container(
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.95),
+                              color: Theme.of(context).colorScheme.surface.withOpacity(0.95),
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF20B2AA).withOpacity(0.2),
+                                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
                                   blurRadius: 15,
                                   offset: const Offset(0, 5),
                                 ),
@@ -262,13 +262,13 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                               obscureText: !isPasswordVisible,
                               style: GoogleFonts.inter(
                                 fontSize: 10.sp,
-                                color: Colors.black87,
+                                color: Theme.of(context).colorScheme.onSurface,
                                 fontWeight: FontWeight.w500,
                               ),
                               decoration: InputDecoration(
                                 hintText: 'Password',
                                 hintStyle: GoogleFonts.inter(
-                                  color: Colors.grey[500],
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   fontSize: 10.sp,
                                 ),
                                 border: InputBorder.none,
@@ -278,7 +278,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                 ),
                                 prefixIcon: Icon(
                                   Icons.lock_outline,
-                                  color: const Color(0xFF20B2AA),
+                                  color: Theme.of(context).colorScheme.primary,
                                   size: 22,
                                 ),
                                 suffixIcon: GestureDetector(
@@ -295,7 +295,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                         'View',
                                         style: GoogleFonts.inter(
                                           fontSize: 10.sp,
-                                          color: const Color(0xFF20B2AA),
+                                          color: Theme.of(context).colorScheme.primary,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),

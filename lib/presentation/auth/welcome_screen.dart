@@ -183,11 +183,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
                             // Enhanced email input with better styling
                           Container(
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.95),
+                              color: Theme.of(context).colorScheme.surface.withOpacity(0.95),
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF20B2AA).withOpacity(0.2),
+                                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
                                   blurRadius: 15,
                                   offset: const Offset(0, 5),
                                 ),
@@ -197,13 +197,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
                               controller: emailController,
                               style: GoogleFonts.inter(
                                 fontSize: 10.sp,
-                                color: Colors.black87,
+                                color: Theme.of(context).colorScheme.onSurface,
                                 fontWeight: FontWeight.w500,
                               ),
                               decoration: InputDecoration(
                                 hintText: 'Email',
                                 hintStyle: GoogleFonts.inter(
-                                  color: Colors.grey[500],
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   fontSize: 10.sp,
                                   fontWeight: FontWeight.w400,
                                 ),
@@ -214,7 +214,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
                                 ),
                                 prefixIcon: Icon(
                                   Icons.email_outlined,
-                                  color: const Color(0xFF20B2AA),
+                                  color: Theme.of(context).colorScheme.primary,
                                   size: 22,
                                 ),
                               ),
@@ -353,7 +353,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
                                       TextSpan(
                                         text: "Sign up",
                                         style: GoogleFonts.inter(
-                                          color: const Color(0xFF20B2AA),
+                                          color: Theme.of(context).colorScheme.primary,
                                           fontWeight: FontWeight.w600,
                                           decoration: TextDecoration.underline,
                                         ),
@@ -373,7 +373,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
                                 'Forgot your password?',
                                 style: GoogleFonts.inter(
                                   fontSize: 11.sp,
-                                  color: const Color(0xFF20B2AA),
+                                  color: Theme.of(context).colorScheme.primary,
                                   fontWeight: FontWeight.w600,
                                   decoration: TextDecoration.underline,
                                 ),

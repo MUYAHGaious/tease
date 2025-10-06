@@ -21,31 +21,30 @@ class SegmentedControlWidget extends StatefulWidget {
 }
 
 class _SegmentedControlWidgetState extends State<SegmentedControlWidget>
-    with TickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
-  late Animation<double> _slideAnimation;
+  late Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 250),
       vsync: this,
     );
-    _slideAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
+    _animation = CurvedAnimation(
       parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+      curve: Curves.easeInOutCubic,
+    );
+    _animationController.forward();
   }
 
   @override
   void didUpdateWidget(SegmentedControlWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.selectedIndex != widget.selectedIndex) {
-      _animationController.forward(from: 0.0);
+      _animationController.reset();
+      _animationController.forward();
     }
   }
 
@@ -59,80 +58,74 @@ class _SegmentedControlWidgetState extends State<SegmentedControlWidget>
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
-      padding: EdgeInsets.all(1.w),
+      padding: EdgeInsets.all(0.5.w),
       decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surface.withValues(alpha: 0.1),
+        color: Theme.of(context).colorScheme.surface.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
           width: 1,
         ),
       ),
-      child: Stack(
-        children: [
-          AnimatedBuilder(
-            animation: _slideAnimation,
-            builder: (context, child) {
-              return AnimatedPositioned(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                left:
-                    (widget.selectedIndex * (100 / widget.segments.length)).w -
-                        2.w,
-                top: 0,
-                bottom: 0,
-                width: (100 / widget.segments.length).w,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AppTheme.lightTheme.colorScheme.primary,
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.lightTheme.colorScheme.primary
-                            .withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-          Row(
-            children: widget.segments.asMap().entries.map((entry) {
-              final int index = entry.key;
-              final String segment = entry.value;
-              final bool isSelected = index == widget.selectedIndex;
+      child: Row(
+        children: widget.segments.asMap().entries.map((entry) {
+          final int index = entry.key;
+          final String segment = entry.value;
+          final bool isSelected = index == widget.selectedIndex;
 
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () => widget.onSelectionChanged(index),
-                  child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 2.h),
-                    child: Center(
-                      child: AnimatedDefaultTextStyle(
-                        duration: const Duration(milliseconds: 200),
-                        style: AppTheme.lightTheme.textTheme.titleMedium
-                                ?.copyWith(
+          return Expanded(
+            child: GestureDetector(
+              onTap: () {
+                // Add haptic feedback for better UX
+                HapticFeedback.selectionClick();
+                widget.onSelectionChanged(index);
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOutCubic,
+                margin: EdgeInsets.all(0.5.w),
+                padding: EdgeInsets.symmetric(vertical: 2.h, horizontal: 2.w),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.primary
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Center(
+                  child: AnimatedDefaultTextStyle(
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeInOutCubic,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               color: isSelected
-                                  ? AppTheme.lightTheme.colorScheme.onPrimary
-                                  : AppTheme.lightTheme.colorScheme.onSurface
-                                      .withValues(alpha: 0.7),
+                                  ? Theme.of(context).colorScheme.onPrimary
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withOpacity(0.7),
                               fontWeight: isSelected
                                   ? FontWeight.w600
                                   : FontWeight.w500,
                             ) ??
-                            const TextStyle(),
-                        child: Text(segment),
-                      ),
-                    ),
+                        const TextStyle(),
+                    child: Text(segment),
                   ),
                 ),
-              );
-            }).toList(),
-          ),
-        ],
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }

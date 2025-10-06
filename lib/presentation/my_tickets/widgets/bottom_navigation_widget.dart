@@ -21,12 +21,11 @@ class BottomNavigationWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surface.withValues(alpha: 0.95),
+        color: Theme.of(context).colorScheme.surface.withOpacity(0.95),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         boxShadow: [
           BoxShadow(
-            color:
-                AppTheme.lightTheme.colorScheme.shadow.withValues(alpha: 0.1),
+            color: Theme.of(context).colorScheme.shadow.withOpacity(0.1),
             blurRadius: 20,
             offset: const Offset(0, -4),
           ),
@@ -42,17 +41,17 @@ class BottomNavigationWidget extends StatelessWidget {
             type: BottomNavigationBarType.fixed,
             backgroundColor: Colors.transparent,
             elevation: 0,
-            selectedItemColor: AppTheme.lightTheme.colorScheme.primary,
-            unselectedItemColor: AppTheme.lightTheme.colorScheme.onSurface
-                .withValues(alpha: 0.6),
+            selectedItemColor: Theme.of(context).colorScheme.primary,
+            unselectedItemColor:
+                Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
             selectedLabelStyle:
-                AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+                Theme.of(context).textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
             unselectedLabelStyle:
-                AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w400,
-            ),
+                Theme.of(context).textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.w400,
+                    ),
             items: [
               BottomNavigationBarItem(
                 icon: _buildNavIcon('home', 0),
@@ -85,15 +84,15 @@ class BottomNavigationWidget extends StatelessWidget {
       padding: EdgeInsets.all(isSelected ? 2.w : 1.w),
       decoration: BoxDecoration(
         color: isSelected
-            ? AppTheme.lightTheme.colorScheme.primary.withValues(alpha: 0.1)
+            ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
             : Colors.transparent,
         borderRadius: BorderRadius.circular(12),
       ),
       child: CustomIconWidget(
         iconName: iconName,
         color: isSelected
-            ? AppTheme.lightTheme.colorScheme.primary
-            : AppTheme.lightTheme.colorScheme.onSurface.withValues(alpha: 0.6),
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
         size: isSelected ? 26 : 24,
       ),
     );

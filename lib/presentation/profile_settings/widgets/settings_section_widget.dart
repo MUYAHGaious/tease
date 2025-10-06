@@ -25,7 +25,7 @@ class SettingsSectionWidget extends StatelessWidget {
             title,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: AppTheme.lightTheme.colorScheme.primary,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
           ),
         ),
@@ -33,6 +33,7 @@ class SettingsSectionWidget extends StatelessWidget {
           margin: EdgeInsets.symmetric(horizontal: 4.w),
           decoration: AppTheme.getGlassmorphismDecoration(
             borderRadius: 12.0,
+            isDark: Theme.of(context).brightness == Brightness.dark,
           ),
           child: Column(
             children: children,

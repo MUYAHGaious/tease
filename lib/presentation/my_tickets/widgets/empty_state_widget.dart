@@ -27,24 +27,26 @@ class EmptyStateWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildIllustration(),
+            _buildIllustration(context),
             SizedBox(height: 4.h),
             Text(
               title,
-              style: AppTheme.lightTheme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppTheme.lightTheme.colorScheme.onSurface,
-              ),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 2.h),
             Text(
               subtitle,
-              style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                color: AppTheme.lightTheme.colorScheme.onSurface
-                    .withValues(alpha: 0.7),
-                height: 1.5,
-              ),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.7),
+                    height: 1.5,
+                  ),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 4.h),
@@ -67,7 +69,7 @@ class EmptyStateWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildIllustration() {
+  Widget _buildIllustration(BuildContext context) {
     if (illustrationUrl != null) {
       return Container(
         width: 60.w,
@@ -88,17 +90,17 @@ class EmptyStateWidget extends StatelessWidget {
       width: 40.w,
       height: 20.h,
       decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.primary.withValues(alpha: 0.1),
+        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: AppTheme.lightTheme.colorScheme.primary.withValues(alpha: 0.2),
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
           width: 2,
         ),
       ),
       child: Center(
         child: CustomIconWidget(
           iconName: 'confirmation_number',
-          color: AppTheme.lightTheme.colorScheme.primary.withValues(alpha: 0.5),
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
           size: 15.w,
         ),
       ),

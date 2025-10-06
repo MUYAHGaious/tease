@@ -30,12 +30,12 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
   String _userRole = 'passenger';
   String _affiliationTitle = 'Public Transport';
 
-  // Theme-aware colors that prevent glitching
-  Color get primaryColor => const Color(0xFF008B8B);
-  Color get backgroundColor => ThemeNotifier().isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
-  Color get textColor => ThemeNotifier().isDarkMode ? Colors.white : Colors.black87;
-  Color get surfaceColor => ThemeNotifier().isDarkMode ? const Color(0xFF2D2D2D) : Colors.white;
-  Color get onSurfaceColor => ThemeNotifier().isDarkMode ? Colors.white70 : Colors.black54;
+  // Theme-aware colors using proper theme system
+  Color get primaryColor => Theme.of(context).colorScheme.primary;
+  Color get backgroundColor => Theme.of(context).scaffoldBackgroundColor;
+  Color get textColor => Theme.of(context).colorScheme.onSurface;
+  Color get surfaceColor => Theme.of(context).colorScheme.surface;
+  Color get onSurfaceColor => Theme.of(context).colorScheme.onSurfaceVariant;
 
   @override
   void initState() {
@@ -59,7 +59,8 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
     final prefs = await SharedPreferences.getInstance();
     _userAffiliation = prefs.getString('user_affiliation') ?? 'regular';
     _userRole = prefs.getString('user_role') ?? 'passenger';
-    _affiliationTitle = prefs.getString('user_affiliation_title') ?? 'Public Transport';
+    _affiliationTitle =
+        prefs.getString('user_affiliation_title') ?? 'Public Transport';
 
     _currentUser = AppState().currentUser;
     _availableMenuItems = _getMenuItemsForAffiliation();
@@ -465,22 +466,49 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
     return Container(
       width: maxDrawerWidth, // Material Design 3 spec
       child: Drawer(
-        child: Container(
-          color: AppTheme.backgroundLight,
-          child: SafeArea(
-            child: Column(
-              children: [
-                // Modern Header with clean design
-                _buildModernHeader(),
-
-                // Categorized Menu Items with better organization
-                Expanded(
-                  child: _buildCategorizedMenu(),
+        child: ClipRRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              decoration: BoxDecoration(
+                color: backgroundColor.withOpacity(0.9),
+                border: Border(
+                  right: BorderSide(
+                    color: primaryColor.withOpacity(0.3),
+                    width: 1.5,
+                  ),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: primaryColor.withOpacity(0.15),
+                    blurRadius: 25,
+                    offset: const Offset(8, 0),
+                    spreadRadius: 3,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(2, 0),
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: SafeArea(
+                child: Column(
+                  children: [
+                    // Modern Header with clean design
+                    _buildModernHeader(),
 
-                // Clean Bottom Actions
-                _buildCleanBottomActions(),
-              ],
+                    // Categorized Menu Items with better organization
+                    Expanded(
+                      child: _buildCategorizedMenu(),
+                    ),
+
+                    // Clean Bottom Actions
+                    _buildCleanBottomActions(),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -526,7 +554,7 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
                 Text(
                   _currentUser?.name ?? 'Guest User',
                   style: TextStyle(
-                    color: AppTheme.onSurfaceLight,
+                    color: textColor,
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
                   ),
@@ -733,7 +761,7 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
               Text(
                 title,
                 style: TextStyle(
-                  color: AppTheme.onSurfaceLight.withOpacity(0.7),
+                  color: onSurfaceColor.withOpacity(0.7),
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.5,
@@ -810,7 +838,7 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
                       Text(
                         item['title'],
                         style: TextStyle(
-                          color: AppTheme.onSurfaceLight,
+                          color: textColor,
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w500,
                         ),
@@ -841,7 +869,7 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
                 // Arrow with proper sizing
                 Icon(
                   isSpecial ? Icons.arrow_forward : Icons.arrow_forward_ios,
-                  color: AppTheme.onSurfaceLight.withOpacity(0.4),
+                  color: onSurfaceColor.withOpacity(0.4),
                   size: isSpecial ? 4.5.w : 3.5.w,
                 ),
               ],
@@ -859,7 +887,7 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(
-            color: AppTheme.onSurfaceLight.withOpacity(0.1),
+            color: onSurfaceColor.withOpacity(0.1),
             width: 1,
           ),
         ),
@@ -899,7 +927,8 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
               Expanded(
                 flex: 1,
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.5.h),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.5.h),
                   child: IconButton(
                     icon: AnimatedSwitcher(
                       duration: const Duration(milliseconds: 300),
@@ -909,13 +938,16 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
                             begin: 0.0,
                             end: 1.0,
                           ).animate(animation),
-                          child: FadeTransition(opacity: animation, child: child),
+                          child:
+                              FadeTransition(opacity: animation, child: child),
                         );
                       },
                       child: Icon(
-                        ThemeNotifier().isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                        ThemeNotifier().isDarkMode
+                            ? Icons.light_mode
+                            : Icons.dark_mode,
                         key: ValueKey(ThemeNotifier().isDarkMode),
-                        color: AppTheme.onSurfaceLight.withOpacity(0.8),
+                        color: onSurfaceColor.withOpacity(0.8),
                         size: 4.5.w,
                       ),
                     ),
@@ -949,7 +981,7 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
     required VoidCallback onTap,
     bool isDestructive = false,
   }) {
-    final color = isDestructive ? Colors.red.shade600 : AppTheme.onSurfaceLight;
+    final color = isDestructive ? Colors.red.shade600 : textColor;
 
     return Material(
       color: Colors.transparent,
@@ -1003,7 +1035,7 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
             child: Text(
               'Cancel',
               style: TextStyle(
-                color: AppTheme.onSurfaceLight.withOpacity(0.7),
+                color: onSurfaceColor.withOpacity(0.7),
                 fontWeight: FontWeight.w500,
               ),
             ),

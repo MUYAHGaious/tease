@@ -214,11 +214,11 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
                               Expanded(
                                 child: Container(
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.95),
+                                    color: Theme.of(context).colorScheme.surface.withOpacity(0.95),
                                     borderRadius: BorderRadius.circular(16),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: const Color(0xFF20B2AA).withOpacity(0.2),
+                                        color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
                                         blurRadius: 15,
                                         offset: const Offset(0, 5),
                                       ),
@@ -228,13 +228,13 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
                                     controller: firstNameController,
                                     style: GoogleFonts.inter(
                                       fontSize: 10.sp,
-                                      color: Colors.black87,
+                                      color: Theme.of(context).colorScheme.onSurface,
                                       fontWeight: FontWeight.w500,
                                     ),
                                     decoration: InputDecoration(
                                       hintText: 'First Name',
                                       hintStyle: GoogleFonts.inter(
-                                        color: Colors.grey[500],
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                                         fontSize: 10.sp,
                                       ),
                                       border: InputBorder.none,
@@ -244,7 +244,7 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
                                       ),
                                       prefixIcon: Icon(
                                         Icons.person_outline,
-                                        color: const Color(0xFF20B2AA),
+                                        color: Theme.of(context).colorScheme.primary,
                                         size: 20,
                                       ),
                                     ),
@@ -255,11 +255,11 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
                               Expanded(
                                 child: Container(
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.95),
+                                    color: Theme.of(context).colorScheme.surface.withOpacity(0.95),
                                     borderRadius: BorderRadius.circular(16),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: const Color(0xFF20B2AA).withOpacity(0.2),
+                                        color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
                                         blurRadius: 15,
                                         offset: const Offset(0, 5),
                                       ),
@@ -269,13 +269,13 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
                                     controller: lastNameController,
                                     style: GoogleFonts.inter(
                                       fontSize: 10.sp,
-                                      color: Colors.black87,
+                                      color: Theme.of(context).colorScheme.onSurface,
                                       fontWeight: FontWeight.w500,
                                     ),
                                     decoration: InputDecoration(
                                       hintText: 'Last Name',
                                       hintStyle: GoogleFonts.inter(
-                                        color: Colors.grey[500],
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                                         fontSize: 10.sp,
                                       ),
                                       border: InputBorder.none,
@@ -285,7 +285,7 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
                                       ),
                                       prefixIcon: Icon(
                                         Icons.person_outline,
-                                        color: const Color(0xFF20B2AA),
+                                        color: Theme.of(context).colorScheme.primary,
                                         size: 20,
                                       ),
                                     ),
@@ -430,7 +430,7 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
                                         'View',
                                         style: GoogleFonts.inter(
                                           fontSize: 10.sp,
-                                          color: const Color(0xFF20B2AA),
+                                          color: Theme.of(context).colorScheme.primary,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -538,7 +538,7 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
                                     TextSpan(
                                       text: "Log in",
                                       style: GoogleFonts.inter(
-                                        color: const Color(0xFF20B2AA),
+                                        color: Theme.of(context).colorScheme.primary,
                                         fontWeight: FontWeight.w600,
                                         decoration: TextDecoration.underline,
                                       ),
