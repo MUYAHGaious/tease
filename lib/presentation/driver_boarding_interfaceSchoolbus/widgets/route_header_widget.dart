@@ -30,16 +30,17 @@ class RouteHeaderWidget extends StatelessWidget {
     final capacityPercentage = (currentCapacity / maxCapacity * 100).round();
     final isNearCapacity = capacityPercentage >= 80;
 
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
       decoration: BoxDecoration(
-        color: AppTheme.primaryLight,
+        color: scheme.primary,
         boxShadow: [
           BoxShadow(
-            color: AppTheme.shadowLight,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: scheme.shadow.withOpacity(0.12),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -70,7 +71,7 @@ class RouteHeaderWidget extends StatelessWidget {
                 // Route Info
                 Expanded(
                   flex: 2,
-                  child: _buildRouteInfo(),
+                  child: _buildRouteInfo(context, scheme),
                 ),
                 // Capacity Indicator
                 Expanded(
@@ -90,7 +91,7 @@ class RouteHeaderWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildRouteInfo() {
+  Widget _buildRouteInfo(BuildContext context, ColorScheme scheme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -98,25 +99,25 @@ class RouteHeaderWidget extends StatelessWidget {
           children: [
             CustomIconWidget(
               iconName: 'directions_bus',
-              color: AppTheme.secondaryLight,
-              size: 24,
+              color: scheme.onPrimary,
+              size: 22,
             ),
             SizedBox(width: 2.w),
             Text(
               'Route $routeNumber',
-              style: AppTheme.lightTheme.textTheme.headlineSmall?.copyWith(
-                color: AppTheme.onPrimaryLight,
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: scheme.onPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
             ),
           ],
         ),
         SizedBox(height: 0.5.h),
         Text(
           'Driver Boarding Interface',
-          style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-            color: AppTheme.onPrimaryLight.withValues(alpha: 0.8),
-          ),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: scheme.onPrimary.withOpacity(0.9),
+              ),
         ),
       ],
     );

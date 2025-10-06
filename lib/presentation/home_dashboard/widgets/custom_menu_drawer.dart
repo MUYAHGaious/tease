@@ -137,44 +137,15 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
       },
 
       // Account & Settings
+      // Upgrade/change role entry
       {
-        'icon': Icons.person,
-        'title': 'Profile Settings',
-        'route': '/profile-settings',
-        'requiresAuth': true,
-        'category': 'account',
-      },
-      // Role change shortcuts
-      {
-        'icon': Icons.school,
-        'title': 'Change Role: Student',
+        'icon': Icons.swap_horiz,
+        'title': _userAffiliation == 'regular'
+            ? 'Upgrade Role'
+            : 'Change Role / Affiliation',
         'category': 'account',
         'onTap': () {
-          Navigator.pop(context);
-          Navigator.pushNamed(
-            context,
-            '/affiliation-selection',
-            arguments: {
-              'affiliation': 'ict_university',
-              'step': 1, // Jump to role selection for university
-            },
-          );
-        },
-      },
-      {
-        'icon': Icons.business,
-        'title': 'Change Role: Agency',
-        'category': 'account',
-        'onTap': () {
-          Navigator.pop(context);
-          Navigator.pushNamed(
-            context,
-            '/affiliation-selection',
-            arguments: {
-              'affiliation': 'agency',
-              'step': 1, // Jump to role selection for agency
-            },
-          );
+          _showUpgradeRoleSheet();
         },
       },
       {
@@ -331,6 +302,81 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
   }
 
   // New method that uses affiliation data from SharedPreferences
+  void _showUpgradeRoleSheet() {
+    HapticFeedback.selectionClick();
+    Navigator.pop(context); // Close drawer
+    Future.delayed(const Duration(milliseconds: 150), () {
+      final rootNav = Navigator.of(context, rootNavigator: true);
+      showModalBottomSheet(
+        context: rootNav.context,
+        useRootNavigator: true,
+        backgroundColor: surfaceColor,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        builder: (ctx) {
+          return SafeArea(
+            top: false,
+            child: Padding(
+              padding: EdgeInsets.all(4.w),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Upgrade or Change Role',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14.sp,
+                        ),
+                  ),
+                  SizedBox(height: 1.h),
+                  ListTile(
+                    leading: const Icon(Icons.school),
+                    title: const Text('Affiliated with the University'),
+                    subtitle: const Text('Choose role, then confirm PIN'),
+                    onTap: () {
+                      final nav = Navigator.of(ctx, rootNavigator: true);
+                      Navigator.pop(ctx);
+                      Future.microtask(() {
+                        nav.pushReplacementNamed(
+                          '/affiliation-selection',
+                          arguments: {
+                            'affiliation': 'ict_university',
+                            'step': 1,
+                          },
+                        );
+                      });
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.business),
+                    title: const Text('With a Transport Agency'),
+                    subtitle: const Text('Pick agency → role → PIN'),
+                    onTap: () {
+                      final nav = Navigator.of(ctx, rootNavigator: true);
+                      Navigator.pop(ctx);
+                      Future.microtask(() {
+                        nav.pushReplacementNamed(
+                          '/affiliation-selection',
+                          arguments: {
+                            'affiliation': 'agency',
+                            'step': 1,
+                          },
+                        );
+                      });
+                    },
+                  ),
+                  SizedBox(height: 1.h),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    });
+  }
+
   List<Map<String, dynamic>> _getMenuItemsForAffiliation() {
     List<Map<String, dynamic>> items = [
       // Core Booking Features (always available)
@@ -354,13 +400,6 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
         'route': '/bus-tracking-map',
         'requiresAuth': false,
         'category': 'travel',
-      },
-      {
-        'icon': Icons.person,
-        'title': 'Profile Settings',
-        'route': '/profile-settings',
-        'requiresAuth': true,
-        'category': 'account',
       },
     ];
 
@@ -435,6 +474,37 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
         });
       }
     }
+
+    // Account and Support items
+    items.addAll([
+      {
+        'icon': Icons.swap_horiz,
+        'title': _userAffiliation == 'regular'
+            ? 'Upgrade Role'
+            : 'Change Role / Affiliation',
+        'category': 'account',
+        'onTap': () {
+          _showUpgradeRoleSheet();
+        },
+      },
+      {
+        'icon': Icons.settings,
+        'title': 'Settings',
+        'route': '/profile-settings',
+        'requiresAuth': true,
+        'category': 'account',
+      },
+      {
+        'icon': Icons.help_outline,
+        'title': 'Help & Support',
+        'category': 'account',
+        'onTap': () {
+          HapticFeedback.selectionClick();
+          Navigator.pop(context);
+          // TODO: Navigate to help screen
+        },
+      },
+    ]);
 
     return items;
   }
@@ -588,7 +658,7 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
                   _currentUser?.name ?? 'Guest User',
                   style: TextStyle(
                     color: textColor,
-                    fontSize: 16.sp,
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
                   ),
                   maxLines: 1,
@@ -606,8 +676,8 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
                     _getUserStatusText(),
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 9.sp,
-                      fontWeight: FontWeight.w500,
+                      fontSize: 7.5.sp,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -795,7 +865,7 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
                 title,
                 style: TextStyle(
                   color: onSurfaceColor.withOpacity(0.7),
-                  fontSize: 11.sp,
+                  fontSize: 10.sp,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.5,
                 ),
@@ -848,8 +918,8 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
               children: [
                 // Icon with modern styling
                 Container(
-                  width: 10.w,
-                  height: 10.w,
+                  width: 9.w,
+                  height: 9.w,
                   decoration: BoxDecoration(
                     color: _getModernIconBg(item),
                     borderRadius: BorderRadius.circular(10),
@@ -857,7 +927,7 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
                   child: Icon(
                     item['icon'],
                     color: _getModernIconColor(item),
-                    size: 5.w,
+                    size: 4.2.w,
                   ),
                 ),
 
@@ -872,7 +942,7 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
                         item['title'],
                         style: TextStyle(
                           color: textColor,
-                          fontSize: 13.sp,
+                          fontSize: 10.sp,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -889,8 +959,8 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
                             item['badge'],
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 8.sp,
-                              fontWeight: FontWeight.w500,
+                              fontSize: 6.sp,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
@@ -927,30 +997,6 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
       ),
       child: Column(
         children: [
-          // Settings Access
-          _buildBottomActionItem(
-            icon: Icons.settings,
-            label: 'Settings',
-            onTap: () {
-              HapticFeedback.selectionClick();
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/profile-settings');
-            },
-          ),
-
-          SizedBox(height: 1.h),
-
-          // Help & Support
-          _buildBottomActionItem(
-            icon: Icons.help_outline,
-            label: 'Help & Support',
-            onTap: () {
-              HapticFeedback.selectionClick();
-              Navigator.pop(context);
-              // TODO: Navigate to help screen
-            },
-          ),
-
           SizedBox(height: 2.h),
 
           // Theme toggle and Logout section
@@ -1035,7 +1081,7 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
                 label,
                 style: TextStyle(
                   color: color,
-                  fontSize: 12.sp,
+                  fontSize: 10.sp,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -1055,12 +1101,12 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
           'Sign Out',
           style: TextStyle(
             fontWeight: FontWeight.w600,
-            fontSize: 16.sp,
+            fontSize: 14.sp,
           ),
         ),
         content: Text(
           'Are you sure you want to sign out?',
-          style: TextStyle(fontSize: 12.sp),
+          style: TextStyle(fontSize: 10.sp),
         ),
         actions: [
           TextButton(

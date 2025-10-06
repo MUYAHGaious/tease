@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/app_export.dart';
 import '../../core/app_state.dart';
@@ -21,8 +22,8 @@ import '../../theme/theme_notifier.dart';
 // 2025 Design Constants
 const double cardElevation = 2.0;
 const double cardBorderRadius = 16.0;
-const double sectionSpacing = 24.0;
-const double gridSpacing = 16.0;
+const double sectionSpacing = 16.0;
+const double gridSpacing = 12.0;
 
 class HomeDashboard extends StatefulWidget {
   const HomeDashboard({super.key});
@@ -39,6 +40,8 @@ class _HomeDashboardState extends State<HomeDashboard>
   final ScrollController _scrollController = ScrollController();
   bool _isRefreshing = false;
   Timer? _themeCheckTimer;
+  String _userRole = 'passenger';
+  bool get _canScan => _userRole == 'bus_driver' || _userRole == 'bus_conductor';
 
   // Theme-aware colors that prevent glitching
   Color get primaryColor => const Color(0xFF008B8B);
@@ -60,6 +63,27 @@ class _HomeDashboardState extends State<HomeDashboard>
   void didChangeDependencies() {
     super.didChangeDependencies();
     _loadContextualContent();
+    _loadUserRole();
+  }
+
+  Future<void> _loadUserRole() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      String role = prefs.getString('user_role') ?? 'passenger';
+      // Fallback to AppState user flags if available
+      try {
+        final user = AppState().currentUser;
+        if (user != null) {
+          if (user.isDriver) role = 'bus_driver';
+          if (user.isConductor) role = 'bus_conductor';
+        }
+      } catch (_) {}
+      if (mounted) {
+        setState(() {
+          _userRole = role;
+        });
+      }
+    } catch (_) {}
   }
 
   void _loadContextualContent() {
@@ -292,7 +316,7 @@ class _HomeDashboardState extends State<HomeDashboard>
                   _timeBasedGreeting,
                   style: TextStyle(
                     color: AppTheme.onSurfaceLight,
-                    fontSize: 16.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -301,7 +325,7 @@ class _HomeDashboardState extends State<HomeDashboard>
                   'Ready to travel today?',
                   style: TextStyle(
                     color: AppTheme.onSurfaceLight.withOpacity(0.7),
-                    fontSize: 12.sp,
+                    fontSize: 9.sp,
                   ),
                 ),
               ],
@@ -327,11 +351,10 @@ class _HomeDashboardState extends State<HomeDashboard>
           padding: EdgeInsets.symmetric(horizontal: 2.w),
           child: Text(
             'Quick Actions',
-            style: TextStyle(
-              color: onSurfaceColor,
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w700,
-            ),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: onSurfaceColor,
+                  fontWeight: FontWeight.w700,
+                ),
           ),
         ),
         SizedBox(height: 2.h),
@@ -376,13 +399,13 @@ class _HomeDashboardState extends State<HomeDashboard>
           onTap: () => _handleNavigation(action['route']),
           borderRadius: BorderRadius.circular(cardBorderRadius),
           child: Padding(
-            padding: EdgeInsets.all(3.w),
+            padding: EdgeInsets.all(2.5.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding: EdgeInsets.all(2.w),
+                  padding: EdgeInsets.all(1.8.w),
                   decoration: BoxDecoration(
                     color: action['color'].withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
@@ -390,24 +413,24 @@ class _HomeDashboardState extends State<HomeDashboard>
                   child: Icon(
                     action['icon'],
                     color: action['color'],
-                    size: 6.w,
+                    size: 5.2.w,
                   ),
                 ),
-                SizedBox(height: 2.h),
+                SizedBox(height: 1.2.h),
                 Text(
                   action['title'],
                   style: TextStyle(
                     color: onSurfaceColor,
-                    fontSize: 13.sp,
+                    fontSize: 10.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                SizedBox(height: 0.5.h),
+                SizedBox(height: 0.4.h),
                 Text(
                   action['subtitle'],
                   style: TextStyle(
                     color: onSurfaceColor.withOpacity(0.6),
-                    fontSize: 10.sp,
+                    fontSize: 8.sp,
                   ),
                 ),
               ],
@@ -428,11 +451,10 @@ class _HomeDashboardState extends State<HomeDashboard>
           padding: EdgeInsets.symmetric(horizontal: 2.w),
           child: Text(
             'For You',
-            style: TextStyle(
-              color: AppTheme.onSurfaceLight,
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w700,
-            ),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: AppTheme.onSurfaceLight,
+                  fontWeight: FontWeight.w700,
+                ),
           ),
         ),
         SizedBox(height: 2.h),
@@ -443,7 +465,7 @@ class _HomeDashboardState extends State<HomeDashboard>
 
   Widget _buildContextualCard(Map<String, dynamic> card) {
     return Container(
-      margin: EdgeInsets.only(bottom: 2.h),
+      margin: EdgeInsets.only(bottom: 1.2.h),
       decoration: BoxDecoration(
         color: AppTheme.surfaceLight,
         borderRadius: BorderRadius.circular(cardBorderRadius),
@@ -453,8 +475,8 @@ class _HomeDashboardState extends State<HomeDashboard>
         ),
         boxShadow: [
           BoxShadow(
-            color: card['color'].withOpacity(0.1),
-            blurRadius: 8,
+            color: card['color'].withOpacity(0.08),
+            blurRadius: 6,
             offset: const Offset(0, 2),
           ),
         ],
@@ -465,11 +487,11 @@ class _HomeDashboardState extends State<HomeDashboard>
           onTap: () => _handleContextualCardTap(card),
           borderRadius: BorderRadius.circular(cardBorderRadius),
           child: Padding(
-            padding: EdgeInsets.all(4.w),
+            padding: EdgeInsets.all(3.w),
             child: Row(
               children: [
                 Container(
-                  padding: EdgeInsets.all(3.w),
+                  padding: EdgeInsets.all(2.4.w),
                   decoration: BoxDecoration(
                     color: card['color'].withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -477,10 +499,10 @@ class _HomeDashboardState extends State<HomeDashboard>
                   child: Icon(
                     card['icon'],
                     color: card['color'],
-                    size: 6.w,
+                    size: 5.4.w,
                   ),
                 ),
-                SizedBox(width: 4.w),
+                SizedBox(width: 3.w),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -489,23 +511,24 @@ class _HomeDashboardState extends State<HomeDashboard>
                         card['title'],
                         style: TextStyle(
                           color: AppTheme.onSurfaceLight,
-                          fontSize: 14.sp,
+                          fontSize: 11.sp,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      SizedBox(height: 0.5.h),
+                      SizedBox(height: 0.4.h),
                       Text(
                         card['subtitle'],
                         style: TextStyle(
                           color: AppTheme.onSurfaceLight.withOpacity(0.7),
-                          fontSize: 11.sp,
+                          fontSize: 8.5.sp,
                         ),
                       ),
                     ],
                   ),
                 ),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 2.6.w, vertical: 0.8.h),
                   decoration: BoxDecoration(
                     color: card['color'],
                     borderRadius: BorderRadius.circular(8),
@@ -514,7 +537,7 @@ class _HomeDashboardState extends State<HomeDashboard>
                     card['action'],
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 10.sp,
+                      fontSize: 8.sp,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -578,7 +601,7 @@ class _HomeDashboardState extends State<HomeDashboard>
                   'Refreshing...',
                   style: TextStyle(
                     color: onSurfaceColor,
-                    fontSize: 12.sp,
+                    fontSize: 10.sp,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -764,6 +787,8 @@ class _HomeDashboardState extends State<HomeDashboard>
               ),
               if (_isRefreshing) _buildModernLoadingOverlay(),
 
+              if (_canScan) _buildScanOverlayButton(),
+
               // Development role switcher removed for clean UI
             ],
           ),
@@ -773,6 +798,42 @@ class _HomeDashboardState extends State<HomeDashboard>
           floatingActionButton: _buildModernFAB(),
           floatingActionButtonLocation:
               FloatingActionButtonLocation.centerDocked,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildScanOverlayButton() {
+    return Positioned(
+      right: 16,
+      bottom: kBottomNavigationBarHeight + 24,
+      child: Semantics(
+        label: 'Open QR scanner',
+        button: true,
+        child: GestureDetector(
+          onTap: () {
+            HapticFeedback.mediumImpact();
+            Navigator.pushNamed(context, '/driver-boarding-interface');
+          },
+          child: Container(
+            padding: EdgeInsets.all(3.6.w),
+            decoration: BoxDecoration(
+              color: primaryColor,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: primaryColor.withOpacity(0.28),
+                  blurRadius: 14,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.qr_code_scanner,
+              color: Colors.white,
+              size: 26,
+            ),
+          ),
         ),
       ),
     );
@@ -847,7 +908,7 @@ class _HomeDashboardState extends State<HomeDashboard>
               'Voice Assistant',
               style: TextStyle(
                 color: onSurfaceColor,
-                fontSize: 24,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -856,7 +917,7 @@ class _HomeDashboardState extends State<HomeDashboard>
               'Say "Book a ticket" to get started',
               style: TextStyle(
                 color: onSurfaceColor.withOpacity(0.7),
-                fontSize: 16,
+                fontSize: 14,
               ),
             ),
             const SizedBox(height: 30),
@@ -874,7 +935,7 @@ class _HomeDashboardState extends State<HomeDashboard>
                 'Listening...',
                 style: TextStyle(
                   color: primaryColor,
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
               ),

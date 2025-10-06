@@ -36,8 +36,11 @@ class _LoginScreenState extends State<LoginScreen>
 
   @override
   Widget build(BuildContext context) {
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+
     return Scaffold(
       backgroundColor: const Color(0xFF008B8B),
+      resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
           // Background - sharp cut teal upper 50%, black lower 50%
@@ -142,11 +145,15 @@ class _LoginScreenState extends State<LoginScreen>
                   ),
                 ),
 
-                // Main content with glassmorphism container
-                Positioned(
+                // Main content with glassmorphism container - ANIMATED for keyboard
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
                   left: 4.w,
                   right: 4.w,
-                  top: 35.h,
+                  top: keyboardHeight > 0
+                      ? 20.h
+                      : 35.h, // Move up when keyboard appears
                   child: FadeTransition(
                     opacity: _fadeAnimation,
                     child: ClipRRect(
@@ -179,250 +186,250 @@ class _LoginScreenState extends State<LoginScreen>
                               ),
                             ],
                           ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(height: 1.5.h),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(height: 1.5.h),
 
-                          // User Profile Section
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 4.w,
-                              vertical: 2.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.05),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.2),
-                                width: 1,
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                // Profile Picture
-                                Container(
-                                  width: 12.w,
-                                  height: 12.w,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: const Color(0xFF20B2AA),
-                                    image: const DecorationImage(
-                                      image: NetworkImage(
-                                        'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
-                                      ),
-                                      fit: BoxFit.cover,
-                                    ),
+                              // User Profile Section
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 4.w,
+                                  vertical: 2.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.05),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.2),
+                                    width: 1,
                                   ),
                                 ),
-                                SizedBox(width: 3.w),
+                                child: Row(
+                                  children: [
+                                    // Profile Picture
+                                    Container(
+                                      width: 12.w,
+                                      height: 12.w,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: const Color(0xFF20B2AA),
+                                        image: const DecorationImage(
+                                          image: NetworkImage(
+                                            'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
+                                          ),
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 3.w),
 
-                                // User Info
-                                Expanded(
-                                  child: Column(
+                                    // User Info
+                                    Expanded(
+                                      child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        widget.name ?? 'Jane Dow',
-                                        style: GoogleFonts.inter(
-                                          fontSize: 10.sp,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      SizedBox(height: 0.5.h),
-                                      Text(
+                                        children: [
+                                          Text(
+                                            widget.name ?? 'Jane Dow',
+                                            style: GoogleFonts.inter(
+                                              fontSize: 10.sp,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          SizedBox(height: 0.5.h),
+                                          Text(
                                             widget.email ??
                                                 'jane.doe@gmail.com',
-                                        style: GoogleFonts.inter(
-                                          fontSize: 10.sp,
+                                            style: GoogleFonts.inter(
+                                              fontSize: 10.sp,
                                               color:
                                                   Colors.white.withOpacity(0.8),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 1.5.h),
-
-                          // Password Input
-                          Container(
-                            decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .surface
-                                      .withOpacity(0.95),
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary
-                                          .withOpacity(0.2),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 5),
-                                ),
-                              ],
-                            ),
-                            child: TextField(
-                              controller: passwordController,
-                              obscureText: !isPasswordVisible,
-                              style: GoogleFonts.inter(
-                                fontSize: 10.sp,
-                                    color:
-                                        Theme.of(context).colorScheme.onSurface,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: 'Password',
-                                hintStyle: GoogleFonts.inter(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
-                                  fontSize: 10.sp,
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 5.w,
-                                  vertical: 1.8.h,
-                                ),
-                                prefixIcon: Icon(
-                                  Icons.lock_outline,
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                  size: 22,
-                                ),
-                                suffixIcon: GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                          isPasswordVisible =
-                                              !isPasswordVisible;
-                                    });
-                                  },
-                                  child: Padding(
-                                    padding: EdgeInsets.only(right: 4.w),
-                                    child: Center(
-                                      widthFactor: 0.0,
-                                      child: Text(
-                                        'View',
-                                        style: GoogleFonts.inter(
-                                          fontSize: 10.sp,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 1.5.h),
-
-                          // Continue Button
-                          Container(
-                            width: double.infinity,
-                            height: 6.5.h,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF008B8B),
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                      color: const Color(0xFF008B8B)
-                                          .withOpacity(0.4),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 8),
-                                ),
-                              ],
-                            ),
-                            child: ElevatedButton(
-                              onPressed: isLoading ? null : _handleLogin,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                shadowColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                              ),
-                              child: isLoading
-                                  ? const SizedBox(
-                                      height: 24,
-                                      width: 24,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.5,
-                                            valueColor:
-                                                AlwaysStoppedAnimation<Color>(
-                                                    Colors.white),
-                                      ),
-                                    )
-                                  : Text(
-                                      'Continue',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                            ),
-                          ),
-
-                          SizedBox(height: 2.h),
-
-                          // Signup Link
-                          Center(
-                            child: GestureDetector(
-                                  onTap: () =>
-                                      Navigator.pushNamed(context, '/signup'),
-                              child: RichText(
-                                text: TextSpan(
-                                  style: GoogleFonts.inter(
-                                    fontSize: 11.sp,
-                                    color: Colors.grey[400],
-                                  ),
-                                  children: [
-                                        const TextSpan(
-                                            text: "Don't have an account? "),
-                                    TextSpan(
-                                      text: "Sign up",
-                                      style: GoogleFonts.inter(
-                                        color: const Color(0xFF20B2AA),
-                                        fontWeight: FontWeight.w600,
-                                            decoration:
-                                                TextDecoration.underline,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                            ),
-                          ),
-                          SizedBox(height: 1.5.h),
+                              SizedBox(height: 1.5.h),
 
-                          // Forgot Password Link
-                          Center(
-                            child: GestureDetector(
-                              onTap: () => _handleForgotPassword(),
-                              child: Text(
-                                'Forgot your password?',
-                                style: GoogleFonts.inter(
-                                  fontSize: 11.sp,
-                                  color: const Color(0xFF20B2AA),
-                                  fontWeight: FontWeight.w600,
-                                  decoration: TextDecoration.underline,
+                              // Password Input
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .surface
+                                      .withOpacity(0.95),
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary
+                                          .withOpacity(0.2),
+                                      blurRadius: 15,
+                                      offset: const Offset(0, 5),
+                                    ),
+                                  ],
+                                ),
+                                child: TextField(
+                                  controller: passwordController,
+                                  obscureText: !isPasswordVisible,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 10.sp,
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  decoration: InputDecoration(
+                                    hintText: 'Password',
+                                    hintStyle: GoogleFonts.inter(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                      fontSize: 10.sp,
+                                    ),
+                                    border: InputBorder.none,
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 5.w,
+                                      vertical: 1.8.h,
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.lock_outline,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                      size: 22,
+                                    ),
+                                    suffixIcon: GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          isPasswordVisible =
+                                              !isPasswordVisible;
+                                        });
+                                      },
+                                      child: Padding(
+                                        padding: EdgeInsets.only(right: 4.w),
+                                        child: Center(
+                                          widthFactor: 0.0,
+                                          child: Text(
+                                            'View',
+                                            style: GoogleFonts.inter(
+                                              fontSize: 10.sp,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                              SizedBox(height: 1.5.h),
+
+                              // Continue Button
+                              Container(
+                                width: double.infinity,
+                                height: 6.5.h,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF008B8B),
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFF008B8B)
+                                          .withOpacity(0.4),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 8),
+                                    ),
+                                  ],
+                                ),
+                                child: ElevatedButton(
+                                  onPressed: isLoading ? null : _handleLogin,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    shadowColor: Colors.transparent,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                  ),
+                                  child: isLoading
+                                      ? const SizedBox(
+                                          height: 24,
+                                          width: 24,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.5,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    Colors.white),
+                                          ),
+                                        )
+                                      : Text(
+                                          'Continue',
+                                          style: GoogleFonts.inter(
+                                            fontSize: 14.sp,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                ),
+                              ),
+
+                              SizedBox(height: 2.h),
+
+                              // Signup Link
+                              Center(
+                                child: GestureDetector(
+                                  onTap: () =>
+                                      Navigator.pushNamed(context, '/signup'),
+                                  child: RichText(
+                                    text: TextSpan(
+                                      style: GoogleFonts.inter(
+                                        fontSize: 11.sp,
+                                        color: Colors.grey[400],
+                                      ),
+                                      children: [
+                                        const TextSpan(
+                                            text: "Don't have an account? "),
+                                        TextSpan(
+                                          text: "Sign up",
+                                          style: GoogleFonts.inter(
+                                            color: const Color(0xFF20B2AA),
+                                            fontWeight: FontWeight.w600,
+                                            decoration:
+                                                TextDecoration.underline,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 1.5.h),
+
+                              // Forgot Password Link
+                              Center(
+                                child: GestureDetector(
+                                  onTap: () => _handleForgotPassword(),
+                                  child: Text(
+                                    'Forgot your password?',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 11.sp,
+                                      color: const Color(0xFF20B2AA),
+                                      fontWeight: FontWeight.w600,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 1.5.h),
+                            ],
                           ),
-                          SizedBox(height: 1.5.h),
-                        ],
-                        ),
                         ),
                       ),
                     ),

@@ -123,8 +123,8 @@ class _DriverBoardingInterfaceState extends State<DriverBoardingInterface> {
   }
 
   void _preventScreenLock() {
-    // Keep screen awake during scanning
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+    // Keep UI comfortable; avoid hiding system overlays
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   }
 
   void _setBrightness() {
@@ -407,8 +407,9 @@ class _DriverBoardingInterfaceState extends State<DriverBoardingInterface> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppTheme.primaryLight,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
           Column(
@@ -427,28 +428,53 @@ class _DriverBoardingInterfaceState extends State<DriverBoardingInterface> {
 
               // Main Content Area
               Expanded(
-                child: Container(
-                  color: AppTheme.lightTheme.scaffoldBackgroundColor,
-                  child: Padding(
-                    padding: EdgeInsets.all(2.w),
-                    child: Row(
-                      children: [
-                        // Camera Scanner (Left Side)
-                        CameraScannerWidget(
-                          onQRCodeScanned: _handleQRCodeScanned,
-                          isScanning: _isScanning,
+                child: Padding(
+                  padding: EdgeInsets.all(2.w),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isWide = constraints.maxWidth >= 700;
+                      if (isWide) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: CameraScannerWidget(
+                                onQRCodeScanned: _handleQRCodeScanned,
+                                isScanning: _isScanning,
+                              ),
+                            ),
+                            SizedBox(width: 2.w),
+                            Expanded(
+                              flex: 4,
+                              child: StudentRosterWidget(
+                                students: _students,
+                                onManualCheckIn: _handleManualCheckIn,
+                                currentStop: _currentStop,
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+                      // Narrow layout: stack vertically
+                      return SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            CameraScannerWidget(
+                              onQRCodeScanned: _handleQRCodeScanned,
+                              isScanning: _isScanning,
+                            ),
+                            SizedBox(height: 2.h),
+                            StudentRosterWidget(
+                              students: _students,
+                              onManualCheckIn: _handleManualCheckIn,
+                              currentStop: _currentStop,
+                            ),
+                          ],
                         ),
-
-                        SizedBox(width: 2.w),
-
-                        // Student Roster (Right Side)
-                        StudentRosterWidget(
-                          students: _students,
-                          onManualCheckIn: _handleManualCheckIn,
-                          currentStop: _currentStop,
-                        ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
                 ),
               ),

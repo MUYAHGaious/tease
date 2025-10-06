@@ -43,8 +43,11 @@ class _SignupScreenState extends State<SignupScreen>
 
   @override
   Widget build(BuildContext context) {
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+
     return Scaffold(
       backgroundColor: const Color(0xFF008B8B),
+      resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
           // Background - sharp cut teal upper 50%, black lower 50%
@@ -149,11 +152,16 @@ class _SignupScreenState extends State<SignupScreen>
                   ),
                 ),
 
-                // Main content with glassmorphism container
-                Positioned(
+                // Main content with glassmorphism container - ANIMATED for keyboard
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
                   left: 4.w,
                   right: 4.w,
-                  top: 35.h,
+                  bottom: 0,
+                  top: keyboardHeight > 0
+                      ? 15.h
+                      : 35.h, // Move up when keyboard appears
                   child: FadeTransition(
                     opacity: _fadeAnimation,
                     child: ClipRRect(
@@ -186,413 +194,419 @@ class _SignupScreenState extends State<SignupScreen>
                               ),
                             ],
                           ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(height: 1.h),
+                          child: SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(height: 1.h),
 
-                          // Subtitle text
-                          Text(
-                            'Looks like you don\'t have an account.\nLet\'s create a new account for',
-                            style: GoogleFonts.inter(
-                              fontSize: 11.sp,
-                              color: Colors.white.withOpacity(0.8),
-                              height: 1.4,
-                            ),
-                          ),
-                          Text(
-                                emailController.text.isNotEmpty
-                                    ? emailController.text
-                                    : 'jane.doe@gmail.com',
-                            style: GoogleFonts.inter(
-                              fontSize: 11.sp,
-                              color: const Color(0xFF20B2AA),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          SizedBox(height: 2.h),
-
-                          // First Name and Last Name Row
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .surface
-                                            .withOpacity(0.95),
-                                    borderRadius: BorderRadius.circular(16),
-                                    boxShadow: [
-                                      BoxShadow(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary
-                                                .withOpacity(0.2),
-                                        blurRadius: 15,
-                                        offset: const Offset(0, 5),
-                                      ),
-                                    ],
+                                // Subtitle text
+                                Text(
+                                  'Looks like you don\'t have an account.\nLet\'s create a new account for',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 11.sp,
+                                    color: Colors.white.withOpacity(0.8),
+                                    height: 1.4,
                                   ),
-                                  child: TextField(
-                                    controller: firstNameController,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 10.sp,
+                                ),
+                                Text(
+                                  emailController.text.isNotEmpty
+                                      ? emailController.text
+                                      : 'jane.doe@gmail.com',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 11.sp,
+                                    color: const Color(0xFF20B2AA),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(height: 2.h),
+
+                                // First Name and Last Name Row
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        decoration: BoxDecoration(
                                           color: Theme.of(context)
                                               .colorScheme
-                                              .onSurface,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                    decoration: InputDecoration(
-                                      hintText: 'First Name',
-                                      hintStyle: GoogleFonts.inter(
+                                              .surface
+                                              .withOpacity(0.95),
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                                  .withOpacity(0.2),
+                                              blurRadius: 15,
+                                              offset: const Offset(0, 5),
+                                            ),
+                                          ],
+                                        ),
+                                        child: TextField(
+                                          controller: firstNameController,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 10.sp,
                                             color: Theme.of(context)
                                                 .colorScheme
-                                                .onSurfaceVariant,
-                                        fontSize: 10.sp,
-                                      ),
-                                      border: InputBorder.none,
-                                      contentPadding: EdgeInsets.symmetric(
-                                        horizontal: 4.w,
-                                        vertical: 1.8.h,
-                                      ),
-                                      prefixIcon: Icon(
-                                        Icons.person_outline,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary,
-                                        size: 20,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 2.w),
-                              Expanded(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .surface
-                                            .withOpacity(0.95),
-                                    borderRadius: BorderRadius.circular(16),
-                                    boxShadow: [
-                                      BoxShadow(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary
-                                                .withOpacity(0.2),
-                                        blurRadius: 15,
-                                        offset: const Offset(0, 5),
-                                      ),
-                                    ],
-                                  ),
-                                  child: TextField(
-                                    controller: lastNameController,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 10.sp,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onSurface,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                    decoration: InputDecoration(
-                                      hintText: 'Last Name',
-                                      hintStyle: GoogleFonts.inter(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onSurfaceVariant,
-                                        fontSize: 10.sp,
-                                      ),
-                                      border: InputBorder.none,
-                                      contentPadding: EdgeInsets.symmetric(
-                                        horizontal: 4.w,
-                                        vertical: 1.8.h,
-                                      ),
-                                      prefixIcon: Icon(
-                                        Icons.person_outline,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary,
-                                        size: 20,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 1.5.h),
-
-                          // Phone Input
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.95),
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                      color: const Color(0xFF20B2AA)
-                                          .withOpacity(0.2),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 5),
-                                ),
-                              ],
-                            ),
-                            child: TextField(
-                              controller: phoneController,
-                              keyboardType: TextInputType.phone,
-                              style: GoogleFonts.inter(
-                                fontSize: 10.sp,
-                                color: Colors.black87,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: 'Phone Number',
-                                hintStyle: GoogleFonts.inter(
-                                  color: Colors.grey[500],
-                                  fontSize: 10.sp,
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 5.w,
-                                  vertical: 1.8.h,
-                                ),
-                                prefixIcon: Icon(
-                                  Icons.phone_outlined,
-                                  color: const Color(0xFF20B2AA),
-                                  size: 22,
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 1.5.h),
-
-                          // ID Card Input
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.95),
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                      color: const Color(0xFF20B2AA)
-                                          .withOpacity(0.2),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 5),
-                                ),
-                              ],
-                            ),
-                            child: TextField(
-                              controller: idCardController,
-                              style: GoogleFonts.inter(
-                                fontSize: 10.sp,
-                                color: Colors.black87,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: 'ID Card Number',
-                                hintStyle: GoogleFonts.inter(
-                                  color: Colors.grey[500],
-                                  fontSize: 10.sp,
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 5.w,
-                                  vertical: 1.8.h,
-                                ),
-                                prefixIcon: Icon(
-                                  Icons.credit_card_outlined,
-                                  color: const Color(0xFF20B2AA),
-                                  size: 22,
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 1.5.h),
-
-                          // Password Input
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.95),
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                      color: const Color(0xFF20B2AA)
-                                          .withOpacity(0.2),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 5),
-                                ),
-                              ],
-                            ),
-                            child: TextField(
-                              controller: passwordController,
-                              obscureText: !isPasswordVisible,
-                              style: GoogleFonts.inter(
-                                fontSize: 10.sp,
-                                color: Colors.black87,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: 'Password',
-                                hintStyle: GoogleFonts.inter(
-                                  color: Colors.grey[500],
-                                  fontSize: 10.sp,
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 5.w,
-                                  vertical: 1.8.h,
-                                ),
-                                prefixIcon: Icon(
-                                  Icons.lock_outline,
-                                  color: const Color(0xFF20B2AA),
-                                  size: 22,
-                                ),
-                                suffixIcon: GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                          isPasswordVisible =
-                                              !isPasswordVisible;
-                                    });
-                                  },
-                                  child: Padding(
-                                    padding: EdgeInsets.only(right: 4.w),
-                                    child: Center(
-                                      widthFactor: 0.0,
-                                      child: Text(
-                                        'View',
-                                        style: GoogleFonts.inter(
-                                          fontSize: 10.sp,
+                                                .onSurface,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                          decoration: InputDecoration(
+                                            hintText: 'First Name',
+                                            hintStyle: GoogleFonts.inter(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                              fontSize: 10.sp,
+                                            ),
+                                            border: InputBorder.none,
+                                            contentPadding:
+                                                EdgeInsets.symmetric(
+                                              horizontal: 4.w,
+                                              vertical: 1.8.h,
+                                            ),
+                                            prefixIcon: Icon(
+                                              Icons.person_outline,
                                               color: Theme.of(context)
                                                   .colorScheme
                                                   .primary,
-                                          fontWeight: FontWeight.w600,
+                                              size: 20,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 2.w),
+                                    Expanded(
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .surface
+                                              .withOpacity(0.95),
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                                  .withOpacity(0.2),
+                                              blurRadius: 15,
+                                              offset: const Offset(0, 5),
+                                            ),
+                                          ],
+                                        ),
+                                        child: TextField(
+                                          controller: lastNameController,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 10.sp,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                          decoration: InputDecoration(
+                                            hintText: 'Last Name',
+                                            hintStyle: GoogleFonts.inter(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                              fontSize: 10.sp,
+                                            ),
+                                            border: InputBorder.none,
+                                            contentPadding:
+                                                EdgeInsets.symmetric(
+                                              horizontal: 4.w,
+                                              vertical: 1.8.h,
+                                            ),
+                                            prefixIcon: Icon(
+                                              Icons.person_outline,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                              size: 20,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 1.5.h),
+
+                                // Phone Input
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.95),
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF20B2AA)
+                                            .withOpacity(0.2),
+                                        blurRadius: 15,
+                                        offset: const Offset(0, 5),
+                                      ),
+                                    ],
+                                  ),
+                                  child: TextField(
+                                    controller: phoneController,
+                                    keyboardType: TextInputType.phone,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 10.sp,
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    decoration: InputDecoration(
+                                      hintText: 'Phone Number',
+                                      hintStyle: GoogleFonts.inter(
+                                        color: Colors.grey[500],
+                                        fontSize: 10.sp,
+                                      ),
+                                      border: InputBorder.none,
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 5.w,
+                                        vertical: 1.8.h,
+                                      ),
+                                      prefixIcon: Icon(
+                                        Icons.phone_outlined,
+                                        color: const Color(0xFF20B2AA),
+                                        size: 22,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 1.5.h),
+
+                                // ID Card Input
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.95),
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF20B2AA)
+                                            .withOpacity(0.2),
+                                        blurRadius: 15,
+                                        offset: const Offset(0, 5),
+                                      ),
+                                    ],
+                                  ),
+                                  child: TextField(
+                                    controller: idCardController,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 10.sp,
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    decoration: InputDecoration(
+                                      hintText: 'ID Card Number',
+                                      hintStyle: GoogleFonts.inter(
+                                        color: Colors.grey[500],
+                                        fontSize: 10.sp,
+                                      ),
+                                      border: InputBorder.none,
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 5.w,
+                                        vertical: 1.8.h,
+                                      ),
+                                      prefixIcon: Icon(
+                                        Icons.credit_card_outlined,
+                                        color: const Color(0xFF20B2AA),
+                                        size: 22,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 1.5.h),
+
+                                // Password Input
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.95),
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF20B2AA)
+                                            .withOpacity(0.2),
+                                        blurRadius: 15,
+                                        offset: const Offset(0, 5),
+                                      ),
+                                    ],
+                                  ),
+                                  child: TextField(
+                                    controller: passwordController,
+                                    obscureText: !isPasswordVisible,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 10.sp,
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    decoration: InputDecoration(
+                                      hintText: 'Password',
+                                      hintStyle: GoogleFonts.inter(
+                                        color: Colors.grey[500],
+                                        fontSize: 10.sp,
+                                      ),
+                                      border: InputBorder.none,
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 5.w,
+                                        vertical: 1.8.h,
+                                      ),
+                                      prefixIcon: Icon(
+                                        Icons.lock_outline,
+                                        color: const Color(0xFF20B2AA),
+                                        size: 22,
+                                      ),
+                                      suffixIcon: GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            isPasswordVisible =
+                                                !isPasswordVisible;
+                                          });
+                                        },
+                                        child: Padding(
+                                          padding: EdgeInsets.only(right: 4.w),
+                                          child: Center(
+                                            widthFactor: 0.0,
+                                            child: Text(
+                                              'View',
+                                              style: GoogleFonts.inter(
+                                                fontSize: 10.sp,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .primary,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 2.h),
+                                SizedBox(height: 2.h),
 
-                          // Terms and Privacy text
-                          RichText(
-                            text: TextSpan(
-                              style: GoogleFonts.inter(
-                                fontSize: 10.sp,
-                                color: Colors.white.withOpacity(0.8),
-                                height: 1.4,
-                              ),
-                              children: [
-                                const TextSpan(
-                                      text:
-                                          'By selecting Agree and continue below,\nI agree to ',
-                                ),
-                                TextSpan(
-                                  text: 'Terms of Service',
-                                  style: GoogleFonts.inter(
-                                    color: const Color(0xFF20B2AA),
-                                    fontWeight: FontWeight.w600,
-                                    decoration: TextDecoration.underline,
+                                // Terms and Privacy text
+                                RichText(
+                                  text: TextSpan(
+                                    style: GoogleFonts.inter(
+                                      fontSize: 10.sp,
+                                      color: Colors.white.withOpacity(0.8),
+                                      height: 1.4,
+                                    ),
+                                    children: [
+                                      const TextSpan(
+                                          text:
+                                              'By selecting Agree and continue below,\nI agree to '),
+                                      TextSpan(
+                                        text: 'Terms of Service',
+                                        style: GoogleFonts.inter(
+                                          color: const Color(0xFF20B2AA),
+                                          fontWeight: FontWeight.w600,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                      ),
+                                      const TextSpan(text: ' and '),
+                                      TextSpan(
+                                        text: 'Privacy Policy',
+                                        style: GoogleFonts.inter(
+                                          color: const Color(0xFF20B2AA),
+                                          fontWeight: FontWeight.w600,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                const TextSpan(text: ' and '),
-                                TextSpan(
-                                  text: 'Privacy Policy',
-                                  style: GoogleFonts.inter(
-                                    color: const Color(0xFF20B2AA),
-                                    fontWeight: FontWeight.w600,
-                                    decoration: TextDecoration.underline,
+                                SizedBox(height: 2.h),
+
+                                // Agree and Continue Button
+                                Container(
+                                  width: double.infinity,
+                                  height: 6.5.h,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF008B8B),
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF008B8B)
+                                            .withOpacity(0.4),
+                                        blurRadius: 20,
+                                        offset: const Offset(0, 8),
+                                      ),
+                                    ],
+                                  ),
+                                  child: ElevatedButton(
+                                    onPressed: isLoading ? null : _handleSignup,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.transparent,
+                                      shadowColor: Colors.transparent,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                    ),
+                                    child: isLoading
+                                        ? const SizedBox(
+                                            height: 24,
+                                            width: 24,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2.5,
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                      Colors.white),
+                                            ),
+                                          )
+                                        : Text(
+                                            'Agree and continue',
+                                            style: GoogleFonts.inter(
+                                              fontSize: 11.sp,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.white,
+                                              letterSpacing: 0.5,
+                                            ),
+                                          ),
+                                  ),
+                                ),
+
+                                SizedBox(height: 2.h),
+
+                                // Login Link
+                                Center(
+                                  child: GestureDetector(
+                                    onTap: () =>
+                                        Navigator.pushNamed(context, '/login'),
+                                    child: RichText(
+                                      text: TextSpan(
+                                        style: GoogleFonts.inter(
+                                          fontSize: 11.sp,
+                                          color: Colors.grey[400],
+                                        ),
+                                        children: [
+                                          const TextSpan(
+                                              text:
+                                                  "Already have an account? "),
+                                          TextSpan(
+                                            text: "Log in",
+                                            style: GoogleFonts.inter(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                              fontWeight: FontWeight.w600,
+                                              decoration:
+                                                  TextDecoration.underline,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          SizedBox(height: 2.h),
-
-                          // Agree and Continue Button
-                          Container(
-                            width: double.infinity,
-                            height: 6.5.h,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF008B8B),
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                      color: const Color(0xFF008B8B)
-                                          .withOpacity(0.4),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 8),
-                                ),
-                              ],
-                            ),
-                            child: ElevatedButton(
-                              onPressed: isLoading ? null : _handleSignup,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                shadowColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                              ),
-                              child: isLoading
-                                  ? const SizedBox(
-                                      height: 24,
-                                      width: 24,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.5,
-                                            valueColor:
-                                                AlwaysStoppedAnimation<Color>(
-                                                    Colors.white),
-                                      ),
-                                    )
-                                  : Text(
-                                      'Agree and continue',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 11.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                            ),
-                          ),
-
-                          SizedBox(height: 2.h),
-
-                          // Login Link
-                          Center(
-                            child: GestureDetector(
-                                  onTap: () =>
-                                      Navigator.pushNamed(context, '/login'),
-                              child: RichText(
-                                text: TextSpan(
-                                  style: GoogleFonts.inter(
-                                    fontSize: 11.sp,
-                                    color: Colors.grey[400],
-                                  ),
-                                  children: [
-                                        const TextSpan(
-                                            text: "Already have an account? "),
-                                    TextSpan(
-                                      text: "Log in",
-                                      style: GoogleFonts.inter(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary,
-                                        fontWeight: FontWeight.w600,
-                                            decoration:
-                                                TextDecoration.underline,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                        ),
                         ),
                       ),
                     ),

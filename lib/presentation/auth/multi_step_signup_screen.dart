@@ -84,8 +84,10 @@ class _MultiStepSignupScreenState extends State<MultiStepSignupScreen>
 
   @override
   Widget build(BuildContext context) {
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     return Scaffold(
       backgroundColor: const Color(0xFF008B8B),
+      resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
           // Background - sharp cut teal upper 50%, black lower 50%
@@ -253,10 +255,12 @@ class _MultiStepSignupScreenState extends State<MultiStepSignupScreen>
                 ),
 
                 // Main content with glassmorphism container
-                Positioned(
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
                   left: 4.w,
                   right: 4.w,
-                  top: 43.h,
+                  top: keyboardHeight > 0 ? 22.h : 43.h,
                   child: SlideTransition(
                     position: _slideAnimation,
                     child: FadeTransition(

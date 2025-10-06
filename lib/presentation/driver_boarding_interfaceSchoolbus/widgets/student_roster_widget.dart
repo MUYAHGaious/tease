@@ -23,20 +23,27 @@ class StudentRosterWidget extends StatelessWidget {
             student['dropoffStop'] == currentStop)
         .toList();
 
+    final scheme = Theme.of(context).colorScheme;
     return Container(
-      width: 45.w,
-      height: 70.h,
+      width: double.infinity,
       decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surface,
+        color: scheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppTheme.primaryLight,
-          width: 2,
+          color: scheme.outline.withOpacity(0.3),
+          width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: scheme.shadow.withOpacity(0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          _buildHeader(expectedStudents.length),
+          _buildHeader(context, expectedStudents.length),
           Expanded(
             child: expectedStudents.isEmpty
                 ? _buildEmptyState()
@@ -47,12 +54,13 @@ class StudentRosterWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(int totalStudents) {
+  Widget _buildHeader(BuildContext context, int totalStudents) {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.5.h),
       decoration: BoxDecoration(
-        color: AppTheme.primaryLight,
+        color: scheme.primary,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(10),
           topRight: Radius.circular(10),
@@ -65,31 +73,31 @@ class StudentRosterWidget extends StatelessWidget {
             children: [
               CustomIconWidget(
                 iconName: 'people',
-                color: AppTheme.onPrimaryLight,
+                color: scheme.onPrimary,
                 size: 20,
               ),
               SizedBox(width: 2.w),
               Expanded(
                 child: Text(
                   'Expected Passengers',
-                  style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
-                    color: AppTheme.onPrimaryLight,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: scheme.onPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
               ),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
                 decoration: BoxDecoration(
-                  color: AppTheme.secondaryLight,
+                  color: scheme.secondary,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   '$totalStudents',
-                  style: AppTheme.lightTheme.textTheme.labelMedium?.copyWith(
-                    color: AppTheme.onSecondaryLight,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: scheme.onSecondary,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ),
             ],
@@ -97,9 +105,9 @@ class StudentRosterWidget extends StatelessWidget {
           SizedBox(height: 0.5.h),
           Text(
             'Stop: $currentStop',
-            style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
-              color: AppTheme.onPrimaryLight.withValues(alpha: 0.8),
-            ),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: scheme.onPrimary.withOpacity(0.8),
+                ),
           ),
         ],
       ),

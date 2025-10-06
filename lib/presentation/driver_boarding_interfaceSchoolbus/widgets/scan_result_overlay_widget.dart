@@ -92,13 +92,14 @@ class _ScanResultOverlayWidgetState extends State<ScanResultOverlayWidget>
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return AnimatedBuilder(
       animation: _fadeAnimation,
       builder: (context, child) {
         return Opacity(
           opacity: _fadeAnimation.value,
           child: Container(
-            color: Colors.black.withValues(alpha: 0.7),
+            color: scheme.scrim.withOpacity(0.6),
             child: Center(
               child: AnimatedBuilder(
                 animation: _scaleAnimation,
@@ -117,10 +118,9 @@ class _ScanResultOverlayWidgetState extends State<ScanResultOverlayWidget>
   }
 
   Widget _buildResultCard() {
-    final backgroundColor =
-        widget.isSuccess ? AppTheme.successLight : AppTheme.errorLight;
-    final textColor =
-        widget.isSuccess ? AppTheme.onPrimaryLight : AppTheme.onErrorLight;
+    final scheme = Theme.of(context).colorScheme;
+    final backgroundColor = widget.isSuccess ? scheme.primary : scheme.error;
+    final textColor = widget.isSuccess ? scheme.onPrimary : scheme.onError;
     final iconName = widget.isSuccess ? 'check_circle' : 'error';
 
     return Container(
@@ -131,8 +131,8 @@ class _ScanResultOverlayWidgetState extends State<ScanResultOverlayWidget>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: backgroundColor.withValues(alpha: 0.3),
-            blurRadius: 20,
+            color: backgroundColor.withOpacity(0.25),
+            blurRadius: 18,
             offset: const Offset(0, 10),
           ),
         ],

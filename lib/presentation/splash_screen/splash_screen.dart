@@ -146,14 +146,14 @@ class _SplashScreenState extends State<SplashScreen>
             opacity: _fadeAnimation,
             child: Image.asset(
               'assets/White.png',
-              width: 40.w,
-              height: 40.w,
+              width: 70.w,
+              height: 70.w,
               fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) {
                 // Fallback if image doesn't load
                 return Container(
-                  width: 40.w,
-                  height: 40.w,
+                  width: 70.w,
+                  height: 70.w,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
@@ -161,7 +161,7 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Icon(
                     Icons.image,
                     color: Colors.black,
-                    size: 20.w,
+                    size: 35.w,
                   ),
                 );
               },

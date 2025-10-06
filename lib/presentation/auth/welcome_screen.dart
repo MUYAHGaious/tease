@@ -32,8 +32,11 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+
     return Scaffold(
       backgroundColor: const Color(0xFF008B8B),
+      resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
           // Background - sharp cut teal upper 50%, black lower 50%
@@ -138,12 +141,16 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   ),
                 ),
 
-                // Main content with better spacing and animations
-                Positioned(
+                // Main content with better spacing and animations - ANIMATED for keyboard
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  top: 30.h,
+                  top: keyboardHeight > 0
+                      ? 15.h
+                      : 30.h, // Move up when keyboard appears
                   child: FadeTransition(
                     opacity: _fadeAnimation,
                     child: ClipRRect(
@@ -177,234 +184,234 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               ),
                             ],
                           ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(height: 1.h),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(height: 1.h),
 
-                            // Enhanced email input with better styling
-                          Container(
-                            decoration: BoxDecoration(
+                              // Enhanced email input with better styling
+                              Container(
+                                decoration: BoxDecoration(
                                   color: Theme.of(context)
                                       .colorScheme
                                       .surface
                                       .withOpacity(0.95),
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
                                       color: Theme.of(context)
                                           .colorScheme
                                           .primary
                                           .withOpacity(0.2),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 5),
+                                      blurRadius: 15,
+                                      offset: const Offset(0, 5),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            child: TextField(
-                              controller: emailController,
-                              style: GoogleFonts.inter(
-                                fontSize: 10.sp,
+                                child: TextField(
+                                  controller: emailController,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 10.sp,
                                     color:
                                         Theme.of(context).colorScheme.onSurface,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: 'Email',
-                                hintStyle: GoogleFonts.inter(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  decoration: InputDecoration(
+                                    hintText: 'Email',
+                                    hintStyle: GoogleFonts.inter(
                                       color: Theme.of(context)
                                           .colorScheme
                                           .onSurfaceVariant,
-                                  fontSize: 10.sp,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 5.w,
-                                  vertical: 2.h,
-                                ),
-                                prefixIcon: Icon(
-                                  Icons.email_outlined,
+                                      fontSize: 10.sp,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    border: InputBorder.none,
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 5.w,
+                                      vertical: 2.h,
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.email_outlined,
                                       color:
                                           Theme.of(context).colorScheme.primary,
-                                  size: 22,
+                                      size: 22,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                          SizedBox(height: 2.5.h),
+                              SizedBox(height: 2.5.h),
 
-                          // Enhanced continue button with teal background
-                          Container(
-                            width: double.infinity,
-                            height: 6.5.h,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF008B8B),
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
+                              // Enhanced continue button with teal background
+                              Container(
+                                width: double.infinity,
+                                height: 6.5.h,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF008B8B),
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
                                       color: const Color(0xFF008B8B)
                                           .withOpacity(0.4),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 8),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 8),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            child: ElevatedButton(
-                              onPressed: isLoading ? null : _handleContinue,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                shadowColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                              ),
-                              child: isLoading
-                                  ? const SizedBox(
-                                      height: 24,
-                                      width: 24,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.5,
+                                child: ElevatedButton(
+                                  onPressed: isLoading ? null : _handleContinue,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    shadowColor: Colors.transparent,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                  ),
+                                  child: isLoading
+                                      ? const SizedBox(
+                                          height: 24,
+                                          width: 24,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.5,
                                             valueColor:
                                                 AlwaysStoppedAnimation<Color>(
                                                     Colors.white),
-                                      ),
-                                    )
-                                  : Text(
-                                      'Continue',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 11.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                            ),
-                          ),
-                          SizedBox(height: 2.5.h),
-
-                          // Enhanced OR divider
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  height: 1,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Colors.transparent,
-                                        Colors.grey[400]!,
-                                        Colors.transparent,
-                                      ],
-                                    ),
-                                  ),
+                                          ),
+                                        )
+                                      : Text(
+                                          'Continue',
+                                          style: GoogleFonts.inter(
+                                            fontSize: 11.sp,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
                                 ),
                               ),
-                              Padding(
+                              SizedBox(height: 2.5.h),
+
+                              // Enhanced OR divider
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      height: 1,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            Colors.transparent,
+                                            Colors.grey[400]!,
+                                            Colors.transparent,
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
                                     padding:
                                         EdgeInsets.symmetric(horizontal: 4.w),
-                                child: Text(
-                                  'or',
-                                  style: GoogleFonts.inter(
-                                    color: Colors.grey[400],
-                                    fontSize: 11.sp,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Container(
-                                  height: 1,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Colors.transparent,
-                                        Colors.grey[400]!,
-                                        Colors.transparent,
-                                      ],
+                                    child: Text(
+                                      'or',
+                                      style: GoogleFonts.inter(
+                                        color: Colors.grey[400],
+                                        fontSize: 11.sp,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ),
-                                ),
+                                  Expanded(
+                                    child: Container(
+                                      height: 1,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            Colors.transparent,
+                                            Colors.grey[400]!,
+                                            Colors.transparent,
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                          SizedBox(height: 2.5.h),
+                              SizedBox(height: 2.5.h),
 
-                          // Enhanced social buttons
-                          _buildSocialButton(
-                            'Continue with Facebook',
-                            const Color(0xFF1877F2),
-                            _facebookIcon(),
-                          ),
-                          SizedBox(height: 2.5.h),
-                          _buildSocialButton(
-                            'Continue with Google',
-                            Colors.white,
-                            _googleIcon(),
-                            textColor: Colors.black87,
-                          ),
-                          SizedBox(height: 2.5.h),
-                          _buildSocialButton(
-                            'Continue with Apple',
-                            Colors.black,
-                            _appleIcon(),
-                          ),
+                              // Enhanced social buttons
+                              _buildSocialButton(
+                                'Continue with Facebook',
+                                const Color(0xFF1877F2),
+                                _facebookIcon(),
+                              ),
+                              SizedBox(height: 2.5.h),
+                              _buildSocialButton(
+                                'Continue with Google',
+                                Colors.white,
+                                _googleIcon(),
+                                textColor: Colors.black87,
+                              ),
+                              SizedBox(height: 2.5.h),
+                              _buildSocialButton(
+                                'Continue with Apple',
+                                Colors.black,
+                                _appleIcon(),
+                              ),
 
-                          const Spacer(),
+                              const Spacer(),
 
-                          // Enhanced bottom links
-                          Row(
+                              // Enhanced bottom links
+                              Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
-                            children: [
-                              GestureDetector(
+                                children: [
+                                  GestureDetector(
                                     onTap: () =>
                                         Navigator.pushNamed(context, '/signup'),
-                                child: RichText(
-                                  text: TextSpan(
-                                    style: GoogleFonts.inter(
-                                      fontSize: 11.sp,
-                                      color: Colors.grey[400],
-                                    ),
-                                    children: [
+                                    child: RichText(
+                                      text: TextSpan(
+                                        style: GoogleFonts.inter(
+                                          fontSize: 11.sp,
+                                          color: Colors.grey[400],
+                                        ),
+                                        children: [
                                           const TextSpan(
                                               text: "Don't have an account? "),
-                                      TextSpan(
-                                        text: "Sign up",
-                                        style: GoogleFonts.inter(
+                                          TextSpan(
+                                            text: "Sign up",
+                                            style: GoogleFonts.inter(
                                               color: Theme.of(context)
                                                   .colorScheme
                                                   .primary,
-                                          fontWeight: FontWeight.w600,
+                                              fontWeight: FontWeight.w600,
                                               decoration:
                                                   TextDecoration.underline,
-                                        ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 2.h),
+
+                              Center(
+                                child: GestureDetector(
+                                  onTap: () => _handleForgotPassword(),
+                                  child: Text(
+                                    'Forgot your password?',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 11.sp,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                      fontWeight: FontWeight.w600,
+                                      decoration: TextDecoration.underline,
+                                    ),
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                          SizedBox(height: 2.h),
-
-                          Center(
-                            child: GestureDetector(
-                              onTap: () => _handleForgotPassword(),
-                              child: Text(
-                                'Forgot your password?',
-                                style: GoogleFonts.inter(
-                                  fontSize: 11.sp,
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                  fontWeight: FontWeight.w600,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                        ),
                         ),
                       ),
                     ),
