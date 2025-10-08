@@ -170,7 +170,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
 
   Widget _buildHeader() {
     return Container(
-      padding: EdgeInsets.all(4.w),
+      padding: EdgeInsets.all(3.w),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -229,7 +229,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
                       Text(
                         'My Favorites',
                         style: GoogleFonts.inter(
-                          fontSize: 18.sp,
+                          fontSize: 14.sp,
                           fontWeight: FontWeight.w700,
                           color: textColor,
                         ),
@@ -237,7 +237,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
                       Text(
                         '${_filteredFavorites.length} saved items',
                         style: GoogleFonts.inter(
-                          fontSize: 14.sp,
+                          fontSize: 12.sp,
                           color: textColor.withOpacity(0.6),
                         ),
                       ),
@@ -248,7 +248,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
             ),
             SizedBox(height: 3.h),
             _buildSearchBar(),
-            SizedBox(height: 2.h),
+            SizedBox(height: 1.h),
             _buildSegmentedControl(),
           ],
         ),
@@ -277,7 +277,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
         decoration: InputDecoration(
           hintText: 'Search favorites...',
           hintStyle: GoogleFonts.inter(
-            fontSize: 14.sp,
+            fontSize: 12.sp,
             color: textColor.withOpacity(0.5),
           ),
           prefixIcon: Icon(
@@ -285,7 +285,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
             color: textColor.withOpacity(0.5),
           ),
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+          contentPadding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
         ),
       ),
     );
@@ -328,7 +328,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
             title,
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
-              fontSize: 14.sp,
+              fontSize: 12.sp,
               color: isSelected ? Colors.white : textColor.withOpacity(0.7),
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
             ),
@@ -350,7 +350,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
           },
           borderRadius: BorderRadius.circular(20),
           child: Container(
-            padding: EdgeInsets.all(4.w),
+            padding: EdgeInsets.all(3.w),
             decoration: BoxDecoration(
               color: surfaceColor,
               borderRadius: BorderRadius.circular(20),
@@ -390,7 +390,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
                           Text(
                             favorite['title'],
                             style: GoogleFonts.inter(
-                              fontSize: 16.sp,
+                              fontSize: 12.sp,
                               fontWeight: FontWeight.w700,
                               color: textColor,
                             ),
@@ -399,7 +399,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
                           Text(
                             favorite['subtitle'],
                             style: GoogleFonts.inter(
-                              fontSize: 12.sp,
+                              fontSize: 11.sp,
                               color: textColor.withOpacity(0.6),
                             ),
                           ),
@@ -436,7 +436,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
                           Text(
                             'Price',
                             style: GoogleFonts.inter(
-                              fontSize: 12.sp,
+                              fontSize: 11.sp,
                               color: textColor.withOpacity(0.6),
                             ),
                           ),
@@ -444,7 +444,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
                           Text(
                             favorite['price'],
                             style: GoogleFonts.inter(
-                              fontSize: 14.sp,
+                              fontSize: 12.sp,
                               fontWeight: FontWeight.w600,
                               color: primaryColor,
                             ),
@@ -459,7 +459,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
                           Text(
                             'Rating',
                             style: GoogleFonts.inter(
-                              fontSize: 12.sp,
+                              fontSize: 11.sp,
                               color: textColor.withOpacity(0.6),
                             ),
                           ),
@@ -475,7 +475,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
                               Text(
                                 '${favorite['rating']}',
                                 style: GoogleFonts.inter(
-                                  fontSize: 14.sp,
+                                  fontSize: 12.sp,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -491,7 +491,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
                           Text(
                             'Frequency',
                             style: GoogleFonts.inter(
-                              fontSize: 12.sp,
+                              fontSize: 11.sp,
                               color: textColor.withOpacity(0.6),
                             ),
                           ),
@@ -499,7 +499,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
                           Text(
                             favorite['frequency'],
                             style: GoogleFonts.inter(
-                              fontSize: 12.sp,
+                              fontSize: 11.sp,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -548,7 +548,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
             'Start exploring routes and operators\nto add them to your favorites',
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
-              fontSize: 14.sp,
+              fontSize: 12.sp,
               color: textColor.withOpacity(0.6),
             ),
           ),
@@ -582,7 +582,7 @@ class _FavoritesState extends State<Favorites> with TickerProviderStateMixin {
                   : SlideTransition(
                       position: _slideAnimation,
                       child: ListView.builder(
-                        padding: EdgeInsets.all(4.w),
+                        padding: EdgeInsets.all(3.w),
                         itemCount: _filteredFavorites.length,
                         itemBuilder: (context, index) {
                           return _buildFavoriteCard(_filteredFavorites[index]);

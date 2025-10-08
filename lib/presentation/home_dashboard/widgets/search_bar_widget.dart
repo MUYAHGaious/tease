@@ -120,13 +120,6 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
               width: 1,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
           ),
           child: Material(
             color: Colors.transparent,
@@ -168,7 +161,10 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                           Text(
                             'Search destinations, routes, and more',
                             style: TextStyle(
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withOpacity(0.6),
                               fontSize: 11.sp,
                               fontWeight: FontWeight.w400,
                             ),
@@ -179,7 +175,10 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                     // Modern arrow icon
                     Icon(
                       Icons.arrow_forward,
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.4),
                       size: 5.w,
                     ),
                   ],
@@ -203,7 +202,8 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
+                  color:
+                      Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -231,7 +231,8 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                 Container(
                   margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
                   height: 1,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
+                  color:
+                      Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
                 ),
 
                 // Popular routes section

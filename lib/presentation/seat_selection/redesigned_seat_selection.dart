@@ -2325,7 +2325,7 @@ class _RedesignedSeatSelectionState extends State<RedesignedSeatSelection>
 
       Navigator.pushNamed(
         context,
-        '/booking-confirmation',
+        '/payment-gateway',
         arguments: bookingData,
       );
     } else {

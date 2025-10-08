@@ -208,14 +208,14 @@ class _MyTicketsState extends State<MyTickets> with TickerProviderStateMixin {
 
   Widget _buildAppBar() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+      padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
       child: Row(
         children: [
           // Back button
           GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Container(
-              padding: EdgeInsets.all(2.w),
+              padding: EdgeInsets.all(1.5.w),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceVariant,
                 borderRadius: BorderRadius.circular(12),
@@ -223,11 +223,11 @@ class _MyTicketsState extends State<MyTickets> with TickerProviderStateMixin {
               child: Icon(
                 Icons.arrow_back,
                 color: textColor,
-                size: 6.w,
+                size: 5.w,
               ),
             ),
           ),
-          SizedBox(width: 4.w),
+          SizedBox(width: 3.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,16 +235,16 @@ class _MyTicketsState extends State<MyTickets> with TickerProviderStateMixin {
                 Text(
                   'My Tickets',
                   style: TextStyle(
-                    fontSize: 20.sp,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
                     color: textColor,
                   ),
                 ),
-                SizedBox(height: 0.5.h),
+                SizedBox(height: 0.3.h),
                 Text(
                   'Manage your bookings',
                   style: TextStyle(
-                    fontSize: 14.sp,
+                    fontSize: 10.sp,
                     color: onSurfaceVariantColor,
                   ),
                 ),
@@ -265,7 +265,7 @@ class _MyTicketsState extends State<MyTickets> with TickerProviderStateMixin {
               icon: Icon(
                 Icons.notifications_outlined,
                 color: onSurfaceVariantColor,
-                size: 24,
+                size: 20,
               ),
             ),
           ),
@@ -316,7 +316,7 @@ class _MyTicketsState extends State<MyTickets> with TickerProviderStateMixin {
         child: FadeTransition(
           opacity: _fadeAnimation,
           child: ListView.builder(
-            padding: EdgeInsets.only(bottom: 2.h),
+            padding: EdgeInsets.only(bottom: 1.h),
             itemCount: filteredTickets.length,
             itemBuilder: (context, index) {
               final ticket = filteredTickets[index];

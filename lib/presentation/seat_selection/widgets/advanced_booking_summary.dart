@@ -287,7 +287,7 @@ class _AdvancedBookingSummaryState extends State<AdvancedBookingSummary>
                         color: ThemeNotifier().isDarkMode
                             ? Colors.white.withOpacity(0.5)
                             : Colors.grey[600],
-                        fontSize: 10.sp,
+                        fontSize: 8.sp,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -329,7 +329,7 @@ class _AdvancedBookingSummaryState extends State<AdvancedBookingSummary>
                 style: GoogleFonts.inter(
                   color: ThemeNotifier().isDarkMode ? Colors.white : Colors.black87,
                   fontWeight: FontWeight.w600,
-                  fontSize: 14.sp,
+                  fontSize: 12.sp,
                 ),
               ),
               Text(
@@ -338,7 +338,7 @@ class _AdvancedBookingSummaryState extends State<AdvancedBookingSummary>
                   color: ThemeNotifier().isDarkMode
                       ? Colors.white.withOpacity(0.7)
                       : Colors.black54,
-                  fontSize: 11.sp,
+                  fontSize: 9.sp,
                 ),
               ),
             ],
@@ -382,7 +382,7 @@ class _AdvancedBookingSummaryState extends State<AdvancedBookingSummary>
                 style: GoogleFonts.inter(
                   color: const Color(0xFF008B8B),
                   fontWeight: FontWeight.w600,
-                  fontSize: 11.sp,
+                  fontSize: 9.sp,
                 ),
               ),
             ],
@@ -404,7 +404,7 @@ class _AdvancedBookingSummaryState extends State<AdvancedBookingSummary>
               style: GoogleFonts.inter(
                 color: Colors.green[700],
                 fontWeight: FontWeight.w500,
-                fontSize: 10.sp,
+                fontSize: 8.sp,
               ),
             ),
           ),
@@ -449,7 +449,7 @@ class _AdvancedBookingSummaryState extends State<AdvancedBookingSummary>
                                 ? Colors.white
                                 : Colors.black87,
                             fontWeight: FontWeight.w700,
-                            fontSize: 15.sp,
+                            fontSize: 13.sp,
                           ),
                         ),
                       ],
@@ -485,7 +485,7 @@ class _AdvancedBookingSummaryState extends State<AdvancedBookingSummary>
                   'Continue',
                   style: GoogleFonts.inter(
                     fontWeight: FontWeight.w600,
-                    fontSize: 12.sp,
+                    fontSize: 10.sp,
                   ),
                 ),
                 SizedBox(width: 1.w),

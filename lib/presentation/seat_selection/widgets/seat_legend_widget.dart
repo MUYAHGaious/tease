@@ -46,7 +46,7 @@ class SeatLegendWidget extends StatelessWidget {
           Text(
             label,
             style: GoogleFonts.inter(
-              fontSize: 9.sp,
+              fontSize: 8.sp,
               color:
                   ThemeNotifier().isDarkMode ? Colors.white70 : Colors.black87,
               fontWeight: FontWeight.w500,

@@ -11,6 +11,7 @@ import './widgets/walk_in_booking_widget.dart';
 import './widgets/reports_widget.dart';
 import './widgets/customer_service_widget.dart';
 import './widgets/quick_actions_widget.dart';
+import './widgets/fleet_management_widget.dart';
 
 class BookingManagement extends StatefulWidget {
   const BookingManagement({Key? key}) : super(key: key);
@@ -34,8 +35,7 @@ class _BookingManagementState extends State<BookingManagement>
   // Tab management - following your segmented control pattern
   int _selectedTab = 0;
   final List<String> _tabs = [
-    'Today\'s Bookings',
-    'Seat Management',
+    'Fleet Management',
     'Customer Service',
     'Reports'
   ];
@@ -218,7 +218,6 @@ class _BookingManagementState extends State<BookingManagement>
           child: Column(
             children: [
               _buildModernHeader(),
-              _buildSearchAndFilterSection(),
               _buildSegmentedControl(),
               Expanded(
                 child: _buildTabContent(),
@@ -227,7 +226,6 @@ class _BookingManagementState extends State<BookingManagement>
           ),
         ),
       ),
-      floatingActionButton: _buildFloatingActionButton(),
       bottomNavigationBar: GlobalBottomNavigation(
         initialIndex: 2, // My Tickets tab
       ),
@@ -273,7 +271,7 @@ class _BookingManagementState extends State<BookingManagement>
                 Text(
                   'Booking Management',
                   style: GoogleFonts.inter(
-                    fontSize: 20.sp,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
                     color: textColor,
                   ),
@@ -282,120 +280,12 @@ class _BookingManagementState extends State<BookingManagement>
                 Text(
                   'Manage passenger bookings & operations',
                   style: GoogleFonts.inter(
-                    fontSize: 14.sp,
+                    fontSize: 11.sp,
                     color: onSurfaceVariantColor,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
-            ),
-          ),
-          // Quick actions container
-          Container(
-            decoration: BoxDecoration(
-              color: surfaceColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: borderColor.withOpacity(0.2),
-                width: 1,
-              ),
-            ),
-            child: IconButton(
-              onPressed: () {
-                HapticFeedback.selectionClick();
-                _showQuickActions();
-              },
-              icon: Icon(
-                Icons.more_vert,
-                color: onSurfaceVariantColor,
-                size: 24,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSearchAndFilterSection() {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: surfaceColor.withOpacity(0.8),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: borderColor.withOpacity(0.2),
-                  width: 1,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: shadowColor.withOpacity(0.05),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: TextField(
-                onChanged: (value) {
-                  setState(() {
-                    _searchQuery = value;
-                  });
-                },
-                style: GoogleFonts.inter(
-                  color: textColor,
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w500,
-                ),
-                decoration: InputDecoration(
-                  hintText: 'Search bookings, passengers, routes...',
-                  hintStyle: GoogleFonts.inter(
-                    color: onSurfaceVariantColor,
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
-                  ),
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: onSurfaceVariantColor,
-                    size: 20,
-                  ),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 4.w,
-                    vertical: 2.h,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          SizedBox(width: 3.w),
-          // Filter button
-          GestureDetector(
-            onTap: () {
-              HapticFeedback.selectionClick();
-              _showFilterBottomSheet();
-            },
-            child: Container(
-              padding: EdgeInsets.all(3.w),
-              decoration: BoxDecoration(
-                color: primaryColor,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: primaryColor.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Icon(
-                Icons.filter_list,
-                color: Theme.of(context).colorScheme.onPrimary,
-                size: 20,
-              ),
             ),
           ),
         ],
@@ -454,7 +344,7 @@ class _BookingManagementState extends State<BookingManagement>
                     duration: const Duration(milliseconds: 250),
                     curve: Curves.easeInOutCubic,
                     style: GoogleFonts.inter(
-                      fontSize: 12.sp,
+                      fontSize: 10.sp,
                       color: isSelected
                           ? Theme.of(context).colorScheme.onPrimary
                           : onSurfaceVariantColor,
@@ -485,22 +375,18 @@ class _BookingManagementState extends State<BookingManagement>
   Widget _getTabContent() {
     switch (_selectedTab) {
       case 0:
-        return _buildTodaysBookings();
+        return FleetManagementWidget();
       case 1:
-        return SeatManagementWidget(
-          onSeatStatusChanged: _onSeatStatusChanged,
-        );
-      case 2:
         return CustomerServiceWidget(
           onWalkInBooking: _processWalkInBooking,
           onRefundProcessed: _onRefundProcessed,
         );
-      case 3:
+      case 2:
         return ReportsWidget(
           onExportReport: _exportReport,
         );
       default:
-        return _buildTodaysBookings();
+        return FleetManagementWidget();
     }
   }
 
@@ -532,24 +418,6 @@ class _BookingManagementState extends State<BookingManagement>
     );
   }
 
-  Widget _buildFloatingActionButton() {
-    return FloatingActionButton.extended(
-      onPressed: () {
-        HapticFeedback.selectionClick();
-        _showQuickBookingDialog();
-      },
-      backgroundColor: primaryColor,
-      foregroundColor: Theme.of(context).colorScheme.onPrimary,
-      icon: Icon(Icons.add),
-      label: Text(
-        'Quick Booking',
-        style: GoogleFonts.inter(
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
   Widget _buildEmptyState() {
     return Center(
       child: Column(
@@ -571,7 +439,7 @@ class _BookingManagementState extends State<BookingManagement>
           Text(
             'No Bookings Found',
             style: GoogleFonts.inter(
-              fontSize: 18.sp,
+              fontSize: 14.sp,
               fontWeight: FontWeight.w600,
               color: textColor,
             ),
@@ -580,7 +448,7 @@ class _BookingManagementState extends State<BookingManagement>
           Text(
             'No bookings match your current filters',
             style: GoogleFonts.inter(
-              fontSize: 14.sp,
+              fontSize: 11.sp,
               color: onSurfaceVariantColor,
               fontWeight: FontWeight.w500,
             ),
@@ -593,7 +461,13 @@ class _BookingManagementState extends State<BookingManagement>
               _showQuickBookingDialog();
             },
             icon: Icon(Icons.add),
-            label: Text('Create New Booking'),
+            label: Text(
+              'Create New Booking',
+              style: GoogleFonts.inter(
+                fontSize: 11.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: primaryColor,
               foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -675,34 +549,20 @@ class _BookingManagementState extends State<BookingManagement>
     );
   }
 
-  void _showQuickActions() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => QuickActionsWidget(
-        onActionSelected: (action) {
-          Navigator.pop(context);
-          _handleQuickAction(action);
-        },
-      ),
-    );
-  }
-
   void _handleQuickAction(String action) {
     HapticFeedback.selectionClick();
     switch (action) {
       case 'quick_booking':
         _showQuickBookingDialog();
         break;
-      case 'seat_management':
-        setState(() => _selectedTab = 1);
+      case 'fleet_management':
+        setState(() => _selectedTab = 0);
         break;
       case 'reports':
-        setState(() => _selectedTab = 3);
+        setState(() => _selectedTab = 2);
         break;
       case 'customer_service':
-        setState(() => _selectedTab = 2);
+        setState(() => _selectedTab = 1);
         break;
     }
   }

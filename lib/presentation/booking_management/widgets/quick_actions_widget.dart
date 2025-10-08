@@ -18,7 +18,8 @@ class QuickActionsWidget extends StatelessWidget {
     final backgroundColor = Theme.of(context).scaffoldBackgroundColor;
     final surfaceColor = Theme.of(context).colorScheme.surface;
     final textColor = Theme.of(context).colorScheme.onSurface;
-    final onSurfaceVariantColor = Theme.of(context).colorScheme.onSurfaceVariant;
+    final onSurfaceVariantColor =
+        Theme.of(context).colorScheme.onSurfaceVariant;
     final shadowColor = Theme.of(context).colorScheme.shadow;
     final borderColor = Theme.of(context).colorScheme.outline;
 
@@ -75,11 +76,11 @@ class QuickActionsWidget extends StatelessWidget {
         'description': 'Create walk-in booking',
       },
       {
-        'title': 'Seat Management',
-        'icon': Icons.event_seat,
+        'title': 'Fleet Management',
+        'icon': Icons.directions_bus,
         'color': Colors.blue,
-        'action': 'seat_management',
-        'description': 'Manage seat availability',
+        'action': 'fleet_management',
+        'description': 'Manage routes & buses',
       },
       {
         'title': 'Customer Service',
@@ -132,7 +133,8 @@ class QuickActionsWidget extends StatelessWidget {
     final primaryColor = Theme.of(context).colorScheme.primary;
     final surfaceColor = Theme.of(context).colorScheme.surface;
     final textColor = Theme.of(context).colorScheme.onSurface;
-    final onSurfaceVariantColor = Theme.of(context).colorScheme.onSurfaceVariant;
+    final onSurfaceVariantColor =
+        Theme.of(context).colorScheme.onSurfaceVariant;
     final shadowColor = Theme.of(context).colorScheme.shadow;
 
     return GestureDetector(

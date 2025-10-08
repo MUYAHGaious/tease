@@ -91,13 +91,6 @@ class _RecentBookingsWidgetState extends State<RecentBookingsWidget> {
           color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
           width: 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Material(
         color: Colors.transparent,
@@ -111,13 +104,14 @@ class _RecentBookingsWidgetState extends State<RecentBookingsWidget> {
             borderRadius: BorderRadius.circular(cardBorderRadius),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // Modern image with status badge
                 Stack(
                   children: [
                     Container(
                       width: double.infinity,
-                      height: 10.h, // Reduced image height
+                      height: 8.h, // Restored reasonable image height
                       decoration: BoxDecoration(
                         color: Theme.of(context)
                             .colorScheme
@@ -127,7 +121,7 @@ class _RecentBookingsWidgetState extends State<RecentBookingsWidget> {
                       child: CustomImageWidget(
                         imageUrl: booking['image'],
                         width: double.infinity,
-                        height: 10.h,
+                        height: 8.h,
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -143,20 +137,12 @@ class _RecentBookingsWidgetState extends State<RecentBookingsWidget> {
                         decoration: BoxDecoration(
                           color: _getStatusColor(booking['status']),
                           borderRadius: BorderRadius.circular(8),
-                          boxShadow: [
-                            BoxShadow(
-                              color: _getStatusColor(booking['status'])
-                                  .withOpacity(0.3),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
                         ),
                         child: Text(
                           booking['status'],
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 9.sp,
+                            fontSize: 7.sp,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -165,121 +151,122 @@ class _RecentBookingsWidgetState extends State<RecentBookingsWidget> {
                   ],
                 ),
 
-                // Compact card content to prevent overflow
-                Padding(
-                  padding: EdgeInsets.all(3.w), // Reduced padding
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min, // Prevent overflow
-                    children: [
-                      // Route and price row
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              booking['route'],
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface,
-                                fontSize: 13.sp, // Slightly smaller
-                                fontWeight: FontWeight.w600,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          Text(
-                            booking['price'],
-                            style: TextStyle(
-                              color: primaryColor,
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 1.h), // Reduced spacing
-
-                      // Date and time row with compact design
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_today,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withOpacity(0.6),
-                            size: 3.w, // Smaller icons
-                          ),
-                          SizedBox(width: 0.5.w),
-                          Expanded(
-                            child: Text(
-                              '${booking['date']} • ${booking['time']}',
-                              style: TextStyle(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withOpacity(0.7),
-                                fontSize: 9.sp, // Smaller text
-                                fontWeight: FontWeight.w500,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 0.8.h), // Reduced spacing
-
-                      // Compact seat and operator row
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 1.5.w,
-                              vertical: 0.3.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: primaryColor.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.airline_seat_recline_normal,
-                                  color: primaryColor,
-                                  size: 2.5.w,
+                // Compact card content to fill space evenly
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.all(2.w),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        // Route and price row
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                booking['route'],
+                                style: TextStyle(
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
+                                  fontSize: 11.sp,
+                                  fontWeight: FontWeight.w600,
                                 ),
-                                SizedBox(width: 0.5.w),
-                                Text(
-                                  booking['seatNumber'],
-                                  style: TextStyle(
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Text(
+                              booking['price'],
+                              style: TextStyle(
+                                color: primaryColor,
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        // Date and time row with compact design
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_today,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withOpacity(0.6),
+                              size: 3.w,
+                            ),
+                            SizedBox(width: 0.5.w),
+                            Expanded(
+                              child: Text(
+                                '${booking['date']} • ${booking['time']}',
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withOpacity(0.7),
+                                  fontSize: 7.sp,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        // Compact seat and operator row
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 1.5.w,
+                                vertical: 0.3.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: primaryColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.airline_seat_recline_normal,
                                     color: primaryColor,
-                                    fontSize: 8.sp,
-                                    fontWeight: FontWeight.w600,
+                                    size: 2.5.w,
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Flexible(
-                            child: Text(
-                              booking['busOperator'],
-                              style: TextStyle(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withOpacity(0.7),
-                                fontSize: 8.sp, // Smaller text
-                                fontWeight: FontWeight.w500,
+                                  SizedBox(width: 0.5.w),
+                                  Text(
+                                    booking['seatNumber'],
+                                    style: TextStyle(
+                                      color: primaryColor,
+                                      fontSize: 7.sp,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.end,
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                            Flexible(
+                              child: Text(
+                                booking['busOperator'],
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withOpacity(0.7),
+                                  fontSize: 7.sp,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.end,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -305,7 +292,7 @@ class _RecentBookingsWidgetState extends State<RecentBookingsWidget> {
                 'Recent Bookings',
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 18.sp,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -329,7 +316,7 @@ class _RecentBookingsWidgetState extends State<RecentBookingsWidget> {
                           'View All',
                           style: TextStyle(
                             color: primaryColor,
-                            fontSize: 12.sp,
+                            fontSize: 10.sp,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -337,7 +324,7 @@ class _RecentBookingsWidgetState extends State<RecentBookingsWidget> {
                         Icon(
                           Icons.arrow_forward,
                           color: primaryColor,
-                          size: 4.w,
+                          size: 3.w,
                         ),
                       ],
                     ),
@@ -347,9 +334,9 @@ class _RecentBookingsWidgetState extends State<RecentBookingsWidget> {
             ],
           ),
         ),
-        SizedBox(height: 2.h),
+        SizedBox(height: 1.h),
         SizedBox(
-          height: 25.h, // Optimized height
+          height: 20.h, // Significantly reduced height
           child: ListView.builder(
             padding: EdgeInsets.only(left: 5.w),
             scrollDirection: Axis.horizontal,

@@ -53,7 +53,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget>
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+      margin: EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.5.h),
       child: Row(
         children: [
           Expanded(

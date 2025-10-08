@@ -80,8 +80,8 @@ class _FilterBottomSheetWidgetState extends State<FilterBottomSheetWidget> {
             child: Text(
               'Filter Tickets',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           IconButton(
@@ -104,8 +104,8 @@ class _FilterBottomSheetWidgetState extends State<FilterBottomSheetWidget> {
         Text(
           'Date Range',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+            fontWeight: FontWeight.w600,
+          ),
         ),
         SizedBox(height: 2.h),
         GestureDetector(
@@ -135,13 +135,13 @@ class _FilterBottomSheetWidgetState extends State<FilterBottomSheetWidget> {
                         ? '${_formatDate(_selectedDateRange!.start)} - ${_formatDate(_selectedDateRange!.end)}'
                         : 'Select date range',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: _selectedDateRange != null
+                      color: _selectedDateRange != null
                               ? Theme.of(context).colorScheme.onSurface
                               : Theme.of(context)
                                   .colorScheme
                                   .onSurface
                                   .withOpacity(0.7),
-                        ),
+                    ),
                   ),
                 ),
                 CustomIconWidget(
@@ -173,8 +173,8 @@ class _FilterBottomSheetWidgetState extends State<FilterBottomSheetWidget> {
         Text(
           'Trip Status',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+            fontWeight: FontWeight.w600,
+          ),
         ),
         SizedBox(height: 2.h),
         Wrap(
@@ -212,12 +212,12 @@ class _FilterBottomSheetWidgetState extends State<FilterBottomSheetWidget> {
                 child: Text(
                   status,
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: isSelected
+                    color: isSelected
                             ? Theme.of(context).colorScheme.onPrimary
                             : Theme.of(context).colorScheme.onSurface,
                         fontWeight:
                             isSelected ? FontWeight.w600 : FontWeight.w500,
-                      ),
+                  ),
                 ),
               ),
             );
@@ -242,8 +242,8 @@ class _FilterBottomSheetWidgetState extends State<FilterBottomSheetWidget> {
         Text(
           'Routes',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+            fontWeight: FontWeight.w600,
+          ),
         ),
         SizedBox(height: 2.h),
         Column(
@@ -311,13 +311,13 @@ class _FilterBottomSheetWidgetState extends State<FilterBottomSheetWidget> {
                       child: Text(
                         route,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: isSelected
+                          color: isSelected
                                   ? Theme.of(context).colorScheme.primary
                                   : Theme.of(context).colorScheme.onSurface,
                               fontWeight: isSelected
                                   ? FontWeight.w600
                                   : FontWeight.w400,
-                            ),
+                        ),
                       ),
                     ),
                   ],

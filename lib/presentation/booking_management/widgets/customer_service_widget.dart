@@ -101,36 +101,36 @@ class _CustomerServiceWidgetState extends State<CustomerServiceWidget> {
     final borderColor = Theme.of(context).colorScheme.outline;
 
     return SingleChildScrollView(
-      padding: EdgeInsets.all(4.w),
+      padding: EdgeInsets.all(3.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Customer Service Operations',
             style: GoogleFonts.inter(
-              fontSize: 18.sp,
+              fontSize: 11.sp,
               fontWeight: FontWeight.w700,
               color: textColor,
             ),
           ),
-          SizedBox(height: 3.h),
+          SizedBox(height: 2.h),
           _buildSectionTitle('Quick Services'),
-          SizedBox(height: 1.h),
+          SizedBox(height: 0.5.h),
           _buildServiceButtons(
               primaryColor, textColor, onSurfaceVariantColor, borderColor),
-          SizedBox(height: 3.h),
+          SizedBox(height: 2.h),
           _buildSectionTitle('Customer Lookup'),
-          SizedBox(height: 1.h),
+          SizedBox(height: 0.5.h),
           _buildCustomerSearch(primaryColor, surfaceColor, textColor,
               onSurfaceVariantColor, borderColor),
-          SizedBox(height: 3.h),
+          SizedBox(height: 2.h),
           _buildSectionTitle('Refund Processing'),
-          SizedBox(height: 1.h),
+          SizedBox(height: 0.5.h),
           _buildRefundSection(primaryColor, surfaceColor, textColor,
               onSurfaceVariantColor, borderColor),
-          SizedBox(height: 3.h),
+          SizedBox(height: 2.h),
           _buildSectionTitle('Issue Resolution'),
-          SizedBox(height: 1.h),
+          SizedBox(height: 0.5.h),
           _buildIssueResolution(primaryColor, surfaceColor, textColor,
               onSurfaceVariantColor, borderColor),
         ],
@@ -143,7 +143,7 @@ class _CustomerServiceWidgetState extends State<CustomerServiceWidget> {
     return Text(
       title,
       style: GoogleFonts.inter(
-        fontSize: 14.sp,
+        fontSize: 11.sp,
         fontWeight: FontWeight.w600,
         color: textColor,
       ),
@@ -208,11 +208,11 @@ class _CustomerServiceWidgetState extends State<CustomerServiceWidget> {
       ),
       child: TextField(
         controller: _customerSearchController,
-        style: GoogleFonts.inter(color: textColor, fontSize: 12.sp),
+        style: GoogleFonts.inter(color: textColor, fontSize: 10.sp),
         decoration: InputDecoration(
           hintText: 'Search by Name, Phone, Email, Booking ID',
           hintStyle:
-              GoogleFonts.inter(color: onSurfaceVariantColor, fontSize: 12.sp),
+              GoogleFonts.inter(color: onSurfaceVariantColor, fontSize: 10.sp),
           prefixIcon:
               Icon(Icons.search, color: onSurfaceVariantColor, size: 20),
           suffixIcon: IconButton(
@@ -239,11 +239,11 @@ class _CustomerServiceWidgetState extends State<CustomerServiceWidget> {
           ),
           child: TextField(
             controller: _refundBookingIdController,
-            style: GoogleFonts.inter(color: textColor, fontSize: 12.sp),
+            style: GoogleFonts.inter(color: textColor, fontSize: 10.sp),
             decoration: InputDecoration(
               hintText: 'Booking ID for Refund',
               hintStyle: GoogleFonts.inter(
-                  color: onSurfaceVariantColor, fontSize: 12.sp),
+                  color: onSurfaceVariantColor, fontSize: 10.sp),
               prefixIcon: Icon(Icons.receipt_long,
                   color: onSurfaceVariantColor, size: 20),
               border: InputBorder.none,
@@ -262,11 +262,11 @@ class _CustomerServiceWidgetState extends State<CustomerServiceWidget> {
           child: TextField(
             controller: _refundAmountController,
             keyboardType: TextInputType.number,
-            style: GoogleFonts.inter(color: textColor, fontSize: 12.sp),
+            style: GoogleFonts.inter(color: textColor, fontSize: 10.sp),
             decoration: InputDecoration(
               hintText: 'Refund Amount (XAF)',
               hintStyle: GoogleFonts.inter(
-                  color: onSurfaceVariantColor, fontSize: 12.sp),
+                  color: onSurfaceVariantColor, fontSize: 10.sp),
               prefixIcon:
                   Icon(Icons.money, color: onSurfaceVariantColor, size: 20),
               border: InputBorder.none,
@@ -320,11 +320,11 @@ class _CustomerServiceWidgetState extends State<CustomerServiceWidget> {
           ),
           child: TextField(
             maxLines: 4,
-            style: GoogleFonts.inter(color: textColor, fontSize: 12.sp),
+            style: GoogleFonts.inter(color: textColor, fontSize: 10.sp),
             decoration: InputDecoration(
               hintText: 'Describe the issue or request...',
               hintStyle: GoogleFonts.inter(
-                  color: onSurfaceVariantColor, fontSize: 12.sp),
+                  color: onSurfaceVariantColor, fontSize: 10.sp),
               border: InputBorder.none,
               contentPadding:
                   EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.8.h),
@@ -380,9 +380,9 @@ class _CustomerServiceWidgetState extends State<CustomerServiceWidget> {
           value: value,
           hint: Text(hint,
               style: GoogleFonts.inter(
-                  color: onSurfaceVariantColor, fontSize: 12.sp)),
+                  color: onSurfaceVariantColor, fontSize: 10.sp)),
           icon: Icon(Icons.arrow_drop_down, color: onSurfaceVariantColor),
-          style: GoogleFonts.inter(color: textColor, fontSize: 12.sp),
+          style: GoogleFonts.inter(color: textColor, fontSize: 10.sp),
           isExpanded: true,
           onChanged: onChanged,
           items: items.map<DropdownMenuItem<String>>((String item) {

@@ -223,7 +223,7 @@ class _SeatSelectionState extends State<SeatSelection>
 
       Navigator.pushNamed(
         context,
-        '/booking-confirmation',
+        '/payment-gateway',
         arguments: bookingData,
       );
     } else {
@@ -448,7 +448,7 @@ class _SeatSelectionState extends State<SeatSelection>
                       seatNumber,
                       style: GoogleFonts.inter(
                         color: Colors.white,
-                        fontSize: 11.sp,
+                        fontSize: 9.sp,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -546,7 +546,7 @@ class _SeatSelectionState extends State<SeatSelection>
                 Text(
                   'Select Seats',
                   style: TextStyle(
-                    fontSize: 16.sp,
+                    fontSize: 14.sp,
                     color: textColor,
                     fontWeight: FontWeight.w600,
                   ),
@@ -554,7 +554,7 @@ class _SeatSelectionState extends State<SeatSelection>
                 Text(
                   '${_busInfo['from']} → ${_busInfo['to']}',
                   style: TextStyle(
-                    fontSize: 12.sp,
+                    fontSize: 10.sp,
                     color: onSurfaceVariantColor,
                   ),
                 ),
@@ -571,7 +571,7 @@ class _SeatSelectionState extends State<SeatSelection>
               child: Text(
                 '${_selectedSeats.length}',
                 style: TextStyle(
-                  fontSize: 12.sp,
+                  fontSize: 10.sp,
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
                 ),
@@ -651,7 +651,7 @@ class _SeatSelectionState extends State<SeatSelection>
                                     Text(
                                       'Express Luxury Coach',
                                       style: GoogleFonts.inter(
-                                        fontSize: 16.sp,
+                                        fontSize: 12.sp,
                                         fontWeight: FontWeight.w700,
                                         color: ThemeNotifier().isDarkMode
                                             ? Colors.white
@@ -661,7 +661,7 @@ class _SeatSelectionState extends State<SeatSelection>
                                     Text(
                                       '${_busInfo['from']} → ${_busInfo['to']} • ${_busInfo['date']}',
                                       style: GoogleFonts.inter(
-                                        fontSize: 12.sp,
+                                        fontSize: 10.sp,
                                         color: ThemeNotifier().isDarkMode
                                             ? Colors.white70
                                             : Colors.black54,
@@ -684,7 +684,7 @@ class _SeatSelectionState extends State<SeatSelection>
                                 child: Text(
                                   '${_selectedSeats.length}/73',
                                   style: GoogleFonts.inter(
-                                    fontSize: 12.sp,
+                                    fontSize: 10.sp,
                                     fontWeight: FontWeight.w700,
                                     color: primaryColor,
                                   ),
@@ -740,7 +740,7 @@ class _SeatSelectionState extends State<SeatSelection>
                                                 'DRIVER',
                                                 style: GoogleFonts.inter(
                                                   color: primaryColor,
-                                                  fontSize: 14.sp,
+                                                  fontSize: 10.sp,
                                                   fontWeight: FontWeight.w700,
                                                 ),
                                               ),

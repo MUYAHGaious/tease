@@ -730,7 +730,7 @@ class _BookingSummaryWidgetState extends State<BookingSummaryWidget>
                         ? Colors.white.withOpacity(0.5)
                         : Colors.grey[400],
                     fontWeight: FontWeight.w500,
-                    fontSize: 12.sp,
+                    fontSize: 10.sp,
                   ),
                 ),
               ],
@@ -754,7 +754,7 @@ class _BookingSummaryWidgetState extends State<BookingSummaryWidget>
                         style: GoogleFonts.inter(
                           color: const Color(0xFF008B8B),
                           fontWeight: FontWeight.w600,
-                          fontSize: 10.sp,
+                          fontSize: 8.sp,
                         ),
                       ),
                     ),
@@ -766,7 +766,7 @@ class _BookingSummaryWidgetState extends State<BookingSummaryWidget>
                             ? Colors.white
                             : Colors.black87,
                         fontWeight: FontWeight.w700,
-                        fontSize: 14.sp,
+                        fontSize: 12.sp,
                       ),
                     ),
                   ],
@@ -798,7 +798,7 @@ class _BookingSummaryWidgetState extends State<BookingSummaryWidget>
                         style: GoogleFonts.inter(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
-                          fontSize: 11.sp,
+                          fontSize: 9.sp,
                         ),
                       ),
                     ),
@@ -842,7 +842,7 @@ class _BookingSummaryWidgetState extends State<BookingSummaryWidget>
                   style: GoogleFonts.inter(
                     color: const Color(0xFF008B8B),
                     fontWeight: FontWeight.w500,
-                    fontSize: 9.sp,
+                    fontSize: 7.sp,
                   ),
                 ),
               ],

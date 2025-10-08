@@ -31,9 +31,19 @@ class SettingsSectionWidget extends StatelessWidget {
         ),
         Container(
           margin: EdgeInsets.symmetric(horizontal: 4.w),
-          decoration: AppTheme.getGlassmorphismDecoration(
-            borderRadius: 12.0,
-            isDark: Theme.of(context).brightness == Brightness.dark,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.08),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Column(
             children: children,

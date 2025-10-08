@@ -81,13 +81,6 @@ class _RoleBasedQuickActionsWidgetState
                 color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
                 width: 1,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: (action['color'] as Color).withOpacity(0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
             ),
             child: Material(
               color: Colors.transparent,

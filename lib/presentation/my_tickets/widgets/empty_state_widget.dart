@@ -23,12 +23,12 @@ class EmptyStateWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: EdgeInsets.all(8.w),
+        padding: EdgeInsets.all(6.w),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildIllustration(context),
-            SizedBox(height: 4.h),
+            SizedBox(height: 1.h),
             Text(
               title,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -37,7 +37,7 @@ class EmptyStateWidget extends StatelessWidget {
                   ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 2.h),
+            SizedBox(height: 1.h),
             Text(
               subtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(

@@ -190,13 +190,6 @@ class _GreetingHeaderWidgetState extends State<GreetingHeaderWidget> {
                 decoration: BoxDecoration(
                   color: primaryColor,
                   shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: primaryColor.withOpacity(0.2),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
                 ),
                 child: Icon(
                   _getGreetingIcon(),
@@ -214,7 +207,7 @@ class _GreetingHeaderWidgetState extends State<GreetingHeaderWidget> {
                     Text(
                       _getGreeting(),
                       style: TextStyle(
-                        fontSize: 18.sp,
+                        fontSize: 14.sp,
                         fontWeight: FontWeight.w700,
                         color: Theme.of(context).colorScheme.onSurface,
                         letterSpacing: 0.2,
@@ -226,7 +219,7 @@ class _GreetingHeaderWidgetState extends State<GreetingHeaderWidget> {
                     Text(
                       'Where would you like to go?',
                       style: TextStyle(
-                        fontSize: 11.sp,
+                        fontSize: 10.sp,
                         fontWeight: FontWeight.w400,
                         color: Theme.of(context)
                             .colorScheme
@@ -253,16 +246,6 @@ class _GreetingHeaderWidgetState extends State<GreetingHeaderWidget> {
                           .withOpacity(0.1),
                       width: 1,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withOpacity(0.08),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
                   ),
                   child: Icon(
                     Icons.menu,
@@ -313,7 +296,7 @@ class _GreetingHeaderWidgetState extends State<GreetingHeaderWidget> {
                     child: Text(
                       _getRoleTips()[_currentTipIndex]['tip'],
                       style: TextStyle(
-                        fontSize: 11.sp,
+                        fontSize: 10.sp,
                         fontWeight: FontWeight.w500,
                         color: Theme.of(context)
                             .colorScheme

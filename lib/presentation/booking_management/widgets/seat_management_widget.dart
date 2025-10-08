@@ -325,6 +325,34 @@ class _SeatManagementWidgetState extends State<SeatManagementWidget>
     return GestureDetector(
       onTap: () {
         HapticFeedback.selectionClick();
+        // Navigate to booking summary for this seat
+        final seatData = {
+          'id': seatId,
+          'seatNumber': seatId,
+          'status': status,
+          'type': type,
+          'price': '7,500 XAF',
+        };
+        final busInfo = {
+          'operator': 'Agency',
+          'busType': 'AC Seater',
+        };
+        final routeInfo = {
+          'route': _selectedRoute.replaceAll('â†’', '→'),
+          'date': _selectedDate,
+        };
+        Navigator.pushNamed(
+          context,
+          '/seat-booking-summary',
+          arguments: {
+            'seat': seatData,
+            'busInfo': busInfo,
+            'routeInfo': routeInfo,
+          },
+        );
+      },
+      onLongPress: () {
+        HapticFeedback.selectionClick();
         _showSeatStatusDialog(seatId, status);
       },
       child: AnimatedContainer(

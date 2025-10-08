@@ -101,7 +101,7 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
       {
         'icon': Icons.check_circle,
         'title': 'Booking Confirmation',
-        'route': '/booking-confirmation',
+        'route': '/payment-gateway',
         'requiresAuth': false,
         'category': 'booking',
       },

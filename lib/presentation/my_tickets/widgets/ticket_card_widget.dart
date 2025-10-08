@@ -52,7 +52,7 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
     final String statusColor = _getStatusColor(widget.ticketData['status']);
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+      margin: EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.5.h),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: BackdropFilter(
@@ -79,19 +79,19 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
                 onTap: widget.onTap,
                 borderRadius: BorderRadius.circular(16),
                 child: Padding(
-                  padding: EdgeInsets.all(4.w),
+                  padding: EdgeInsets.all(3.w),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildTicketHeader(),
-                      SizedBox(height: 2.h),
+                      SizedBox(height: 1.h),
                       _buildRouteInfo(),
-                      SizedBox(height: 2.h),
+                      SizedBox(height: 1.h),
                       _buildTravelDetails(),
-                      SizedBox(height: 2.h),
+                      SizedBox(height: 1.h),
                       _buildQRCodeSection(),
                       if (_isExpanded) ...[
-                        SizedBox(height: 2.h),
+                        SizedBox(height: 1.h),
                         _buildActionButtons(isUpcoming),
                       ],
                     ],
@@ -122,7 +122,7 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
                           .withOpacity(0.7),
                     ),
               ),
-              SizedBox(height: 0.5.h),
+              SizedBox(height: 0.3.h),
               Text(
                 widget.ticketData['busOperator'] ?? 'Tease Express',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -133,7 +133,7 @@ class _TicketCardWidgetState extends State<TicketCardWidget>
           ),
         ),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
+          padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
           decoration: BoxDecoration(
             color: _getStatusColorValue(widget.ticketData['status'])
                 .withOpacity(0.1),

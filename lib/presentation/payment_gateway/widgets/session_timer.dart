@@ -92,13 +92,13 @@ class _SessionTimerState extends State<SessionTimer>
         return Transform.scale(
           scale: isUrgent ? _pulseAnimation.value : 1.0,
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
+            padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
             decoration: BoxDecoration(
               color: isUrgent
                   ? Colors.red.withValues(alpha: 0.1)
                   : AppTheme.lightTheme.colorScheme.secondary
                       .withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(6),
               border: Border.all(
                 color: isUrgent
                     ? Colors.red.withValues(alpha: 0.3)
@@ -114,18 +114,19 @@ class _SessionTimerState extends State<SessionTimer>
                   color: isUrgent
                       ? Colors.red
                       : AppTheme.lightTheme.colorScheme.primary,
-                  size: 20,
+                  size: 16,
                 ),
-                SizedBox(width: 2.w),
+                SizedBox(width: 1.w),
                 Text(
-                  'Session expires in ',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  'Payment gateway closes in ',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: isUrgent
                             ? Colors.red
                             : Theme.of(context)
                                 .colorScheme
                                 .onSurface
                                 .withValues(alpha: 0.7),
+                        fontSize: 10.sp,
                       ),
                 ),
                 Text(

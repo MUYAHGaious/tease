@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui';
 import 'package:sizer/sizer.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/app_export.dart';
 import '../../../theme/app_theme.dart';
@@ -142,6 +143,8 @@ class _PaymentMethodCardState extends State<PaymentMethodCard>
   }
 
   Widget _buildPaymentIcon() {
+    final logoPath = widget.paymentMethod['logo'] as String?;
+
     return Container(
       width: 12.w,
       height: 12.w,
@@ -150,11 +153,23 @@ class _PaymentMethodCardState extends State<PaymentMethodCard>
         borderRadius: BorderRadius.circular(8),
       ),
       child: Center(
-        child: CustomIconWidget(
-          iconName: widget.paymentMethod['icon'] as String,
-          color: AppTheme.lightTheme.colorScheme.primary,
-          size: 24,
-        ),
+        child: logoPath != null && logoPath.endsWith('.svg')
+            ? SvgPicture.asset(
+                'assets/$logoPath',
+                width: 8.w,
+                height: 8.w,
+                fit: BoxFit.contain,
+                placeholderBuilder: (context) => CustomIconWidget(
+                  iconName: widget.paymentMethod['icon'] as String,
+                  color: AppTheme.lightTheme.colorScheme.primary,
+                  size: 24,
+                ),
+              )
+            : CustomIconWidget(
+                iconName: widget.paymentMethod['icon'] as String,
+                color: AppTheme.lightTheme.colorScheme.primary,
+                size: 24,
+              ),
       ),
     );
   }

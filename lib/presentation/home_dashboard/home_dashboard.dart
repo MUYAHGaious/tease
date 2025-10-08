@@ -41,7 +41,8 @@ class _HomeDashboardState extends State<HomeDashboard>
   bool _isRefreshing = false;
   Timer? _themeCheckTimer;
   String _userRole = 'passenger';
-  bool get _canScan => _userRole == 'bus_driver' || _userRole == 'bus_conductor';
+  bool get _canScan =>
+      _userRole == 'bus_driver' || _userRole == 'bus_conductor';
 
   // Theme-aware colors that prevent glitching
   Color get primaryColor => const Color(0xFF008B8B);
@@ -53,6 +54,12 @@ class _HomeDashboardState extends State<HomeDashboard>
       ThemeNotifier().isDarkMode ? const Color(0xFF2D2D2D) : Colors.white;
   Color get onSurfaceColor =>
       ThemeNotifier().isDarkMode ? Colors.white70 : Colors.black54;
+  Color get borderColor =>
+      ThemeNotifier().isDarkMode ? Colors.grey[800]! : Colors.grey[300]!;
+  Color get shadowColor =>
+      ThemeNotifier().isDarkMode ? Colors.black : Colors.grey;
+  Color get onSurfaceVariantColor =>
+      ThemeNotifier().isDarkMode ? Colors.white60 : Colors.black45;
 
   // 2025 Contextual Data - Smart content based on time and user behavior
   List<Map<String, dynamic>> _contextualCards = [];
@@ -284,7 +291,7 @@ class _HomeDashboardState extends State<HomeDashboard>
 
   Widget _buildContextualGreeting() {
     return Container(
-      padding: EdgeInsets.all(4.w),
+      padding: EdgeInsets.all(3.w),
       decoration: BoxDecoration(
         color: primaryColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(cardBorderRadius),
@@ -316,7 +323,7 @@ class _HomeDashboardState extends State<HomeDashboard>
                   _timeBasedGreeting,
                   style: TextStyle(
                     color: AppTheme.onSurfaceLight,
-                    fontSize: 12.sp,
+                    fontSize: 8.sp,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -325,7 +332,7 @@ class _HomeDashboardState extends State<HomeDashboard>
                   'Ready to travel today?',
                   style: TextStyle(
                     color: AppTheme.onSurfaceLight.withOpacity(0.7),
-                    fontSize: 9.sp,
+                    fontSize: 8.sp,
                   ),
                 ),
               ],
@@ -421,7 +428,7 @@ class _HomeDashboardState extends State<HomeDashboard>
                   action['title'],
                   style: TextStyle(
                     color: onSurfaceColor,
-                    fontSize: 10.sp,
+                    fontSize: 8.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -601,7 +608,7 @@ class _HomeDashboardState extends State<HomeDashboard>
                   'Refreshing...',
                   style: TextStyle(
                     color: onSurfaceColor,
-                    fontSize: 10.sp,
+                    fontSize: 8.sp,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -671,10 +678,19 @@ class _HomeDashboardState extends State<HomeDashboard>
     }
   }
 
-  // 2025 Clean Background - No animations, just clean solid color
+  // 2025 Gradient Background matching booking management screen
   Widget _buildCleanBackground() {
     return Container(
-      color: backgroundColor,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            primaryColor.withOpacity(0.05),
+            backgroundColor,
+          ],
+        ),
+      ),
     );
   }
 
@@ -751,7 +767,7 @@ class _HomeDashboardState extends State<HomeDashboard>
                                 ),
 
                                 SizedBox(
-                                    height: 1.h), // Reduced from 2.h to 1.h
+                                    height: 0.5.h), // Further reduced spacing
 
                                 // Role-based Quick Actions Widget
                                 RoleBasedQuickActionsWidget(
@@ -797,7 +813,7 @@ class _HomeDashboardState extends State<HomeDashboard>
           ),
           floatingActionButton: _buildModernFAB(),
           floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerDocked,
+              FloatingActionButtonLocation.centerFloat,
         ),
       ),
     );
