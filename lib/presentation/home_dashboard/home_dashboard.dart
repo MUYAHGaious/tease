@@ -11,6 +11,7 @@ import '../../core/app_export.dart';
 import '../../core/app_state.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/global_bottom_navigation.dart';
+import '../../widgets/global_microphone_button.dart';
 import './widgets/custom_menu_drawer.dart';
 import './widgets/greeting_header_widget.dart';
 import './widgets/popular_routes_widget.dart';
@@ -730,91 +731,102 @@ class _HomeDashboardState extends State<HomeDashboard>
         // Optional: Trigger haptic feedback when transition completes
         HapticFeedback.lightImpact();
       },
-      child: Builder(
-        builder: (context) => Scaffold(
-          backgroundColor: backgroundColor,
-          drawer: const CustomMenuDrawer(),
-          onDrawerChanged: (isOpened) {
-            if (!isOpened) {
-              // Drawer was closed - theme changes handled by ThemeNotifier
-            }
-          },
-          body: Stack(
-            children: [
-              _buildCleanBackground(),
-              Column(
+      child: Stack(
+        children: [
+          Builder(
+            builder: (context) => Scaffold(
+              backgroundColor: backgroundColor,
+              drawer: const CustomMenuDrawer(),
+              onDrawerChanged: (isOpened) {
+                if (!isOpened) {
+                  // Drawer was closed - theme changes handled by ThemeNotifier
+                }
+              },
+              body: Stack(
                 children: [
-                  _buildModernHeader(),
-                  Expanded(
-                    child: RefreshIndicator(
-                      onRefresh: _handleRefresh,
-                      color: primaryColor,
-                      backgroundColor: surfaceColor,
-                      child: CustomScrollView(
-                        controller: _scrollController,
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        slivers: [
-                          SliverToBoxAdapter(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(
-                                    height: 1.h), // Reduced from 3.h to 1.h
+                  _buildCleanBackground(),
+                  Column(
+                    children: [
+                      _buildModernHeader(),
+                      Expanded(
+                        child: RefreshIndicator(
+                          onRefresh: _handleRefresh,
+                          color: primaryColor,
+                          backgroundColor: surfaceColor,
+                          child: CustomScrollView(
+                            controller: _scrollController,
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            slivers: [
+                              SliverToBoxAdapter(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                        height: 1.h), // Reduced from 3.h to 1.h
 
-                                // Original Search Bar Widget with modern styling
-                                SearchBarWidget(
-                                  onSearchTap: _handleNavigation,
+                                    // Original Search Bar Widget with modern styling
+                                    SearchBarWidget(
+                                      onSearchTap: _handleNavigation,
+                                    ),
+
+                                    SizedBox(
+                                        height:
+                                            0.5.h), // Further reduced spacing
+
+                                    // Role-based Quick Actions Widget
+                                    RoleBasedQuickActionsWidget(
+                                      onActionTap: _handleNavigation,
+                                    ),
+
+                                    SizedBox(
+                                        height: 1.h), // Reduced from 2.h to 1.h
+
+                                    // Original Recent Bookings Widget with modern styling
+                                    RecentBookingsWidget(
+                                      onBookingTap: _handleBookingTap,
+                                    ),
+
+                                    SizedBox(
+                                        height: 1.h), // Reduced from 2.h to 1.h
+
+                                    // Original Popular Routes Widget with modern styling
+                                    PopularRoutesWidget(
+                                      onRouteTap: _handleRouteTap,
+                                    ),
+
+                                    SizedBox(
+                                        height: 3.h), // Reduced from 8.h to 3.h
+                                  ],
                                 ),
-
-                                SizedBox(
-                                    height: 0.5.h), // Further reduced spacing
-
-                                // Role-based Quick Actions Widget
-                                RoleBasedQuickActionsWidget(
-                                  onActionTap: _handleNavigation,
-                                ),
-
-                                SizedBox(
-                                    height: 1.h), // Reduced from 2.h to 1.h
-
-                                // Original Recent Bookings Widget with modern styling
-                                RecentBookingsWidget(
-                                  onBookingTap: _handleBookingTap,
-                                ),
-
-                                SizedBox(
-                                    height: 1.h), // Reduced from 2.h to 1.h
-
-                                // Original Popular Routes Widget with modern styling
-                                PopularRoutesWidget(
-                                  onRouteTap: _handleRouteTap,
-                                ),
-
-                                SizedBox(
-                                    height: 3.h), // Reduced from 8.h to 3.h
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
+                  if (_isRefreshing) _buildModernLoadingOverlay(),
+
+                  if (_canScan) _buildScanOverlayButton(),
+
+                  // Development role switcher removed for clean UI
                 ],
               ),
-              if (_isRefreshing) _buildModernLoadingOverlay(),
-
-              if (_canScan) _buildScanOverlayButton(),
-
-              // Development role switcher removed for clean UI
-            ],
+              bottomNavigationBar: GlobalBottomNavigation(
+                initialIndex: 0, // Home tab
+              ),
+              floatingActionButton: null, // Remove the floating action button
+              floatingActionButtonLocation: null,
+            ),
           ),
-          bottomNavigationBar: GlobalBottomNavigation(
-            initialIndex: 0, // Home tab
+          // Add microphone icon positioned in bottom right
+          GlobalMicrophoneButton(
+            onPressed: () => _showModernVoiceAssistant(),
+            bottomOffset:
+                70, // Center-based positioning, aligned with other screens
+            rightOffset: 3.0,
           ),
-          floatingActionButton: _buildModernFAB(),
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerFloat,
-        ),
+        ],
       ),
     );
   }
@@ -855,7 +867,6 @@ class _HomeDashboardState extends State<HomeDashboard>
     );
   }
 
-  // 2025 Clean FAB - No gradients, solid color
   Widget _buildModernFAB() {
     return Container(
       decoration: BoxDecoration(

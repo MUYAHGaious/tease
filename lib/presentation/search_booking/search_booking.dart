@@ -570,7 +570,7 @@ class _SearchBookingState extends State<SearchBooking>
                 children: [
                   Text(
                     'Search Buses',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                           color: textColor,
                         ),
@@ -1286,7 +1286,7 @@ class _SearchBookingState extends State<SearchBooking>
                             SizedBox(height: 0.3.h),
                             Text(
                               '${result['price']} XAF',
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w700,
                                     color: primaryColor,
                                   ),
@@ -1324,7 +1324,7 @@ class _SearchBookingState extends State<SearchBooking>
         SizedBox(height: 0.3.h),
         Text(
           value,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: textColor,
               ),
@@ -1557,7 +1557,7 @@ class _SearchBookingState extends State<SearchBooking>
             child: Icon(
               ticket['icon'],
               color: ticket['color'],
-              size: 4.w,
+              size: 3.6.w,
             ),
           ),
           SizedBox(width: 3.w),
@@ -1567,29 +1567,26 @@ class _SearchBookingState extends State<SearchBooking>
               children: [
                 Text(
                   ticket['title'],
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w600,
-                    color: textColor,
-                  ),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: textColor,
+                      ),
                 ),
                 Text(
                   ticket['subtitle'],
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    color: onSurfaceVariantColor,
-                  ),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: onSurfaceVariantColor,
+                      ),
                 ),
               ],
             ),
           ),
           Text(
             ticket['validUntil'],
-            style: TextStyle(
-              fontSize: 10.sp,
-              color: ticket['color'],
-              fontWeight: FontWeight.w500,
-            ),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: ticket['color'],
+                  fontWeight: FontWeight.w500,
+                ),
           ),
         ],
       ),

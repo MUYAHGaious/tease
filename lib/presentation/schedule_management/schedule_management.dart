@@ -2,9 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/services.dart';
+import 'dart:async';
 
 import '../../theme/theme_notifier.dart';
 import '../../widgets/global_bottom_navigation.dart';
+import '../../widgets/global_microphone_button.dart';
+
+// Extension for string capitalization
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${substring(1)}";
+  }
+}
 
 class ScheduleManagementScreen extends StatefulWidget {
   const ScheduleManagementScreen({Key? key}) : super(key: key);
@@ -18,6 +27,21 @@ class _ScheduleManagementScreenState extends State<ScheduleManagementScreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
   int _currentSubTab = 0; // For Driver/Conductor sub-tabs
+
+  // Drag & Drop Basket State
+  List<Map<String, dynamic>> _basketItems = [];
+  bool _isDragging = false;
+  bool _showDropArea = false;
+  Timer? _dragDelayTimer;
+
+  // Trip Management State
+  List<Map<String, dynamic>> _assembledTrips = [];
+  Map<String, dynamic>? _currentTrip;
+  List<String> _conflicts = [];
+
+  // Trip Slots Management
+  List<Map<String, dynamic>> _tripSlots = [];
+  int _nextSlotId = 1;
 
   // Route status options
   final List<Map<String, dynamic>> _routeStatusOptions = [
@@ -506,8 +530,45 @@ class _ScheduleManagementScreenState extends State<ScheduleManagementScreen>
     });
   }
 
+  // Helper method to handle delayed drag start with proper delay
+  void _handleDelayedDragStart(Map<String, dynamic> data) {
+    _dragDelayTimer?.cancel();
+    _dragDelayTimer = Timer(Duration(milliseconds: 1000), () {
+      // 1 second delay
+      setState(() {
+        _isDragging = true;
+        _showDropArea = true;
+      });
+      // Provide haptic feedback when drag actually starts
+      HapticFeedback.mediumImpact();
+    });
+  }
+
+  // Helper method to handle long press start (immediate feedback)
+  void _handleLongPressStart(Map<String, dynamic> data) {
+    // Provide immediate haptic feedback
+    HapticFeedback.lightImpact();
+    // Start the delay timer
+    _handleDelayedDragStart(data);
+  }
+
+  // Helper method to handle drag end
+  void _handleDragEnd() {
+    _dragDelayTimer?.cancel();
+    setState(() {
+      _isDragging = false;
+      _showDropArea = false;
+    });
+  }
+
+  // Helper method to cancel drag delay
+  void _cancelDragDelay() {
+    _dragDelayTimer?.cancel();
+  }
+
   @override
   void dispose() {
+    _dragDelayTimer?.cancel();
     ThemeNotifier().removeListener(_onThemeChanged);
     _fadeController.dispose();
     _slideController.dispose();
@@ -522,28 +583,45 @@ class _ScheduleManagementScreenState extends State<ScheduleManagementScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              primaryColor.withOpacity(0.05),
-              backgroundColor,
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(),
-              _buildSegmentedControl(),
-              Expanded(
-                child: _buildTabContent(),
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  primaryColor.withOpacity(0.05),
+                  backgroundColor,
+                ],
               ),
-            ],
+            ),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  _buildHeader(),
+                  _buildSegmentedControl(),
+                  Expanded(
+                    child: _buildTabContent(),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
+
+          // Auto-opening Drop Area
+          if (_showDropArea) _buildAutoDropArea(),
+
+          // Basket Icon (Bottom Right)
+          _buildBasketIcon(),
+
+          // Microphone Icon (Below Basket)
+          GlobalMicrophoneButton(
+            bottomOffset:
+                40, // Center-based positioning, aligned with basket icon center
+            rightOffset: 3.0,
+          ),
+        ],
       ),
       bottomNavigationBar: GlobalBottomNavigation(
         initialIndex: 2, // My Tickets tab
@@ -1230,96 +1308,157 @@ class _ScheduleManagementScreenState extends State<ScheduleManagementScreen>
     );
     Color statusColor = statusOption['color'];
 
-    return Container(
-      margin: EdgeInsets.only(bottom: 1.h),
-      padding: EdgeInsets.all(2.w),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: borderColor.withOpacity(0.1),
-        ),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      route['name'],
-                      style: GoogleFonts.inter(
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w600,
-                        color: textColor,
-                      ),
-                    ),
-                    SizedBox(height: 0.5.h),
-                    Text(
-                      '${route['distance']} • ${route['duration']}',
-                      style: GoogleFonts.inter(
-                        fontSize: 10.sp,
-                        color: textColor.withOpacity(0.6),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
-                decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  statusOption['label'],
+    return GestureDetector(
+      onLongPressStart: (details) => _handleLongPressStart(route),
+      onLongPressCancel: _cancelDragDelay,
+      child: Draggable<Map<String, dynamic>>(
+        data: route,
+        onDragStarted: () {
+          // This will be called after the delay
+        },
+        onDragEnd: (details) => _handleDragEnd(),
+        feedback: Material(
+          elevation: 8,
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            width: 200,
+            padding: EdgeInsets.all(2.w),
+            decoration: BoxDecoration(
+              color: primaryColor,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.route, color: Colors.white, size: 24),
+                Text(
+                  route['name'],
                   style: GoogleFonts.inter(
-                    fontSize: 9.sp,
-                    color: statusColor,
+                    fontSize: 11.sp,
                     fontWeight: FontWeight.w600,
+                    color: Colors.white,
                   ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: 1.h),
-          Row(
-            children: [
-              Expanded(
-                child: _buildRouteDetail(
-                    'Distance', route['distance'], Icons.straighten),
-              ),
-              Expanded(
-                child: _buildRouteDetail(
-                    'Duration', route['duration'], Icons.schedule),
-              ),
-            ],
-          ),
-          SizedBox(height: 1.h),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () => _editRoute(route),
-                  icon: Icon(Icons.edit, size: 3.w),
-                  label: Text('Edit Route',
-                      style: GoogleFonts.inter(fontSize: 9.sp)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor.withOpacity(0.1),
-                    foregroundColor: primaryColor,
-                    padding: EdgeInsets.symmetric(vertical: 0.5.h),
+                Text(
+                  '${route['distance']} • ${route['duration']}',
+                  style: GoogleFonts.inter(
+                    fontSize: 10.sp,
+                    color: Colors.white70,
                   ),
                 ),
+              ],
+            ),
+          ),
+        ),
+        childWhenDragging: Container(
+          margin: EdgeInsets.only(bottom: 1.h),
+          padding: EdgeInsets.all(2.w),
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: SizedBox.shrink(), // Completely hide the card
+        ),
+        child: Container(
+          margin: EdgeInsets.only(bottom: 1.h),
+          padding: EdgeInsets.all(2.w),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: borderColor.withOpacity(0.1),
+            ),
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  // Drag handle
+                  Icon(
+                    Icons.drag_handle,
+                    size: 16,
+                    color: Colors.grey.withOpacity(0.6),
+                  ),
+                  SizedBox(width: 1.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          route['name'],
+                          style: GoogleFonts.inter(
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w600,
+                            color: textColor,
+                          ),
+                        ),
+                        SizedBox(height: 0.5.h),
+                        Text(
+                          '${route['distance']} • ${route['duration']}',
+                          style: GoogleFonts.inter(
+                            fontSize: 10.sp,
+                            color: textColor.withOpacity(0.6),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
+                    decoration: BoxDecoration(
+                      color: statusColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      statusOption['label'],
+                      style: GoogleFonts.inter(
+                        fontSize: 9.sp,
+                        color: statusColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(width: 2.w),
-              Expanded(
-                child: _buildRouteStatusDropdown(route),
+              SizedBox(height: 1.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildRouteDetail(
+                        'Distance', route['distance'], Icons.straighten),
+                  ),
+                  Expanded(
+                    child: _buildRouteDetail(
+                        'Duration', route['duration'], Icons.schedule),
+                  ),
+                ],
+              ),
+              SizedBox(height: 1.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => _editRoute(route),
+                      icon: Icon(Icons.edit, size: 3.w),
+                      label: Text('Edit Route',
+                          style: GoogleFonts.inter(fontSize: 9.sp)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor.withOpacity(0.1),
+                        foregroundColor: primaryColor,
+                        padding: EdgeInsets.symmetric(vertical: 0.5.h),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 2.w),
+                  Expanded(
+                    child: _buildRouteStatusDropdown(route),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -1487,32 +1626,13 @@ class _ScheduleManagementScreenState extends State<ScheduleManagementScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Driver Status Overview',
-                style: GoogleFonts.inter(
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w600,
-                  color: textColor,
-                ),
-              ),
-              ElevatedButton.icon(
-                onPressed: () => _showAddDriverSheet(),
-                icon: Icon(Icons.person_add, size: 3.w),
-                label: Text(
-                  'Add Driver',
-                  style: GoogleFonts.inter(fontSize: 9.sp),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  foregroundColor: Colors.white,
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
-                ),
-              ),
-            ],
+          Text(
+            'Driver Status Overview',
+            style: GoogleFonts.inter(
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w600,
+              color: textColor,
+            ),
           ),
           SizedBox(height: 1.h),
           Row(
@@ -1596,32 +1716,13 @@ class _ScheduleManagementScreenState extends State<ScheduleManagementScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Conductor Status Overview',
-                style: GoogleFonts.inter(
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w600,
-                  color: textColor,
-                ),
-              ),
-              ElevatedButton.icon(
-                onPressed: () => _showAddConductorSheet(),
-                icon: Icon(Icons.badge, size: 3.w),
-                label: Text(
-                  'Add Conductor',
-                  style: GoogleFonts.inter(fontSize: 9.sp),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  foregroundColor: Colors.white,
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
-                ),
-              ),
-            ],
+          Text(
+            'Conductor Status Overview',
+            style: GoogleFonts.inter(
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w600,
+              color: textColor,
+            ),
           ),
           SizedBox(height: 1.h),
           Row(
@@ -1730,6 +1831,75 @@ class _ScheduleManagementScreenState extends State<ScheduleManagementScreen>
     Color statusColor = statusOption['color'];
 
     return GestureDetector(
+      onLongPressStart: (details) => _handleLongPressStart(driver),
+      onLongPressCancel: _cancelDragDelay,
+      child: _dragDelayTimer?.isActive == true
+          ? _buildDriverCardContent(driver, statusColor,
+              statusOption) // Show static card during delay
+          : Draggable<Map<String, dynamic>>(
+              data: driver,
+              onDragStarted: () {
+                // Only allow drag after delay is complete
+                if (_dragDelayTimer?.isActive == true) {
+                  return; // Prevent drag if timer is still active
+                }
+                setState(() {
+                  _isDragging = true;
+                  _showDropArea = true;
+                });
+                HapticFeedback.mediumImpact();
+              },
+              onDragEnd: (details) => _handleDragEnd(),
+              feedback: Material(
+                elevation: 8,
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  width: 200,
+                  padding: EdgeInsets.all(2.w),
+                  decoration: BoxDecoration(
+                    color: primaryColor,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.person, color: Colors.white, size: 24),
+                      Text(
+                        driver['name'],
+                        style: GoogleFonts.inter(
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Text(
+                        '${driver['license']} • ${driver['experience']}',
+                        style: GoogleFonts.inter(
+                          fontSize: 10.sp,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              childWhenDragging: Container(
+                margin: EdgeInsets.only(bottom: 1.h),
+                padding: EdgeInsets.all(2.w),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: SizedBox.shrink(), // Completely hide the card
+              ),
+              child: _buildDriverCardContent(driver, statusColor, statusOption),
+            ),
+    );
+  }
+
+  Widget _buildDriverCardContent(Map<String, dynamic> driver, Color statusColor,
+      Map<String, dynamic> statusOption) {
+    return GestureDetector(
       onTap: () => _showDriverDetailsOverlay(driver),
       child: Container(
         margin: EdgeInsets.only(bottom: 1.h),
@@ -1745,6 +1915,13 @@ class _ScheduleManagementScreenState extends State<ScheduleManagementScreen>
           children: [
             Row(
               children: [
+                // Drag handle
+                Icon(
+                  Icons.drag_handle,
+                  size: 16,
+                  color: Colors.grey.withOpacity(0.6),
+                ),
+                SizedBox(width: 1.w),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1873,99 +2050,163 @@ class _ScheduleManagementScreenState extends State<ScheduleManagementScreen>
     );
     Color statusColor = statusOption['color'];
 
-    return GestureDetector(
-      onTap: () => _showConductorDetailsOverlay(conductor),
-      child: Container(
+    return Draggable<Map<String, dynamic>>(
+      data: conductor,
+      onDragStarted: () {
+        setState(() {
+          _isDragging = true;
+          _showDropArea = true;
+        });
+      },
+      onDragEnd: (details) {
+        setState(() {
+          _isDragging = false;
+          _showDropArea = false;
+        });
+      },
+      feedback: Material(
+        elevation: 8,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          width: 200,
+          padding: EdgeInsets.all(2.w),
+          decoration: BoxDecoration(
+            color: primaryColor,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.badge, color: Colors.white, size: 24),
+              Text(
+                conductor['name'],
+                style: GoogleFonts.inter(
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+              Text(
+                '${conductor['employeeId']} • ${conductor['experience']}',
+                style: GoogleFonts.inter(
+                  fontSize: 10.sp,
+                  color: Colors.white70,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      childWhenDragging: Container(
         margin: EdgeInsets.only(bottom: 1.h),
         padding: EdgeInsets.all(2.w),
         decoration: BoxDecoration(
-          color: backgroundColor,
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: borderColor.withOpacity(0.1),
-          ),
         ),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        conductor['name'],
-                        style: GoogleFonts.inter(
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w600,
-                          color: textColor,
-                        ),
-                      ),
-                      SizedBox(height: 0.5.h),
-                      Text(
-                        '${conductor['employeeId']} • ${conductor['experience']}',
-                        style: GoogleFonts.inter(
-                          fontSize: 10.sp,
-                          color: textColor.withOpacity(0.6),
-                        ),
-                      ),
-                    ],
+        child: SizedBox.shrink(), // Completely hide the card
+      ),
+      child: GestureDetector(
+        onTap: () => _showConductorDetailsOverlay(conductor),
+        child: Container(
+          margin: EdgeInsets.only(bottom: 1.h),
+          padding: EdgeInsets.all(2.w),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: borderColor.withOpacity(0.1),
+            ),
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  // Drag handle
+                  Icon(
+                    Icons.drag_handle,
+                    size: 16,
+                    color: Colors.grey.withOpacity(0.6),
                   ),
-                ),
-                Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
-                  decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    statusOption['label'],
-                    style: GoogleFonts.inter(
-                      fontSize: 9.sp,
-                      color: statusColor,
-                      fontWeight: FontWeight.w600,
+                  SizedBox(width: 1.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          conductor['name'],
+                          style: GoogleFonts.inter(
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w600,
+                            color: textColor,
+                          ),
+                        ),
+                        SizedBox(height: 0.5.h),
+                        Text(
+                          '${conductor['employeeId']} • ${conductor['experience']}',
+                          style: GoogleFonts.inter(
+                            fontSize: 10.sp,
+                            color: textColor.withOpacity(0.6),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: 1.h),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildDriverDetail(
-                      'Route', conductor['currentRoute'], Icons.route),
-                ),
-                Expanded(
-                  child: _buildDriverDetail(
-                      'Shift', conductor['shift'], Icons.schedule),
-                ),
-                Expanded(
-                  child: _buildDriverDetail(
-                      'Driver', conductor['driver'], Icons.person),
-                ),
-              ],
-            ),
-            SizedBox(height: 1.h),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => _assignConductor(conductor),
-                    icon: Icon(Icons.assignment_ind, size: 3.w),
-                    label: Text('Assign',
-                        style: GoogleFonts.inter(fontSize: 9.sp)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryColor.withOpacity(0.1),
-                      foregroundColor: primaryColor,
-                      padding: EdgeInsets.symmetric(vertical: 0.5.h),
+                  Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
+                    decoration: BoxDecoration(
+                      color: statusColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      statusOption['label'],
+                      style: GoogleFonts.inter(
+                        fontSize: 9.sp,
+                        color: statusColor,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+              SizedBox(height: 1.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildDriverDetail(
+                        'Route', conductor['currentRoute'], Icons.route),
+                  ),
+                  Expanded(
+                    child: _buildDriverDetail(
+                        'Shift', conductor['shift'], Icons.schedule),
+                  ),
+                  Expanded(
+                    child: _buildDriverDetail(
+                        'Driver', conductor['driver'], Icons.person),
+                  ),
+                ],
+              ),
+              SizedBox(height: 1.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => _assignConductor(conductor),
+                      icon: Icon(Icons.assignment_ind, size: 3.w),
+                      label: Text('Assign',
+                          style: GoogleFonts.inter(fontSize: 9.sp)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor.withOpacity(0.1),
+                        foregroundColor: primaryColor,
+                        padding: EdgeInsets.symmetric(vertical: 0.5.h),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -2176,106 +2417,172 @@ class _ScheduleManagementScreenState extends State<ScheduleManagementScreen>
     );
     Color statusColor = statusOption['color'];
 
-    return Container(
-      margin: EdgeInsets.only(bottom: 1.h),
-      padding: EdgeInsets.all(2.w),
-      decoration: BoxDecoration(
-        color: backgroundColor,
+    return Draggable<Map<String, dynamic>>(
+      data: bus,
+      onDragStarted: () {
+        setState(() {
+          _isDragging = true;
+          _showDropArea = true;
+        });
+      },
+      onDragEnd: (details) {
+        setState(() {
+          _isDragging = false;
+          _showDropArea = false;
+        });
+      },
+      feedback: Material(
+        elevation: 8,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: borderColor.withOpacity(0.1),
+        child: Container(
+          width: 200,
+          padding: EdgeInsets.all(2.w),
+          decoration: BoxDecoration(
+            color: primaryColor,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.directions_bus, color: Colors.white, size: 24),
+              Text(
+                bus['plateNumber'],
+                style: GoogleFonts.inter(
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+              Text(
+                '${bus['model']} • 70 seats',
+                style: GoogleFonts.inter(
+                  fontSize: 10.sp,
+                  color: Colors.white70,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      bus['plateNumber'],
-                      style: GoogleFonts.inter(
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w600,
-                        color: textColor,
-                      ),
-                    ),
-                    SizedBox(height: 0.5.h),
-                    Text(
-                      '${bus['model']} • 70 seats',
-                      style: GoogleFonts.inter(
-                        fontSize: 10.sp,
-                        color: textColor.withOpacity(0.6),
-                      ),
-                    ),
-                  ],
+      childWhenDragging: Container(
+        margin: EdgeInsets.only(bottom: 1.h),
+        padding: EdgeInsets.all(2.w),
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: SizedBox.shrink(), // Completely hide the card
+      ),
+      child: Container(
+        margin: EdgeInsets.only(bottom: 1.h),
+        padding: EdgeInsets.all(2.w),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: borderColor.withOpacity(0.1),
+          ),
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                // Drag handle
+                Icon(
+                  Icons.drag_handle,
+                  size: 16,
+                  color: Colors.grey.withOpacity(0.6),
                 ),
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
-                decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  statusOption['label'],
-                  style: GoogleFonts.inter(
-                    fontSize: 9.sp,
-                    color: statusColor,
-                    fontWeight: FontWeight.w600,
+                SizedBox(width: 1.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        bus['plateNumber'],
+                        style: GoogleFonts.inter(
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w600,
+                          color: textColor,
+                        ),
+                      ),
+                      SizedBox(height: 0.5.h),
+                      Text(
+                        '${bus['model']} • 70 seats',
+                        style: GoogleFonts.inter(
+                          fontSize: 10.sp,
+                          color: textColor.withOpacity(0.6),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: 1.h),
-          Row(
-            children: [
-              Expanded(
-                child: _buildBusDetail('Driver', bus['driver'], Icons.person),
-              ),
-              Expanded(
-                child:
-                    _buildBusDetail('Route', bus['currentRoute'], Icons.route),
-              ),
-            ],
-          ),
-          SizedBox(height: 0.5.h),
-          Row(
-            children: [
-              Expanded(
-                child:
-                    _buildBusDetail('Conductor', bus['conductor'], Icons.badge),
-              ),
-              Expanded(
-                child: Container(), // Empty space for alignment
-              ),
-            ],
-          ),
-          SizedBox(height: 1.h),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () => _editBus(bus),
-                  icon: Icon(Icons.edit, size: 3.w),
-                  label: Text('Edit', style: GoogleFonts.inter(fontSize: 9.sp)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor.withOpacity(0.1),
-                    foregroundColor: primaryColor,
-                    padding: EdgeInsets.symmetric(vertical: 0.5.h),
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    statusOption['label'],
+                    style: GoogleFonts.inter(
+                      fontSize: 9.sp,
+                      color: statusColor,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(width: 2.w),
-              Expanded(
-                child: _buildBusStatusDropdown(bus),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+            SizedBox(height: 1.h),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildBusDetail('Driver', bus['driver'], Icons.person),
+                ),
+                Expanded(
+                  child: _buildBusDetail(
+                      'Route', bus['currentRoute'], Icons.route),
+                ),
+              ],
+            ),
+            SizedBox(height: 0.5.h),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildBusDetail(
+                      'Conductor', bus['conductor'], Icons.badge),
+                ),
+                Expanded(
+                  child: Container(), // Empty space for alignment
+                ),
+              ],
+            ),
+            SizedBox(height: 1.h),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => _editBus(bus),
+                    icon: Icon(Icons.edit, size: 3.w),
+                    label:
+                        Text('Edit', style: GoogleFonts.inter(fontSize: 9.sp)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor.withOpacity(0.1),
+                      foregroundColor: primaryColor,
+                      padding: EdgeInsets.symmetric(vertical: 0.5.h),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 2.w),
+                Expanded(
+                  child: _buildBusStatusDropdown(bus),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -2321,19 +2628,105 @@ class _ScheduleManagementScreenState extends State<ScheduleManagementScreen>
       position: _slideAnimation,
       child: FadeTransition(
         opacity: _fadeAnimation,
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(3.w),
-          child: Column(
-            children: [
-              _buildRealTimeStats(),
-              SizedBox(height: 2.h),
-              _buildActiveDelays(),
-              SizedBox(height: 2.h),
-              _buildEmergencyControls(),
-              SizedBox(height: 2.h),
-              _buildCommunicationCenter(),
-            ],
-          ),
+        child: Stack(
+          children: [
+            // Original content (blurred/disabled)
+            SingleChildScrollView(
+              padding: EdgeInsets.all(3.w),
+              child: Column(
+                children: [
+                  _buildRealTimeStats(),
+                  SizedBox(height: 2.h),
+                  _buildActiveDelays(),
+                  SizedBox(height: 2.h),
+                  _buildEmergencyControls(),
+                  SizedBox(height: 2.h),
+                  _buildCommunicationCenter(),
+                ],
+              ),
+            ),
+            // Overlay
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(
+                child: Container(
+                  padding: EdgeInsets.all(4.w),
+                  decoration: BoxDecoration(
+                    color: surfaceColor,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: borderColor.withOpacity(0.2)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.construction,
+                        size: 12.w,
+                        color: primaryColor.withOpacity(0.7),
+                      ),
+                      SizedBox(height: 2.h),
+                      Text(
+                        'Coming Soon',
+                        style: GoogleFonts.inter(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w700,
+                          color: textColor,
+                        ),
+                      ),
+                      SizedBox(height: 1.h),
+                      Text(
+                        'Real-Time Control',
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: primaryColor,
+                        ),
+                      ),
+                      SizedBox(height: 1.h),
+                      Text(
+                        'This feature is currently under development.\nReal-time monitoring and emergency controls\nwill be available in a future update.',
+                        style: GoogleFonts.inter(
+                          fontSize: 11.sp,
+                          color: textColor.withOpacity(0.7),
+                          height: 1.4,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 2.h),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 3.w, vertical: 1.h),
+                        decoration: BoxDecoration(
+                          color: primaryColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border:
+                              Border.all(color: primaryColor.withOpacity(0.3)),
+                        ),
+                        child: Text(
+                          '🚧 Under Development',
+                          style: GoogleFonts.inter(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w500,
+                            color: primaryColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -2698,10 +3091,6 @@ class _ScheduleManagementScreenState extends State<ScheduleManagementScreen>
           padding: EdgeInsets.all(3.w),
           child: Column(
             children: [
-              _buildPerformanceStats(),
-              SizedBox(height: 2.h),
-              _buildPerformanceCharts(),
-              SizedBox(height: 2.h),
               _buildPerformanceReports(),
             ],
           ),
@@ -2878,7 +3267,7 @@ class _ScheduleManagementScreenState extends State<ScheduleManagementScreen>
                 onPressed: () => _generateReport(),
                 icon: Icon(Icons.download, size: 4.w),
                 label: Text(
-                  'Generate',
+                  'Download All',
                   style: GoogleFonts.inter(fontSize: 10.sp),
                 ),
                 style: ElevatedButton.styleFrom(
@@ -5490,6 +5879,2400 @@ class _ScheduleManagementScreenState extends State<ScheduleManagementScreen>
     // TODO: Implement add conductor sheet
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Add Conductor functionality')),
+    );
+  }
+
+  Widget _buildDropZone(String title, IconData icon, String hint) {
+    return DragTarget<Map<String, dynamic>>(
+      onWillAccept: (data) => true,
+      onAccept: (data) => _handleDrop(data, title),
+      builder: (context, candidateData, rejectedData) {
+        bool isHighlighted = candidateData.isNotEmpty;
+
+        return Container(
+          width: double.infinity,
+          height: 80,
+          decoration: BoxDecoration(
+            color:
+                isHighlighted ? primaryColor.withOpacity(0.1) : backgroundColor,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isHighlighted ? primaryColor : borderColor,
+              width: isHighlighted ? 3 : 2,
+              style: isHighlighted ? BorderStyle.solid : BorderStyle.none,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 32,
+                color: isHighlighted ? primaryColor : Colors.grey,
+              ),
+              SizedBox(height: 0.5.h),
+              Text(
+                title,
+                style: GoogleFonts.inter(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  color: isHighlighted ? primaryColor : Colors.grey,
+                ),
+              ),
+              SizedBox(height: 0.2.h),
+              Text(
+                hint,
+                style: GoogleFonts.inter(
+                  fontSize: 10.sp,
+                  color: isHighlighted
+                      ? primaryColor.withOpacity(0.7)
+                      : Colors.grey.withOpacity(0.7),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _handleDrop(Map<String, dynamic> data, String dropZoneTitle) {
+    String itemType = _getItemType(data);
+
+    // Check if we already have this type of item in any slot
+    List<Map<String, dynamic>> existingSlots = [];
+    for (var slot in _tripSlots) {
+      if (slot['items'].any((item) => _getItemType(item) == itemType)) {
+        existingSlots.add(slot);
+      }
+    }
+
+    if (existingSlots.isNotEmpty) {
+      // Show slot selection dialog
+      _showSlotSelectionDialog(data, existingSlots, dropZoneTitle);
+      return;
+    }
+
+    // Check for other conflicts
+    List<String> conflicts = _checkConflicts(data);
+    if (conflicts.isNotEmpty) {
+      _showConflictDialog(conflicts, data);
+      return;
+    }
+
+    // Add to first available slot or create new slot
+    _addToSlot(data, dropZoneTitle);
+  }
+
+  String _getItemType(Map<String, dynamic> data) {
+    if (data.containsKey('license')) return 'driver';
+    if (data.containsKey('employeeId')) return 'conductor';
+    if (data.containsKey('plateNumber')) return 'bus';
+    if (data.containsKey('name') && data.containsKey('distance'))
+      return 'route';
+    return 'unknown';
+  }
+
+  void _showAssignmentConfirmation(
+      Map<String, dynamic> data, String dropZoneTitle) {
+    String itemName = data['name'] ?? data['plateNumber'];
+    String itemType = _getItemType(data);
+
+    // Show notification instead of dialog
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(_getItemIcon(itemType), color: Colors.white, size: 20),
+            SizedBox(width: 2.w),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '$itemName added to trip assembly',
+                    style: GoogleFonts.inter(
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    _getItemSubtitle(data, itemType),
+                    style: GoogleFonts.inter(
+                      fontSize: 9.sp,
+                      color: Colors.white.withOpacity(0.8),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: primaryColor,
+        duration: Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
+
+  IconData _getItemIcon(String type) {
+    switch (type) {
+      case 'driver':
+        return Icons.person;
+      case 'conductor':
+        return Icons.badge;
+      case 'bus':
+        return Icons.directions_bus;
+      case 'route':
+        return Icons.route;
+      default:
+        return Icons.help;
+    }
+  }
+
+  String _getItemSubtitle(Map<String, dynamic> data, String type) {
+    switch (type) {
+      case 'driver':
+        return '${data['license']} • ${data['experience']}';
+      case 'conductor':
+        return '${data['employeeId']} • ${data['experience']}';
+      case 'bus':
+        return '${data['model']} • 70 seats';
+      case 'route':
+        return '${data['distance']} • ${data['duration']}';
+      default:
+        return '';
+    }
+  }
+
+  Widget _buildAutoDropArea() {
+    return Positioned(
+      bottom: 0,
+      left: 0,
+      right: 0,
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        height: 120,
+        decoration: BoxDecoration(
+          color: primaryColor.withOpacity(0.95),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: primaryColor.withOpacity(0.3),
+              blurRadius: 20,
+              offset: Offset(0, -5),
+            ),
+          ],
+        ),
+        child: DragTarget<Map<String, dynamic>>(
+          onWillAccept: (data) => true,
+          onAccept: (data) => _handleDrop(data, 'Trip Assembly'),
+          builder: (context, candidateData, rejectedData) {
+            bool isHighlighted = candidateData.isNotEmpty;
+
+            return Container(
+              padding: EdgeInsets.all(3.w),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.add_circle_outline,
+                    color: Colors.white,
+                    size: isHighlighted ? 48 : 40,
+                  ),
+                  SizedBox(height: 1.h),
+                  Text(
+                    isHighlighted
+                        ? 'Drop here to add to trip'
+                        : 'Drop items here to build your trip',
+                    style: GoogleFonts.inter(
+                      fontSize: isHighlighted ? 14.sp : 12.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBasketIcon() {
+    return Positioned(
+      bottom: 100, // Center-based positioning
+      right: 3.w,
+      child: GestureDetector(
+        onTap: () => _showBasketOverlay(),
+        child: Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            color: primaryColor,
+            borderRadius: BorderRadius.circular(30),
+            boxShadow: [
+              BoxShadow(
+                color: primaryColor.withOpacity(0.3),
+                blurRadius: 15,
+                offset: Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              Center(
+                child: Icon(
+                  Icons.schedule,
+                  color: Colors.white,
+                  size: 28,
+                ),
+              ),
+              if (_tripSlots.isNotEmpty)
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    width: 20,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '${_tripSlots.length}',
+                        style: GoogleFonts.inter(
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showBasketOverlay() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: backgroundColor,
+      isScrollControlled: true, // Allow the sheet to grow
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      builder: (BuildContext context) {
+        return DraggableScrollableSheet(
+          initialChildSize:
+              _tripSlots.isEmpty ? 0.3 : 0.6, // Start smaller if empty
+          minChildSize: 0.3, // Minimum height
+          maxChildSize: 0.9, // Maximum height (90% of screen)
+          expand: false,
+          builder: (context, scrollController) {
+            return Container(
+              padding: EdgeInsets.all(3.w),
+              child: Column(
+                children: [
+                  // Handle
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  SizedBox(height: 2.h),
+
+                  // Title
+                  Text(
+                    'Trip Slots Management',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: textColor,
+                    ),
+                  ),
+                  SizedBox(height: 1.h),
+                  Text(
+                    'Manage your trip slots and assemble trips',
+                    style: GoogleFonts.inter(
+                      fontSize: 10.sp,
+                      color: textColor.withOpacity(0.7),
+                    ),
+                  ),
+                  SizedBox(height: 2.h),
+
+                  // Trip Slots List - Scrollable
+                  Expanded(
+                    child: _tripSlots.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.schedule_outlined,
+                                  size: 64,
+                                  color: Colors.grey.withOpacity(0.5),
+                                ),
+                                SizedBox(height: 2.h),
+                                Text(
+                                  'No trip slots created',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12.sp,
+                                    color: Colors.grey.withOpacity(0.7),
+                                  ),
+                                ),
+                                Text(
+                                  'Drag items from the tabs above to create trip slots',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 10.sp,
+                                    color: Colors.grey.withOpacity(0.5),
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            controller: scrollController,
+                            itemCount: _tripSlots.length,
+                            itemBuilder: (context, index) {
+                              final slot = _tripSlots[index];
+                              return _buildTripSlotCard(slot, index);
+                            },
+                          ),
+                  ),
+
+                  // Actions - Fixed at bottom
+                  if (_tripSlots.isNotEmpty) ...[
+                    SizedBox(height: 2.h),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              setState(() {
+                                _tripSlots.clear();
+                              });
+                              Navigator.of(context).pop();
+                            },
+                            icon: Icon(Icons.clear_all, size: 4.w),
+                            label: Text('Clear All Slots',
+                                style: GoogleFonts.inter(fontSize: 10.sp)),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.red,
+                              side: BorderSide(color: Colors.red),
+                              padding: EdgeInsets.symmetric(vertical: 1.h),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 2.w),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              _assembleAllTrips();
+                            },
+                            icon: Icon(Icons.check_circle, size: 4.w),
+                            label: Text('Assemble All Trips',
+                                style: GoogleFonts.inter(fontSize: 10.sp)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryColor,
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(vertical: 1.h),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildTripSlotCard(Map<String, dynamic> slot, int index) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 1.h),
+      padding: EdgeInsets.all(2.w),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: borderColor.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Slot Header
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(1.w),
+                decoration: BoxDecoration(
+                  color: primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Icon(
+                  Icons.schedule,
+                  color: primaryColor,
+                  size: 16,
+                ),
+              ),
+              SizedBox(width: 2.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            slot['name'],
+                            style: GoogleFonts.inter(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w600,
+                              color: textColor,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => _renameSlot(slot),
+                          icon: Icon(Icons.edit, color: primaryColor, size: 16),
+                          constraints: BoxConstraints(),
+                          padding: EdgeInsets.zero,
+                        ),
+                      ],
+                    ),
+                    Text(
+                      '${slot['items'].length} items • ${_getSlotCompletionStatus(slot)}',
+                      style: GoogleFonts.inter(
+                        fontSize: 10.sp,
+                        color: textColor.withOpacity(0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    _tripSlots.removeAt(index);
+                  });
+                },
+                icon: Icon(Icons.delete_outline, color: Colors.red, size: 16),
+                constraints: BoxConstraints(),
+                padding: EdgeInsets.zero,
+              ),
+            ],
+          ),
+
+          SizedBox(height: 1.h),
+
+          // Items in Slot
+          if (slot['items'].isNotEmpty) ...[
+            Wrap(
+              spacing: 1.w,
+              runSpacing: 0.5.h,
+              children: slot['items'].map<Widget>((item) {
+                String itemType = _getItemType(item);
+                String itemName = item['name'] ?? item['plateNumber'];
+                return Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 1.w, vertical: 0.5.h),
+                  decoration: BoxDecoration(
+                    color: _getItemTypeColor(itemType).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                        color: _getItemTypeColor(itemType).withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        _getItemIcon(itemType),
+                        color: _getItemTypeColor(itemType),
+                        size: 12,
+                      ),
+                      SizedBox(width: 0.5.w),
+                      Text(
+                        itemName,
+                        style: GoogleFonts.inter(
+                          fontSize: 9.sp,
+                          fontWeight: FontWeight.w500,
+                          color: _getItemTypeColor(itemType),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+            SizedBox(height: 1.h),
+          ],
+
+          // Slot Actions
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => _assembleSlotTrip(slot),
+                  icon: Icon(Icons.check_circle_outline, size: 12),
+                  label: Text('Assemble Trip',
+                      style: GoogleFonts.inter(fontSize: 9.sp)),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: primaryColor,
+                    side: BorderSide(color: primaryColor),
+                    padding: EdgeInsets.symmetric(vertical: 0.5.h),
+                    minimumSize: Size(0, 0),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getItemTypeColor(String type) {
+    switch (type) {
+      case 'driver':
+        return Colors.blue;
+      case 'conductor':
+        return Colors.green;
+      case 'bus':
+        return Colors.orange;
+      case 'route':
+        return Colors.purple;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  void _renameSlot(Map<String, dynamic> slot) {
+    TextEditingController controller =
+        TextEditingController(text: slot['name']);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: backgroundColor,
+          title: Text(
+            'Rename Trip Slot',
+            style: GoogleFonts.inter(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w600,
+              color: textColor,
+            ),
+          ),
+          content: TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              labelText: 'Slot Name',
+              hintText: 'Enter a custom name for this trip slot',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            style: GoogleFonts.inter(fontSize: 10.sp),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  slot['name'] = controller.text.trim().isNotEmpty
+                      ? controller.text.trim()
+                      : 'Trip Slot ${slot['id']}';
+                });
+                Navigator.of(context).pop();
+              },
+              child: Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _assembleSlotTrip(Map<String, dynamic> slot) {
+    // Validate slot completeness
+    List<String> errors = _validateSlotCompleteness(slot);
+    if (errors.isNotEmpty) {
+      _showValidationDialog(errors);
+      return;
+    }
+
+    // Create trip from slot
+    Map<String, dynamic> trip = _createTripFromSlot(slot);
+
+    // Add to assembled trips
+    setState(() {
+      _assembledTrips.add(trip);
+      _currentTrip = trip;
+    });
+
+    // Show trip result
+    _showTripResult(trip);
+  }
+
+  void _assembleAllTrips() {
+    List<Map<String, dynamic>> validTrips = [];
+    List<String> allErrors = [];
+
+    for (var slot in _tripSlots) {
+      List<String> errors = _validateSlotCompleteness(slot);
+      if (errors.isEmpty) {
+        validTrips.add(_createTripFromSlot(slot));
+      } else {
+        allErrors.addAll(errors.map((error) => '${slot['name']}: $error'));
+      }
+    }
+
+    if (validTrips.isEmpty) {
+      _showValidationDialog(allErrors);
+      return;
+    }
+
+    // Add all valid trips
+    setState(() {
+      _assembledTrips.addAll(validTrips);
+      _currentTrip = validTrips.first;
+    });
+
+    // Show success message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+            'Successfully assembled ${validTrips.length} trip${validTrips.length > 1 ? 's' : ''}'),
+        backgroundColor: Colors.green,
+        duration: Duration(seconds: 2),
+      ),
+    );
+
+    // Show trip management
+    _showTripManagement();
+  }
+
+  List<String> _validateSlotCompleteness(Map<String, dynamic> slot) {
+    List<String> errors = [];
+    List<String> requiredTypes = ['driver', 'conductor', 'bus', 'route'];
+    List<String> presentTypes =
+        slot['items'].map<String>((item) => _getItemType(item)).toList();
+
+    for (String type in requiredTypes) {
+      if (!presentTypes.contains(type)) {
+        errors.add('$type is required');
+      }
+    }
+
+    return errors;
+  }
+
+  Map<String, dynamic> _createTripFromSlot(Map<String, dynamic> slot) {
+    var driver =
+        slot['items'].firstWhere((item) => _getItemType(item) == 'driver');
+    var conductor =
+        slot['items'].firstWhere((item) => _getItemType(item) == 'conductor');
+    var bus = slot['items'].firstWhere((item) => _getItemType(item) == 'bus');
+    var route =
+        slot['items'].firstWhere((item) => _getItemType(item) == 'route');
+
+    String tripId =
+        'TRP-${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}';
+
+    return {
+      'tripId': tripId,
+      'driver': driver,
+      'conductor': conductor,
+      'bus': bus,
+      'route': route,
+      'status': 'assembled',
+      'createdAt': DateTime.now(),
+      'departureTime': _calculateDepartureTime(),
+      'estimatedArrival': _calculateArrivalTime(),
+      'passengerCapacity': bus['capacity'],
+      'estimatedRevenue': _calculateEstimatedRevenue(),
+      'slotName': slot['name'],
+    };
+  }
+
+  void _assembleTrip() {
+    if (_basketItems.isEmpty) return;
+
+    // Validate trip completeness
+    List<String> validationErrors = _validateTripCompleteness();
+
+    if (validationErrors.isNotEmpty) {
+      _showValidationDialog(validationErrors);
+      return;
+    }
+
+    // Create the trip
+    Map<String, dynamic> trip = _createTrip();
+
+    // Add to assembled trips
+    setState(() {
+      _assembledTrips.add(trip);
+      _currentTrip = trip;
+      _basketItems.clear();
+    });
+
+    // Show trip result
+    _showTripResult(trip);
+  }
+
+  List<String> _checkConflicts(Map<String, dynamic> newItem) {
+    List<String> conflicts = [];
+    String itemType = _getItemType(newItem);
+
+    // Check for duplicate items
+    for (var existingItem in _basketItems) {
+      if (_getItemType(existingItem) == itemType) {
+        conflicts.add('${itemType.capitalize()} already added to trip');
+        break;
+      }
+    }
+
+    // Check for schedule conflicts
+    if (itemType == 'driver') {
+      conflicts.addAll(_checkDriverConflicts(newItem));
+    } else if (itemType == 'conductor') {
+      conflicts.addAll(_checkConductorConflicts(newItem));
+    } else if (itemType == 'bus') {
+      conflicts.addAll(_checkBusConflicts(newItem));
+    } else if (itemType == 'route') {
+      conflicts.addAll(_checkRouteConflicts(newItem));
+    }
+
+    // Check for capacity conflicts
+    conflicts.addAll(_checkCapacityConflicts(newItem));
+
+    return conflicts;
+  }
+
+  List<String> _checkDriverConflicts(Map<String, dynamic> driver) {
+    List<String> conflicts = [];
+
+    // Check if driver is already assigned to another trip
+    for (var trip in _assembledTrips) {
+      if (trip['driver']['id'] == driver['id']) {
+        conflicts.add(
+            'Driver ${driver['name']} is already assigned to Trip ${trip['tripId']}');
+      }
+    }
+
+    // Check working hours
+    if (driver['status'] == 'on_break') {
+      conflicts.add('Driver ${driver['name']} is currently on break');
+    } else if (driver['status'] == 'sick_leave') {
+      conflicts.add('Driver ${driver['name']} is on sick leave');
+    } else if (driver['status'] == 'vacation') {
+      conflicts.add('Driver ${driver['name']} is on vacation');
+    }
+
+    return conflicts;
+  }
+
+  List<String> _checkConductorConflicts(Map<String, dynamic> conductor) {
+    List<String> conflicts = [];
+
+    // Check if conductor is already assigned to another trip
+    for (var trip in _assembledTrips) {
+      if (trip['conductor']['id'] == conductor['id']) {
+        conflicts.add(
+            'Conductor ${conductor['name']} is already assigned to Trip ${trip['tripId']}');
+      }
+    }
+
+    // Check availability
+    if (conductor['status'] == 'on_break') {
+      conflicts.add('Conductor ${conductor['name']} is currently on break');
+    } else if (conductor['status'] == 'sick_leave') {
+      conflicts.add('Conductor ${conductor['name']} is on sick leave');
+    } else if (conductor['status'] == 'vacation') {
+      conflicts.add('Conductor ${conductor['name']} is on vacation');
+    }
+
+    return conflicts;
+  }
+
+  List<String> _checkBusConflicts(Map<String, dynamic> bus) {
+    List<String> conflicts = [];
+
+    // Check if bus is already assigned to another trip
+    for (var trip in _assembledTrips) {
+      if (trip['bus']['id'] == bus['id']) {
+        conflicts.add(
+            'Bus ${bus['plateNumber']} is already assigned to Trip ${trip['tripId']}');
+      }
+    }
+
+    // Check bus status
+    if (bus['status'] == 'maintenance') {
+      conflicts.add('Bus ${bus['plateNumber']} is in maintenance');
+    } else if (bus['status'] == 'inactive') {
+      conflicts.add('Bus ${bus['plateNumber']} is inactive');
+    } else if (bus['status'] == 'suspended') {
+      conflicts.add('Bus ${bus['plateNumber']} is suspended');
+    }
+
+    return conflicts;
+  }
+
+  List<String> _checkRouteConflicts(Map<String, dynamic> route) {
+    List<String> conflicts = [];
+
+    // Check if route is already assigned to another trip
+    for (var trip in _assembledTrips) {
+      if (trip['route'] == route['name']) {
+        conflicts.add(
+            'Route ${route['name']} is already assigned to Trip ${trip['tripId']}');
+      }
+    }
+
+    // Check route status
+    if (route['status'] == 'inactive') {
+      conflicts.add('Route ${route['name']} is inactive');
+    } else if (route['status'] == 'maintenance') {
+      conflicts.add('Route ${route['name']} is under maintenance');
+    } else if (route['status'] == 'suspended') {
+      conflicts.add('Route ${route['name']} is suspended');
+    }
+
+    return conflicts;
+  }
+
+  List<String> _checkCapacityConflicts(Map<String, dynamic> item) {
+    List<String> conflicts = [];
+
+    if (_getItemType(item) == 'bus') {
+      // Check if bus capacity is sufficient for route
+      var route = _basketItems.firstWhere(
+        (item) => _getItemType(item) == 'route',
+        orElse: () => {},
+      );
+
+      if (route.isNotEmpty && route['expectedPassengers'] > item['capacity']) {
+        conflicts.add(
+            'Bus capacity (${item['capacity']}) insufficient for route (${route['expectedPassengers']} passengers)');
+      }
+    }
+
+    return conflicts;
+  }
+
+  void _showConflictDialog(List<String> conflicts, Map<String, dynamic> item) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: backgroundColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.warning, color: Colors.orange, size: 24),
+              SizedBox(width: 1.w),
+              Text(
+                'Assignment Conflict',
+                style: GoogleFonts.inter(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w600,
+                  color: textColor,
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Cannot add ${item['name'] ?? item['plateNumber']} due to:',
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  color: textColor,
+                ),
+              ),
+              SizedBox(height: 1.h),
+              ...conflicts.map((conflict) => Padding(
+                    padding: EdgeInsets.only(bottom: 0.5.h),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.error_outline, color: Colors.red, size: 16),
+                        SizedBox(width: 1.w),
+                        Expanded(
+                          child: Text(
+                            conflict,
+                            style: GoogleFonts.inter(
+                              fontSize: 12.sp,
+                              color: textColor.withOpacity(0.8),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'OK',
+                style: GoogleFonts.inter(
+                  fontSize: 12.sp,
+                  color: primaryColor,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    // Haptic feedback for conflict
+    HapticFeedback.heavyImpact();
+  }
+
+  void _showReplacementDialog(Map<String, dynamic> existingItem,
+      Map<String, dynamic> newItem, String dropZoneTitle) {
+    String itemType = _getItemType(existingItem);
+    String existingName = existingItem['name'] ?? existingItem['plateNumber'];
+    String newName = newItem['name'] ?? newItem['plateNumber'];
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: backgroundColor,
+          title: Text(
+            '${itemType.capitalize()} Already Selected',
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+              color: textColor,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'You already have ${existingName} selected.',
+                style: GoogleFonts.inter(
+                  fontSize: 12.sp,
+                  color: textColor.withOpacity(0.8),
+                ),
+              ),
+              SizedBox(height: 2.h),
+              Text(
+                'What would you like to do with ${newName}?',
+                style: GoogleFonts.inter(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w500,
+                  color: textColor,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.inter(
+                  fontSize: 11.sp,
+                  color: textColor.withOpacity(0.6),
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _replaceItem(existingItem, newItem, dropZoneTitle);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange.withOpacity(0.1),
+                foregroundColor: Colors.orange,
+                padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
+              ),
+              child: Text(
+                'Replace',
+                style: GoogleFonts.inter(fontSize: 11.sp),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _addAsSeparateTrip(newItem, dropZoneTitle);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor.withOpacity(0.1),
+                foregroundColor: primaryColor,
+                padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
+              ),
+              child: Text(
+                'Add Separate',
+                style: GoogleFonts.inter(fontSize: 11.sp),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _replaceItem(Map<String, dynamic> existingItem,
+      Map<String, dynamic> newItem, String dropZoneTitle) {
+    setState(() {
+      // Remove the existing item
+      _basketItems.removeWhere((item) => item == existingItem);
+
+      // Add the new item
+      _basketItems.add({
+        ...newItem,
+        'type': _getItemType(newItem),
+        'addedAt': DateTime.now(),
+        'status': 'pending',
+      });
+    });
+
+    // Show replacement confirmation
+    _showReplacementConfirmation(existingItem, newItem, dropZoneTitle);
+
+    // Haptic feedback
+    HapticFeedback.mediumImpact();
+  }
+
+  void _addAsSeparateTrip(Map<String, dynamic> newItem, String dropZoneTitle) {
+    // Check for conflicts
+    List<String> conflicts = _checkConflicts(newItem);
+    if (conflicts.isNotEmpty) {
+      _showConflictDialog(conflicts, newItem);
+      return;
+    }
+
+    // Add item to basket
+    setState(() {
+      _basketItems.add({
+        ...newItem,
+        'type': _getItemType(newItem),
+        'addedAt': DateTime.now(),
+        'status': 'pending',
+        'separateTrip': true, // Mark as separate trip
+      });
+    });
+
+    // Show assignment confirmation
+    _showAssignmentConfirmation(newItem, dropZoneTitle);
+
+    // Haptic feedback
+    HapticFeedback.mediumImpact();
+  }
+
+  void _showReplacementConfirmation(Map<String, dynamic> oldItem,
+      Map<String, dynamic> newItem, String dropZoneTitle) {
+    String itemType = _getItemType(newItem);
+    String oldName = oldItem['name'] ?? oldItem['plateNumber'];
+    String newName = newItem['name'] ?? newItem['plateNumber'];
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              _getItemIcon(itemType),
+              color: Colors.white,
+              size: 20,
+            ),
+            SizedBox(width: 2.w),
+            Expanded(
+              child: Text(
+                'Replaced $oldName with $newName',
+                style: GoogleFonts.inter(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.orange,
+        duration: Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.all(3.w),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
+
+  void _showSlotSelectionDialog(Map<String, dynamic> newItem,
+      List<Map<String, dynamic>> existingSlots, String dropZoneTitle) {
+    String itemType = _getItemType(newItem);
+    String itemName = newItem['name'] ?? newItem['plateNumber'];
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: backgroundColor,
+          title: Text(
+            'Select Trip Slot',
+            style: GoogleFonts.inter(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w600,
+              color: textColor,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Where would you like to add $itemName?',
+                style: GoogleFonts.inter(
+                  fontSize: 10.sp,
+                  color: textColor.withOpacity(0.8),
+                ),
+              ),
+              SizedBox(height: 2.h),
+              Text(
+                'Available Trip Slots:',
+                style: GoogleFonts.inter(
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w500,
+                  color: textColor,
+                ),
+              ),
+              SizedBox(height: 1.h),
+              ...existingSlots
+                  .map((slot) => Container(
+                        margin: EdgeInsets.only(bottom: 1.h),
+                        child: ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Container(
+                            padding: EdgeInsets.all(1.w),
+                            decoration: BoxDecoration(
+                              color: primaryColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Icon(
+                              Icons.schedule,
+                              color: primaryColor,
+                              size: 16,
+                            ),
+                          ),
+                          title: Text(
+                            slot['name'],
+                            style: GoogleFonts.inter(
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w600,
+                              color: textColor,
+                            ),
+                          ),
+                          subtitle: Text(
+                            '${slot['items'].length} items • ${_getSlotCompletionStatus(slot)}',
+                            style: GoogleFonts.inter(
+                              fontSize: 9.sp,
+                              color: textColor.withOpacity(0.6),
+                            ),
+                          ),
+                          trailing: ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              _addToExistingSlot(slot, newItem, dropZoneTitle);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryColor.withOpacity(0.1),
+                              foregroundColor: primaryColor,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 2.w, vertical: 0.5.h),
+                              minimumSize: Size(0, 0),
+                            ),
+                            child: Text(
+                              'Add Here',
+                              style: GoogleFonts.inter(fontSize: 8.sp),
+                            ),
+                          ),
+                        ),
+                      ))
+                  .toList(),
+              SizedBox(height: 1.h),
+              Divider(color: borderColor.withOpacity(0.3)),
+              SizedBox(height: 1.h),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Container(
+                  padding: EdgeInsets.all(1.w),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Icon(
+                    Icons.add,
+                    color: Colors.green,
+                    size: 16,
+                  ),
+                ),
+                title: Text(
+                  'Create New Trip Slot',
+                  style: GoogleFonts.inter(
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.green,
+                  ),
+                ),
+                subtitle: Text(
+                  'Start a new trip slot',
+                  style: GoogleFonts.inter(
+                    fontSize: 9.sp,
+                    color: textColor.withOpacity(0.6),
+                  ),
+                ),
+                trailing: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _createNewSlot(newItem, dropZoneTitle);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green.withOpacity(0.1),
+                    foregroundColor: Colors.green,
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
+                    minimumSize: Size(0, 0),
+                  ),
+                  child: Text(
+                    'Create',
+                    style: GoogleFonts.inter(fontSize: 8.sp),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.inter(
+                  fontSize: 11.sp,
+                  color: textColor.withOpacity(0.6),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _getSlotCompletionStatus(Map<String, dynamic> slot) {
+    List<String> requiredTypes = ['driver', 'conductor', 'bus', 'route'];
+    List<String> presentTypes =
+        slot['items'].map<String>((item) => _getItemType(item)).toList();
+
+    int completed =
+        requiredTypes.where((type) => presentTypes.contains(type)).length;
+    return '$completed/${requiredTypes.length} complete';
+  }
+
+  void _addToExistingSlot(Map<String, dynamic> slot,
+      Map<String, dynamic> newItem, String dropZoneTitle) {
+    String itemType = _getItemType(newItem);
+
+    // Check if slot already has this type
+    bool hasType = slot['items'].any((item) => _getItemType(item) == itemType);
+
+    if (hasType) {
+      // Show replacement dialog for this specific slot
+      _showSlotReplacementDialog(slot, newItem, dropZoneTitle);
+      return;
+    }
+
+    // Check for conflicts
+    List<String> conflicts = _checkConflicts(newItem);
+    if (conflicts.isNotEmpty) {
+      _showConflictDialog(conflicts, newItem);
+      return;
+    }
+
+    // Add to slot
+    setState(() {
+      slot['items'].add({
+        ...newItem,
+        'type': itemType,
+        'addedAt': DateTime.now(),
+        'status': 'pending',
+      });
+    });
+
+    _showAssignmentConfirmation(newItem, dropZoneTitle);
+    HapticFeedback.mediumImpact();
+  }
+
+  void _createNewSlot(Map<String, dynamic> newItem, String dropZoneTitle) {
+    String itemType = _getItemType(newItem);
+
+    // Check for conflicts
+    List<String> conflicts = _checkConflicts(newItem);
+    if (conflicts.isNotEmpty) {
+      _showConflictDialog(conflicts, newItem);
+      return;
+    }
+
+    // Create new slot
+    Map<String, dynamic> newSlot = {
+      'id': _nextSlotId++,
+      'name': 'Trip Slot ${_tripSlots.length + 1}',
+      'items': [
+        {
+          ...newItem,
+          'type': itemType,
+          'addedAt': DateTime.now(),
+          'status': 'pending',
+        }
+      ],
+      'createdAt': DateTime.now(),
+      'isEditable': true,
+    };
+
+    setState(() {
+      _tripSlots.add(newSlot);
+    });
+
+    _showAssignmentConfirmation(newItem, dropZoneTitle);
+    HapticFeedback.mediumImpact();
+  }
+
+  void _addToSlot(Map<String, dynamic> data, String dropZoneTitle) {
+    String itemType = _getItemType(data);
+
+    // Check for conflicts
+    List<String> conflicts = _checkConflicts(data);
+    if (conflicts.isNotEmpty) {
+      _showConflictDialog(conflicts, data);
+      return;
+    }
+
+    if (_tripSlots.isEmpty) {
+      // Create first slot
+      _createNewSlot(data, dropZoneTitle);
+    } else {
+      // Add to first available slot
+      var firstSlot = _tripSlots.first;
+      _addToExistingSlot(firstSlot, data, dropZoneTitle);
+    }
+  }
+
+  void _showSlotReplacementDialog(Map<String, dynamic> slot,
+      Map<String, dynamic> newItem, String dropZoneTitle) {
+    String itemType = _getItemType(newItem);
+    String newName = newItem['name'] ?? newItem['plateNumber'];
+
+    // Find existing item of same type in slot
+    var existingItem =
+        slot['items'].firstWhere((item) => _getItemType(item) == itemType);
+    String existingName = existingItem['name'] ?? existingItem['plateNumber'];
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: backgroundColor,
+          title: Text(
+            'Replace in ${slot['name']}',
+            style: GoogleFonts.inter(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w600,
+              color: textColor,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'This slot already has $existingName.',
+                style: GoogleFonts.inter(
+                  fontSize: 10.sp,
+                  color: textColor.withOpacity(0.8),
+                ),
+              ),
+              SizedBox(height: 1.h),
+              Text(
+                'What would you like to do with $newName?',
+                style: GoogleFonts.inter(
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w500,
+                  color: textColor,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.inter(
+                  fontSize: 11.sp,
+                  color: textColor.withOpacity(0.6),
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _replaceInSlot(slot, existingItem, newItem, dropZoneTitle);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange.withOpacity(0.1),
+                foregroundColor: Colors.orange,
+                padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
+              ),
+              child: Text(
+                'Replace',
+                style: GoogleFonts.inter(fontSize: 11.sp),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _createNewSlot(newItem, dropZoneTitle);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor.withOpacity(0.1),
+                foregroundColor: primaryColor,
+                padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
+              ),
+              child: Text(
+                'New Slot',
+                style: GoogleFonts.inter(fontSize: 11.sp),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _replaceInSlot(Map<String, dynamic> slot, Map<String, dynamic> oldItem,
+      Map<String, dynamic> newItem, String dropZoneTitle) {
+    setState(() {
+      // Remove old item
+      slot['items'].removeWhere((item) => item == oldItem);
+
+      // Add new item
+      slot['items'].add({
+        ...newItem,
+        'type': _getItemType(newItem),
+        'addedAt': DateTime.now(),
+        'status': 'pending',
+      });
+    });
+
+    _showReplacementConfirmation(oldItem, newItem, dropZoneTitle);
+    HapticFeedback.mediumImpact();
+  }
+
+  List<String> _validateTripCompleteness() {
+    List<String> errors = [];
+
+    // Group items by type and separate trip status
+    Map<String, List<Map<String, dynamic>>> groupedItems = {};
+    List<Map<String, dynamic>> separateTrips = [];
+
+    for (var item in _basketItems) {
+      String type = _getItemType(item);
+      if (item['separateTrip'] == true) {
+        separateTrips.add(item);
+      } else {
+        if (!groupedItems.containsKey(type)) {
+          groupedItems[type] = [];
+        }
+        groupedItems[type]!.add(item);
+      }
+    }
+
+    // Check main trip completeness
+    if (!groupedItems.containsKey('driver')) {
+      errors.add('Driver is required');
+    }
+    if (!groupedItems.containsKey('conductor')) {
+      errors.add('Conductor is required');
+    }
+    if (!groupedItems.containsKey('bus')) {
+      errors.add('Bus is required');
+    }
+    if (!groupedItems.containsKey('route')) {
+      errors.add('Route is required');
+    }
+
+    // Check for multiple items of same type in main trip
+    groupedItems.forEach((type, items) {
+      if (items.length > 1) {
+        errors.add(
+            'Multiple ${type}s selected for main trip. Use "Add Separate" for additional ${type}s.');
+      }
+    });
+
+    // Validate separate trips
+    for (var separateItem in separateTrips) {
+      String type = _getItemType(separateItem);
+      if (!groupedItems.containsKey(type)) {
+        errors.add(
+            'Cannot create separate trip for $type without main trip $type');
+      }
+    }
+
+    // Check compatibility for main trip
+    if (groupedItems.containsKey('driver') &&
+        groupedItems.containsKey('conductor') &&
+        groupedItems.containsKey('bus') &&
+        groupedItems.containsKey('route')) {
+      var driver = groupedItems['driver']!.first;
+      var conductor = groupedItems['conductor']!.first;
+      var bus = groupedItems['bus']!.first;
+      var route = groupedItems['route']!.first;
+
+      // Check driver-conductor compatibility
+      if (driver['currentRoute'] != conductor['currentRoute']) {
+        errors.add('Driver and conductor are assigned to different routes');
+      }
+
+      // Check bus-driver compatibility
+      if (bus['currentRoute'] != driver['currentRoute']) {
+        errors.add('Bus and driver are assigned to different routes');
+      }
+    }
+
+    return errors;
+  }
+
+  void _showValidationDialog(List<String> errors) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: backgroundColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.error, color: Colors.red, size: 24),
+              SizedBox(width: 1.w),
+              Text(
+                'Trip Incomplete',
+                style: GoogleFonts.inter(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  color: textColor,
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Cannot assemble trip. Missing requirements:',
+                style: GoogleFonts.inter(
+                  fontSize: 10.sp,
+                  color: textColor,
+                ),
+              ),
+              SizedBox(height: 1.h),
+              ...errors.map((error) => Padding(
+                    padding: EdgeInsets.only(bottom: 0.5.h),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.warning, color: Colors.orange, size: 16),
+                        SizedBox(width: 1.w),
+                        Expanded(
+                          child: Text(
+                            error,
+                            style: GoogleFonts.inter(
+                              fontSize: 9.sp,
+                              color: textColor.withOpacity(0.8),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'OK',
+                style: GoogleFonts.inter(
+                  fontSize: 10.sp,
+                  color: primaryColor,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Map<String, dynamic> _createTrip() {
+    // Get main trip components (non-separate items)
+    var driver = _basketItems.firstWhere((item) =>
+        _getItemType(item) == 'driver' && item['separateTrip'] != true);
+    var conductor = _basketItems.firstWhere((item) =>
+        _getItemType(item) == 'conductor' && item['separateTrip'] != true);
+    var bus = _basketItems.firstWhere(
+        (item) => _getItemType(item) == 'bus' && item['separateTrip'] != true);
+    var route = _basketItems.firstWhere((item) =>
+        _getItemType(item) == 'route' && item['separateTrip'] != true);
+
+    String tripId =
+        'TRP-${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}';
+
+    return {
+      'tripId': tripId,
+      'driver': driver,
+      'conductor': conductor,
+      'bus': bus,
+      'route': route,
+      'status': 'assembled',
+      'createdAt': DateTime.now(),
+      'departureTime': _calculateDepartureTime(),
+      'estimatedArrival': _calculateArrivalTime(),
+      'passengerCapacity': bus['capacity'],
+      'estimatedRevenue': _calculateEstimatedRevenue(),
+      'separateTrips': _createSeparateTrips(),
+    };
+  }
+
+  List<Map<String, dynamic>> _createSeparateTrips() {
+    List<Map<String, dynamic>> separateTrips = [];
+
+    // Group separate items by type
+    Map<String, List<Map<String, dynamic>>> separateItems = {};
+    for (var item in _basketItems) {
+      if (item['separateTrip'] == true) {
+        String type = _getItemType(item);
+        if (!separateItems.containsKey(type)) {
+          separateItems[type] = [];
+        }
+        separateItems[type]!.add(item);
+      }
+    }
+
+    // Create separate trips for each additional item
+    separateItems.forEach((type, items) {
+      for (var item in items) {
+        // Get the main trip components for this separate trip
+        var mainDriver = _basketItems.firstWhere(
+            (i) => _getItemType(i) == 'driver' && i['separateTrip'] != true);
+        var mainConductor = _basketItems.firstWhere(
+            (i) => _getItemType(i) == 'conductor' && i['separateTrip'] != true);
+        var mainBus = _basketItems.firstWhere(
+            (i) => _getItemType(i) == 'bus' && i['separateTrip'] != true);
+        var mainRoute = _basketItems.firstWhere(
+            (i) => _getItemType(i) == 'route' && i['separateTrip'] != true);
+
+        // Create separate trip with the additional item
+        Map<String, dynamic> separateTrip = {
+          'tripId':
+              'TRP-${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}-${type.toUpperCase()}',
+          'driver': type == 'driver' ? item : mainDriver,
+          'conductor': type == 'conductor' ? item : mainConductor,
+          'bus': type == 'bus' ? item : mainBus,
+          'route': type == 'route' ? item : mainRoute,
+          'status': 'assembled',
+          'createdAt': DateTime.now(),
+          'departureTime': _calculateDepartureTime(),
+          'estimatedArrival': _calculateArrivalTime(),
+          'passengerCapacity':
+              type == 'bus' ? item['capacity'] : mainBus['capacity'],
+          'estimatedRevenue': _calculateEstimatedRevenue(),
+          'isSeparateTrip': true,
+          'separateItemType': type,
+        };
+
+        separateTrips.add(separateTrip);
+      }
+    });
+
+    return separateTrips;
+  }
+
+  String _calculateDepartureTime() {
+    // Calculate next available departure time
+    DateTime now = DateTime.now();
+    DateTime nextHour = DateTime(now.year, now.month, now.day, now.hour + 1);
+    return '${nextHour.hour.toString().padLeft(2, '0')}:00';
+  }
+
+  String _calculateArrivalTime() {
+    // Calculate arrival time based on route duration
+    DateTime now = DateTime.now();
+    DateTime arrival = now.add(Duration(hours: 4)); // Default 4 hours
+    return '${arrival.hour.toString().padLeft(2, '0')}:${arrival.minute.toString().padLeft(2, '0')}';
+  }
+
+  double _calculateEstimatedRevenue() {
+    var bus = _basketItems.firstWhere((item) => _getItemType(item) == 'bus');
+    int capacity = bus['capacity'];
+    double occupancyRate = 0.75; // 75% occupancy
+    double ticketPrice = 7500.0; // XAF
+
+    return capacity * occupancyRate * ticketPrice;
+  }
+
+  void _showTripResult(Map<String, dynamic> trip) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: backgroundColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Container(
+            width: 90.w,
+            constraints: BoxConstraints(maxHeight: 80.h),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Container(
+                  padding: EdgeInsets.all(3.w),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.1),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(2.w),
+                        decoration: BoxDecoration(
+                          color: Colors.green,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(Icons.check_circle,
+                            color: Colors.white, size: 4.w),
+                      ),
+                      SizedBox(width: 2.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Trip Assembled Successfully!',
+                              style: GoogleFonts.inter(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                                color: textColor,
+                              ),
+                            ),
+                            Text(
+                              'Trip ID: ${trip['tripId']}',
+                              style: GoogleFonts.inter(
+                                fontSize: 12.sp,
+                                color: textColor.withOpacity(0.7),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: Icon(Icons.close, color: textColor, size: 4.w),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Content
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.all(3.w),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Trip Details
+                        _buildTripDetailSection('Trip Details', [
+                          {
+                            'label': 'Route',
+                            'value': trip['route'],
+                            'icon': Icons.route
+                          },
+                          {
+                            'label': 'Departure',
+                            'value': trip['departureTime'],
+                            'icon': Icons.schedule
+                          },
+                          {
+                            'label': 'Arrival',
+                            'value': trip['estimatedArrival'],
+                            'icon': Icons.schedule
+                          },
+                          {
+                            'label': 'Capacity',
+                            'value': '${trip['passengerCapacity']} seats',
+                            'icon': Icons.people
+                          },
+                        ]),
+
+                        SizedBox(height: 2.h),
+
+                        // Team Assignment
+                        _buildTripDetailSection('Team Assignment', [
+                          {
+                            'label': 'Driver',
+                            'value': trip['driver']['name'],
+                            'icon': Icons.person
+                          },
+                          {
+                            'label': 'Conductor',
+                            'value': trip['conductor']['name'],
+                            'icon': Icons.badge
+                          },
+                          {
+                            'label': 'Bus',
+                            'value': trip['bus']['plateNumber'],
+                            'icon': Icons.directions_bus
+                          },
+                        ]),
+
+                        SizedBox(height: 2.h),
+
+                        // Financial Projection
+                        _buildTripDetailSection('Financial Projection', [
+                          {
+                            'label': 'Estimated Revenue',
+                            'value':
+                                '${trip['estimatedRevenue'].toStringAsFixed(0)} XAF',
+                            'icon': Icons.attach_money
+                          },
+                          {
+                            'label': 'Occupancy Rate',
+                            'value': '75%',
+                            'icon': Icons.trending_up
+                          },
+                          {
+                            'label': 'Ticket Price',
+                            'value': '7,500 XAF',
+                            'icon': Icons.confirmation_number
+                          },
+                        ]),
+
+                        // Separate Trips (if any)
+                        if (trip['separateTrips'] != null &&
+                            trip['separateTrips'].isNotEmpty) ...[
+                          SizedBox(height: 2.h),
+                          _buildSeparateTripsSection(trip['separateTrips']),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Footer Actions
+                Container(
+                  padding: EdgeInsets.all(3.w),
+                  decoration: BoxDecoration(
+                    color: backgroundColor,
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(16),
+                      bottomRight: Radius.circular(16),
+                    ),
+                    border: Border(
+                        top: BorderSide(color: borderColor.withOpacity(0.2))),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            _showTripManagement();
+                          },
+                          icon: Icon(Icons.list, size: 3.w),
+                          label: Text('View All Trips',
+                              style: GoogleFonts.inter(fontSize: 10.sp)),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: textColor,
+                            side: BorderSide(color: borderColor),
+                            padding: EdgeInsets.symmetric(vertical: 1.h),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 2.w),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            _startTrip(trip);
+                          },
+                          icon: Icon(Icons.play_arrow, size: 3.w),
+                          label: Text('Start Trip',
+                              style: GoogleFonts.inter(fontSize: 10.sp)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(vertical: 1.h),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTripDetailSection(
+      String title, List<Map<String, dynamic>> details) {
+    return Container(
+      padding: EdgeInsets.all(2.w),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: borderColor.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+              color: textColor,
+            ),
+          ),
+          SizedBox(height: 1.h),
+          ...details.map((detail) => Padding(
+                padding: EdgeInsets.only(bottom: 0.5.h),
+                child: Row(
+                  children: [
+                    Icon(detail['icon'], color: primaryColor, size: 3.w),
+                    SizedBox(width: 1.w),
+                    Text(
+                      detail['label'],
+                      style: GoogleFonts.inter(
+                        fontSize: 11.sp,
+                        color: textColor.withOpacity(0.7),
+                      ),
+                    ),
+                    Spacer(),
+                    Text(
+                      detail['value'],
+                      style: GoogleFonts.inter(
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w600,
+                        color: textColor,
+                      ),
+                    ),
+                  ],
+                ),
+              )),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSeparateTripsSection(List<Map<String, dynamic>> separateTrips) {
+    return Container(
+      padding: EdgeInsets.all(2.w),
+      decoration: BoxDecoration(
+        color: Colors.blue.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.blue.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.add_road, color: Colors.blue, size: 16),
+              SizedBox(width: 1.w),
+              Text(
+                'Additional Trips Created',
+                style: GoogleFonts.inter(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.blue,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 1.h),
+          Text(
+            'You created ${separateTrips.length} additional trip${separateTrips.length > 1 ? 's' : ''} with different components:',
+            style: GoogleFonts.inter(
+              fontSize: 11.sp,
+              color: textColor.withOpacity(0.8),
+            ),
+          ),
+          SizedBox(height: 1.h),
+          ...separateTrips
+              .map((trip) => Container(
+                    margin: EdgeInsets.only(bottom: 1.h),
+                    padding: EdgeInsets.all(1.5.w),
+                    decoration: BoxDecoration(
+                      color: backgroundColor,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: borderColor.withOpacity(0.1)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.route, size: 14, color: primaryColor),
+                            SizedBox(width: 1.w),
+                            Text(
+                              'Trip ${trip['tripId']}',
+                              style: GoogleFonts.inter(
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.w600,
+                                color: textColor,
+                              ),
+                            ),
+                            Spacer(),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 1.w, vertical: 0.3.h),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                trip['separateItemType']
+                                    .toString()
+                                    .toUpperCase(),
+                                style: GoogleFonts.inter(
+                                  fontSize: 8.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.blue,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 0.5.h),
+                        Text(
+                          'Different ${trip['separateItemType']}: ${trip['separateItemType'] == 'driver' ? trip['driver']['name'] : trip['separateItemType'] == 'conductor' ? trip['conductor']['name'] : trip['separateItemType'] == 'bus' ? trip['bus']['plateNumber'] : trip['route']['name']}',
+                          style: GoogleFonts.inter(
+                            fontSize: 9.sp,
+                            color: textColor.withOpacity(0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ))
+              .toList(),
+        ],
+      ),
+    );
+  }
+
+  void _showTripManagement() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: backgroundColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      builder: (BuildContext context) {
+        return Container(
+          height: 70.h,
+          padding: EdgeInsets.all(3.w),
+          child: Column(
+            children: [
+              // Handle
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              SizedBox(height: 2.h),
+
+              // Title
+              Text(
+                'Trip Management',
+                style: GoogleFonts.inter(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w600,
+                  color: textColor,
+                ),
+              ),
+              SizedBox(height: 2.h),
+
+              // Trips List
+              Expanded(
+                child: _assembledTrips.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.directions_bus_outlined,
+                              size: 64,
+                              color: Colors.grey.withOpacity(0.5),
+                            ),
+                            SizedBox(height: 2.h),
+                            Text(
+                              'No trips assembled yet',
+                              style: GoogleFonts.inter(
+                                fontSize: 16.sp,
+                                color: Colors.grey.withOpacity(0.7),
+                              ),
+                            ),
+                            Text(
+                              'Assemble trips using the drag & drop system',
+                              style: GoogleFonts.inter(
+                                fontSize: 12.sp,
+                                color: Colors.grey.withOpacity(0.5),
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: _assembledTrips.length,
+                        itemBuilder: (context, index) {
+                          final trip = _assembledTrips[index];
+                          return _buildTripCard(trip, index);
+                        },
+                      ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTripCard(Map<String, dynamic> trip, int index) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 1.h),
+      padding: EdgeInsets.all(2.w),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: borderColor.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      trip['tripId'],
+                      style: GoogleFonts.inter(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                        color: textColor,
+                      ),
+                    ),
+                    Text(
+                      trip['route'],
+                      style: GoogleFonts.inter(
+                        fontSize: 11.sp,
+                        color: textColor.withOpacity(0.7),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  trip['status'].toUpperCase(),
+                  style: GoogleFonts.inter(
+                    fontSize: 9.sp,
+                    color: Colors.green,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 1.h),
+          Row(
+            children: [
+              Expanded(
+                child: _buildTripDetail(
+                    'Driver', trip['driver']['name'], Icons.person),
+              ),
+              Expanded(
+                child: _buildTripDetail(
+                    'Conductor', trip['conductor']['name'], Icons.badge),
+              ),
+              Expanded(
+                child: _buildTripDetail(
+                    'Bus', trip['bus']['plateNumber'], Icons.directions_bus),
+              ),
+            ],
+          ),
+          SizedBox(height: 1.h),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => _startTrip(trip),
+                  icon: Icon(Icons.play_arrow, size: 3.w),
+                  label:
+                      Text('Start', style: GoogleFonts.inter(fontSize: 9.sp)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: 0.5.h),
+                  ),
+                ),
+              ),
+              SizedBox(width: 2.w),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => _editTrip(trip),
+                  icon: Icon(Icons.edit, size: 3.w),
+                  label: Text('Edit', style: GoogleFonts.inter(fontSize: 9.sp)),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: textColor,
+                    side: BorderSide(color: borderColor),
+                    padding: EdgeInsets.symmetric(vertical: 0.5.h),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTripDetail(String label, String value, IconData icon) {
+    return Row(
+      children: [
+        Icon(icon, size: 3.w, color: textColor.withOpacity(0.6)),
+        SizedBox(width: 0.5.w),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: GoogleFonts.inter(
+                  fontSize: 9.sp,
+                  color: textColor.withOpacity(0.6),
+                ),
+              ),
+              Text(
+                value,
+                style: GoogleFonts.inter(
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w600,
+                  color: textColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _startTrip(Map<String, dynamic> trip) {
+    setState(() {
+      trip['status'] = 'active';
+      trip['startedAt'] = DateTime.now();
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Trip ${trip['tripId']} started successfully'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  void _editTrip(Map<String, dynamic> trip) {
+    // TODO: Implement trip editing
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Trip editing functionality coming soon')),
     );
   }
 }
