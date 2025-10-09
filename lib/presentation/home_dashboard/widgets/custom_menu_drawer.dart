@@ -216,9 +216,9 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
             'badge': 'Manager',
           },
           {
-            'icon': Icons.dashboard,
-            'title': 'Schedule Dashboard',
-            'route': '/admin-dashboard',
+            'icon': Icons.edit_calendar,
+            'title': 'Schedule Manager',
+            'route': AppRoutes.scheduleManagement,
             'requiresAuth': true,
             'category': 'management',
             'badge': 'Manager',
@@ -458,7 +458,7 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
         items.add({
           'icon': Icons.edit_calendar,
           'title': 'Schedule Manager',
-          'route': '/schedule-management',
+          'route': AppRoutes.scheduleManagement,
           'requiresAuth': true,
           'category': 'management',
         });
@@ -541,12 +541,16 @@ class _CustomMenuDrawerState extends State<CustomMenuDrawer>
       }
     }
 
+    // Use root navigator to avoid using a disposed drawer context
+    final nav = Navigator.of(context, rootNavigator: true);
     Navigator.pop(context);
 
     if (item.containsKey('onTap')) {
-      item['onTap']();
+      // Defer to ensure drawer is closed before running callbacks
+      Future.microtask(() => item['onTap']());
     } else if (item.containsKey('route')) {
-      Navigator.pushNamed(context, item['route']);
+      final route = item['route'];
+      Future.microtask(() => nav.pushNamed(route));
     }
   }
 

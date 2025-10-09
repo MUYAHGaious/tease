@@ -24,9 +24,10 @@ import '../presentation/driver_boarding_interfaceSchoolbus/driver_boarding_inter
 import '../presentation/parent_dashboardSchoolbus/parent_dashboard.dart';
 import '../presentation/favorites/favorites.dart';
 import '../presentation/ticket_booking/ticket_booking_screen.dart';
-import '../presentation/bus_tracking_map/safe_bus_tracking_screen.dart';
+import '../presentation/bus_tracking_map/bus_tracking_map_screen.dart';
 import '../presentation/booking_management/booking_management.dart';
 import '../presentation/booking_management/widgets/seat_booking_summary_screen.dart';
+import '../presentation/schedule_management/schedule_management.dart';
 import '../presentation/auth/agency_selection_screen.dart';
 import '../presentation/auth/role_selection_screen.dart';
 
@@ -67,6 +68,7 @@ class AppRoutes {
   static const String conductorDashboard = '/conductor-dashboard';
   static const String bookingClerkDashboard = '/booking-clerk-dashboard';
   static const String bookingManagement = '/booking-management';
+  static const String scheduleManagement = '/schedule-management';
   static const String seatBookingSummary = '/seat-booking-summary';
   static const String qrCodeDisplaySchoolbus = '/qr-code-display-schoolbus';
   static const String voiceAi = '/voice-ai';
@@ -138,6 +140,7 @@ class AppRoutes {
         const BookingManagement(), // Booking management for clerks
     bookingManagement: (context) =>
         const BookingManagement(), // Booking management screen
+    scheduleManagement: (context) => const ScheduleManagementScreen(),
     '/seat-booking-summary': (context) {
       final arguments =
           ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
@@ -153,7 +156,7 @@ class AppRoutes {
         const HomeDashboard(), // Placeholder - Voice AI coming soon
     favorites: (context) => const Favorites(),
     ticketBooking: (context) => const TicketBookingScreen(),
-    busTrackingMap: (context) => const SafeBusTrackingScreen(),
+    busTrackingMap: (context) => const BusTrackingMapScreen(),
     popularRoutes: (context) =>
         const SearchBooking(), // Use SearchBooking for popular routes
     schoolDashboard: (context) =>
